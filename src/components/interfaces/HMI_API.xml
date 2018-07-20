@@ -2509,14 +2509,26 @@
   <param name="compassDirection" type="Common.CompassDirection" mandatory="false">
     <description>See CompassDirection.</description>
   </param>
-  <param name="pdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
+  <param name="pdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false" since="5.0">
     <description>PDOP.</description>
+    <history>
+      <param name="pdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true" until="5.0">
+      </param>
+    </history>
   </param>
-  <param name="hdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
+  <param name="hdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false" since="5.0">
     <description>HDOP.</description>
+    <history>
+      <param name="hdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true" until="5.0">
+      </param>
+    </history>
   </param>
-  <param name="vdop" type="Float" minvalue="0" maxvalue="10" mandatory="false">
+  <param name="vdop" type="Float" minvalue="0" maxvalue="1000" mandatory="false" since="5.0">
     <description>VDOP.</description>
+    <history>
+      <param name="vdop" type="Float" minvalue="0" maxvalue="10" defvalue="0" mandatory="true" until="5.0">
+      </param>
+    </history>
   </param>
   <param name="actual" type="Boolean" mandatory="false">
     <description>
