@@ -30,27 +30,35 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rc_rpc_plugin/commands/mobile/button_press_response.h"
-#include "application_manager/rpc_service.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H_
 
-namespace rc_rpc_plugin {
-namespace commands {
-
-ButtonPressResponse::ButtonPressResponse(
-    const app_mngr::commands::MessageSharedPtr& message,
-    const RCCommandParams& params)
-    : application_manager::commands::CommandResponseImpl(
-          message,
-          params.application_manager_,
-          params.rpc_service_,
-          params.hmi_capabilities_,
-          params.policy_handler_) {}
-ButtonPressResponse::~ButtonPressResponse() {}
-
-void ButtonPressResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  application_manager_.GetRPCService().SendMessageToMobile(message_);
+namespace application_manager {
+class ApplicationManager;
+namespace rpc_service {
+class RPCService;
+}
+class HMICapabilities;
 }
 
-}  // namespace commands
-}  // namespace rc_rpc_plugin
+namespace policy {
+class PolicyHandlerInterface;
+}
+
+namespace rc_rpc_plugin {
+
+class ResourceAllocationManager;
+class InteriorDataCache;
+class InteriorDataManager;
+
+struct RCCommandParams {
+  application_manager::ApplicationManager& application_manager_;
+  application_manager::rpc_service::RPCService& rpc_service_;
+  application_manager::HMICapabilities& hmi_capabilities_;
+  policy::PolicyHandlerInterface& policy_handler_;
+  rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager_;
+  rc_rpc_plugin::InteriorDataCache& interior_data_cache_;
+  rc_rpc_plugin::InteriorDataManager& interior_data_manager_;
+};
+}
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H_
