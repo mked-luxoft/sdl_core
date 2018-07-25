@@ -234,11 +234,11 @@ class Parser(object):
 
         """
         params, subelements, attrib = self._parse_base_item(element, prefix)
-
         scope = None
         for attribute in attrib:
             if attribute == "scope":
                 scope = attrib[attribute]
+
             else:
                 raise ParseError("Unexpected attribute '" + attribute +
                                  "' in struct '" + params["name"] + "'")
@@ -580,12 +580,15 @@ class Parser(object):
                 attrib, "maxvalue", int if type_name == "Integer" else float)
             default_value = self._extract_optional_number_attrib(
                 attrib, "defvalue", int if type_name == "Integer" else float)
+            since = self._extract_optional_number_attrib(
+            attrib, "since", float)
 
             param_type = \
                 (Model.Integer if type_name == "Integer" else Model.Double)(
                     min_value=min_value,
                     max_value=max_value,
-                    default_value=default_value)
+                    default_value=default_value,
+                    since=since)
         elif type_name == "String":
             min_length = self._extract_optional_number_attrib(
                 attrib, "minlength")
@@ -674,7 +677,8 @@ class Parser(object):
                 base_type.allowed_elements[element_name] = \
                     base_type.enum.elements[element_name]
             else:
-                other_subelements.append(subelement)
+                if subelement.tag != "history":
+                    other_subelements.append(subelement)
 
         if isinstance(param_type, Model.Array):
             param_type.element_type = base_type

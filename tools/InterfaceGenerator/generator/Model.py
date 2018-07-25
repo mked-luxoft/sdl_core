@@ -36,11 +36,11 @@ class Integer(object):
 
     """
 
-    def __init__(self, min_value=None, max_value=None, default_value=None):
+    def __init__(self, min_value=None, max_value=None, default_value=None, since=None):
         self.min_value = min_value
         self.max_value = max_value
         self.default_value = default_value
-
+        self.since = since
 
 class Double(object):
 
@@ -53,10 +53,11 @@ class Double(object):
 
     """
 
-    def __init__(self, min_value=None, max_value=None, default_value=None):
+    def __init__(self, min_value=None, max_value=None, default_value=None, since=None):
         self.min_value = min_value
         self.max_value = max_value
         self.default_value = default_value
+        self.since = since
 
 class String(object):
 
@@ -69,10 +70,11 @@ class String(object):
 
     """
 
-    def __init__(self, min_length=None, max_length=None, default_value=None):
+    def __init__(self, min_length=None, max_length=None, default_value=None, since=None):
         self.min_length = min_length
         self.max_length = max_length
         self.default_value = default_value
+        self.since = since
 
 
 class Array(object):
@@ -86,10 +88,11 @@ class Array(object):
 
     """
 
-    def __init__(self, min_size=None, max_size=None, element_type=None):
+    def __init__(self, min_size=None, max_size=None, element_type=None, since=None):
         self.min_size = min_size
         self.max_size = max_size
         self.element_type = element_type
+        self.since = since
 
 
 class Issue(object):
@@ -229,7 +232,7 @@ class Param(InterfaceItemBase):
 
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, is_mandatory=True, default_value=None, scope=None):
+                 platform=None, is_mandatory=True, default_value=None, scope=None, since=None):
         super(Param, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
@@ -238,6 +241,7 @@ class Param(InterfaceItemBase):
         self.is_mandatory = is_mandatory
         self.param_type = param_type
         self.default_value = default_value
+        self.since = since
 
 
 class FunctionParam(Param):
@@ -251,11 +255,11 @@ class FunctionParam(Param):
 
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, is_mandatory=True, default_value=None, scope=None):
+                 platform=None, is_mandatory=True, default_value=None, scope=None, since=None):
         super(FunctionParam, self).__init__(
             name, param_type=param_type, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, is_mandatory=is_mandatory, default_value=default_value, scope=scope)
+            platform=platform, is_mandatory=is_mandatory, default_value=default_value, scope=scope, since=since)
 
         self.default_value = default_value
 
