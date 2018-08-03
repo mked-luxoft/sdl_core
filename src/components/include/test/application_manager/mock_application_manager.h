@@ -318,6 +318,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(IsAppInReconnectMode,
                      bool(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(GetCommandFactory, application_manager::CommandFactory&());
+  MOCK_METHOD1(ResetGlobalProperties, application_manager::ResetGlobalPropertiesResult(const application_manager::ApplicationSharedPtr application));
+  MOCK_CONST_METHOD1(GetApplicationGlobalProperties, smart_objects::SmartObject( application_manager::ApplicationConstSharedPtr application));
 };
 
 }  // namespace application_manager_test

@@ -417,6 +417,23 @@ void ResumptionDataProcessor::SetGlobalProperties(
 
 void ResumptionDataProcessor::DeleteGlobalProperties(const int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  const ApplicationSharedPtr application = application_manager_.application(app_id);
+
+  const auto result = application_manager_.ResetGlobalProperties(application);
+
+  if (result.HasUIPropertiesReset()){
+    smart_objects::SmartObjectSPtr ui_gl_props_reset_req = 
+     MessageHelper::CreateUIResetGlobalPropertiesRequest(result, application);
+
+    ProcessHMIRequest(ui_gl_props_reset_req, false);
+  }
+  if(result.HasTTSPropertiesReset()) {
+    smart_objects::SmartObjectSPtr tts_gl_props_reset_req = 
+     MessageHelper::CreateUIResetGlobalPropertiesRequest(result, application);
+
+    ProcessHMIRequest(tts_gl_props_reset_req, false);
+  }
 }
 
 void ResumptionDataProcessor::AddWayPointsSubscription(

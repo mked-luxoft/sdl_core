@@ -250,14 +250,6 @@ class ResumptionData {
       app_mngr::ApplicationConstSharedPtr application) const;
 
   /**
-   * @brief checks pointer that it is not equal NULL
-   * @param ptr - contains pointer which need to check
-   * @return smartObject from pointer
-   */
-  smart_objects::SmartObject PointerToSmartObj(
-      const smart_objects::SmartObject* ptr) const;
-
-  /**
    * @brief Creates smart array from received data
    * @param first - iterator points to beginning of the data
    * @param last - iterator points to ending of the data

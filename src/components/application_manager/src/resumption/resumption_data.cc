@@ -107,32 +107,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationInteractionChoiseSets(
 
 smart_objects::SmartObject ResumptionData::GetApplicationGlobalProperties(
     app_mngr::ApplicationConstSharedPtr application) const {
-  using namespace app_mngr;
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  DCHECK(application.get());
-  smart_objects::SmartObject global_properties =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  if (!application) {
-    LOG4CXX_ERROR(logger_, "NULL Pointer App");
-    return global_properties;
-  }
-
-  global_properties[strings::help_prompt] =
-      PointerToSmartObj(application->help_prompt());
-  global_properties[strings::timeout_prompt] =
-      PointerToSmartObj(application->timeout_prompt());
-  global_properties[strings::vr_help] =
-      PointerToSmartObj(application->vr_help());
-  global_properties[strings::vr_help_title] =
-      PointerToSmartObj(application->vr_help_title());
-  global_properties[strings::keyboard_properties] =
-      PointerToSmartObj(application->keyboard_props());
-  global_properties[strings::menu_title] =
-      PointerToSmartObj(application->menu_title());
-  global_properties[strings::menu_icon] =
-      PointerToSmartObj(application->menu_icon());
-  return global_properties;
+  return application_manager_.GetApplicationGlobalProperties(application);
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
@@ -196,15 +171,5 @@ smart_objects::SmartObject ResumptionData::GetApplicationFiles(
     }
   }
   return files;
-}
-
-smart_objects::SmartObject ResumptionData::PointerToSmartObj(
-    const smart_objects::SmartObject* ptr) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject temp;
-  if (ptr != NULL) {
-    temp = *ptr;
-  }
-  return temp;
 }
 }  // namespace resumption

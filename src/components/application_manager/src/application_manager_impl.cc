@@ -2974,6 +2974,67 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
   }
 }
 
+bool ApplicationManagerImpl::ResetHelpPromt(
+    ApplicationSharedPtr app) {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+  smart_objects::SmartObject so_help_prompt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  app->set_help_prompt(so_help_prompt);
+  return true;
+}
+
+bool ApplicationManagerImpl::ResetTimeoutPromt(
+    ApplicationSharedPtr const app) {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+
+  const std::vector<std::string>& time_out_promt =
+      get_settings().time_out_promt();
+
+  smart_objects::SmartObject so_time_out_promt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
+    smart_objects::SmartObject timeoutPrompt =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    timeoutPrompt[strings::text] = time_out_promt[i];
+    timeoutPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+    so_time_out_promt[i] = timeoutPrompt;
+  }
+
+  app->set_timeout_prompt(so_time_out_promt);
+
+  return true;
+}
+
+bool ApplicationManagerImpl::ResetVrHelpTitleItems(
+    ApplicationSharedPtr const app) {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+  app->reset_vr_help_title();
+  app->reset_vr_help();
+
+  return true;
+}
+
+smart_objects::SmartObject ApplicationManagerImpl::PointerToSmartObj(
+    const smart_objects::SmartObject* ptr) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject temp;
+  if (ptr != NULL) {
+    temp = *ptr;
+  }
+  return temp;
+}
+
+
 void ApplicationManagerImpl::SendHMIStatusNotification(
     const std::shared_ptr<Application> app) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -3308,6 +3369,86 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
     }
   }
   tts_global_properties_app_list_lock_.Release();
+}
+
+ResetGlobalPropertiesResult ApplicationManagerImpl::ResetGlobalProperties(ApplicationSharedPtr application) {
+  // if application waits for sending ttsGlobalProperties need to remove this
+  // application from tts_global_properties_app_list_
+  LOG4CXX_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
+  RemoveAppFromTTSGlobalPropertiesList(application->app_id());
+
+  ResetGlobalPropertiesResult result;
+  const smart_objects::SmartObject& global_properties = 
+      GetApplicationGlobalProperties(application);
+
+  for (auto it_property = global_properties.map_begin();
+  it_property != global_properties.map_end(); ++it_property) {
+   switch (it_property->second.asInt()) {
+     case mobile_apis::GlobalProperty::HELPPROMPT : {
+       result.help_prompt = ResetHelpPromt(application);
+       break;
+    }
+     case mobile_apis::GlobalProperty::TIMEOUTPROMPT : {
+       result.timeout_prompt = ResetTimeoutPromt(application);
+       break;
+    }
+     case mobile_apis::GlobalProperty::VRHELPTITLE :
+     case mobile_apis::GlobalProperty::VRHELPITEMS : {
+       if (0 == result.number_of_reset_vr) {
+         result.number_of_reset_vr++;
+         result.vr_help_title_items = ResetVrHelpTitleItems(application);
+       }
+       break;
+    }
+     case mobile_apis::GlobalProperty::MENUNAME : {
+       result.menu_name = true;
+       break;
+    }
+     case mobile_apis::GlobalProperty::MENUICON : {
+       result.menu_icon = true;
+       break;
+    }
+     case mobile_apis::GlobalProperty::KEYBOARDPROPERTIES : {
+       result.keyboard_properties = true;
+       break;
+    }
+    default: {
+      LOG4CXX_TRACE(logger_, "Unknown global property");
+      break;
+    }
+   }
+  }
+
+  return result;
+}
+
+smart_objects::SmartObject ApplicationManagerImpl::GetApplicationGlobalProperties(ApplicationConstSharedPtr application) const {
+  using namespace app_mngr;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  DCHECK(application.get());
+  smart_objects::SmartObject global_properties =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  if (!application) {
+    LOG4CXX_ERROR(logger_, "NULL Pointer App");
+    return global_properties;
+  }
+
+  global_properties[strings::help_prompt] =
+      PointerToSmartObj(application->help_prompt());
+  global_properties[strings::timeout_prompt] =
+      PointerToSmartObj(application->timeout_prompt());
+  global_properties[strings::vr_help] =
+      PointerToSmartObj(application->vr_help());
+  global_properties[strings::vr_help_title] =
+      PointerToSmartObj(application->vr_help_title());
+  global_properties[strings::keyboard_properties] =
+      PointerToSmartObj(application->keyboard_props());
+  global_properties[strings::menu_title] =
+      PointerToSmartObj(application->menu_title());
+  global_properties[strings::menu_icon] =
+      PointerToSmartObj(application->menu_icon());
+  return global_properties;
 }
 
 mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(
