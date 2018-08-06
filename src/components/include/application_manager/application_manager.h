@@ -493,20 +493,22 @@ class ApplicationManager {
 
   /**
    * @brief Resets application's global properties to default values
-   * returning struct that indicates which properties have been 
+   * returning struct that indicates which properties have been
    * successfully reset.
    * @param shared ptr to application which properties to reset
    * @return struct with flags indicating global properties reset
    */
-  virtual ResetGlobalPropertiesResult ResetGlobalProperties(const ApplicationSharedPtr application) = 0;
+  virtual ResetGlobalPropertiesResult ResetGlobalProperties(
+      const ApplicationSharedPtr application) = 0;
 
   /**
    * @brief Returns smart object with application's
-   * global properties 
+   * global properties
    * @param shared ptr to application which properties to get
    * @return application global properties
    */
-  virtual smart_objects::SmartObject GetApplicationGlobalProperties(ApplicationConstSharedPtr application) const = 0;
+  virtual smart_objects::SmartObject GetApplicationGlobalProperties(
+      ApplicationConstSharedPtr application) const = 0;
 
   virtual mobile_apis::Result::eType SaveBinary(
       const std::vector<uint8_t>& binary_data,

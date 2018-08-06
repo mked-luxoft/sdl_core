@@ -2974,8 +2974,7 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
   }
 }
 
-bool ApplicationManagerImpl::ResetHelpPromt(
-    ApplicationSharedPtr app) {
+bool ApplicationManagerImpl::ResetHelpPromt(ApplicationSharedPtr app) {
   if (!app) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return false;
@@ -2986,8 +2985,7 @@ bool ApplicationManagerImpl::ResetHelpPromt(
   return true;
 }
 
-bool ApplicationManagerImpl::ResetTimeoutPromt(
-    ApplicationSharedPtr const app) {
+bool ApplicationManagerImpl::ResetTimeoutPromt(ApplicationSharedPtr const app) {
   if (!app) {
     LOG4CXX_ERROR(logger_, "Null pointer");
     return false;
@@ -3033,7 +3031,6 @@ smart_objects::SmartObject ApplicationManagerImpl::PointerToSmartObj(
   }
   return temp;
 }
-
 
 void ApplicationManagerImpl::SendHMIStatusNotification(
     const std::shared_ptr<Application> app) {
@@ -3371,58 +3368,62 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
   tts_global_properties_app_list_lock_.Release();
 }
 
-ResetGlobalPropertiesResult ApplicationManagerImpl::ResetGlobalProperties(ApplicationSharedPtr application) {
+ResetGlobalPropertiesResult ApplicationManagerImpl::ResetGlobalProperties(
+    ApplicationSharedPtr application) {
   // if application waits for sending ttsGlobalProperties need to remove this
   // application from tts_global_properties_app_list_
   LOG4CXX_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
   RemoveAppFromTTSGlobalPropertiesList(application->app_id());
 
   ResetGlobalPropertiesResult result;
-  const smart_objects::SmartObject& global_properties = 
+  const smart_objects::SmartObject& global_properties =
       GetApplicationGlobalProperties(application);
 
   for (auto it_property = global_properties.map_begin();
-  it_property != global_properties.map_end(); ++it_property) {
-   switch (it_property->second.asInt()) {
-     case mobile_apis::GlobalProperty::HELPPROMPT : {
-       result.help_prompt = ResetHelpPromt(application);
-       break;
+       it_property != global_properties.map_end();
+       ++it_property) {
+    switch (it_property->second.asInt()) {
+      case mobile_apis::GlobalProperty::HELPPROMPT: {
+        result.help_prompt = ResetHelpPromt(application);
+        break;
+      }
+      case mobile_apis::GlobalProperty::TIMEOUTPROMPT: {
+        result.timeout_prompt = ResetTimeoutPromt(application);
+        break;
+      }
+      case mobile_apis::GlobalProperty::VRHELPTITLE:
+      case mobile_apis::GlobalProperty::VRHELPITEMS: {
+        if (0 == result.number_of_reset_vr) {
+          result.number_of_reset_vr++;
+          result.vr_help_title_items = ResetVrHelpTitleItems(application);
+        }
+        break;
+      }
+      case mobile_apis::GlobalProperty::MENUNAME: {
+        result.menu_name = true;
+        break;
+      }
+      case mobile_apis::GlobalProperty::MENUICON: {
+        result.menu_icon = true;
+        break;
+      }
+      case mobile_apis::GlobalProperty::KEYBOARDPROPERTIES: {
+        result.keyboard_properties = true;
+        break;
+      }
+      default: {
+        LOG4CXX_TRACE(logger_, "Unknown global property");
+        break;
+      }
     }
-     case mobile_apis::GlobalProperty::TIMEOUTPROMPT : {
-       result.timeout_prompt = ResetTimeoutPromt(application);
-       break;
-    }
-     case mobile_apis::GlobalProperty::VRHELPTITLE :
-     case mobile_apis::GlobalProperty::VRHELPITEMS : {
-       if (0 == result.number_of_reset_vr) {
-         result.number_of_reset_vr++;
-         result.vr_help_title_items = ResetVrHelpTitleItems(application);
-       }
-       break;
-    }
-     case mobile_apis::GlobalProperty::MENUNAME : {
-       result.menu_name = true;
-       break;
-    }
-     case mobile_apis::GlobalProperty::MENUICON : {
-       result.menu_icon = true;
-       break;
-    }
-     case mobile_apis::GlobalProperty::KEYBOARDPROPERTIES : {
-       result.keyboard_properties = true;
-       break;
-    }
-    default: {
-      LOG4CXX_TRACE(logger_, "Unknown global property");
-      break;
-    }
-   }
   }
 
   return result;
 }
 
-smart_objects::SmartObject ApplicationManagerImpl::GetApplicationGlobalProperties(ApplicationConstSharedPtr application) const {
+smart_objects::SmartObject
+ApplicationManagerImpl::GetApplicationGlobalProperties(
+    ApplicationConstSharedPtr application) const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
 

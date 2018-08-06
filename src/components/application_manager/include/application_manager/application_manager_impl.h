@@ -926,9 +926,24 @@ class ApplicationManagerImpl
    */
   void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) OVERRIDE;
 
-  ResetGlobalPropertiesResult ResetGlobalProperties(const ApplicationSharedPtr application) OVERRIDE;
+  /**
+   * @brief Resets application's global properties to default values
+   * returning struct that indicates which properties have been
+   * successfully reset.
+   * @param shared ptr to application which properties to reset
+   * @return struct with flags indicating global properties reset
+   */
+  virtual ResetGlobalPropertiesResult ResetGlobalProperties(
+      const ApplicationSharedPtr application) OVERRIDE;
 
-  smart_objects::SmartObject GetApplicationGlobalProperties( ApplicationConstSharedPtr application) const OVERRIDE;
+  /**
+   * @brief Returns smart object with application's
+   * global properties
+   * @param shared ptr to application which properties to get
+   * @return application global properties
+   */
+  virtual smart_objects::SmartObject GetApplicationGlobalProperties(
+      ApplicationConstSharedPtr application) const OVERRIDE;
 
   /**
    * DEPRECATED
@@ -1300,8 +1315,7 @@ class ApplicationManagerImpl
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetVrHelpTitleItems(
-      ApplicationSharedPtr const app);
+  bool ResetVrHelpTitleItems(ApplicationSharedPtr const app);
 
   /**
    * @brief checks pointer that it is not equal NULL

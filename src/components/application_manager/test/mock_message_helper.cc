@@ -565,22 +565,25 @@ void MessageHelper::SendUnsubscribeButtonNotification(
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
 }
 
-smart_objects::SmartObjectSPtr MessageHelper::CreateUIResetGlobalPropertiesRequest(
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateUIResetGlobalPropertiesRequest(
     const ResetGlobalPropertiesResult& reset_result,
-    ApplicationSharedPtr application){
+    ApplicationSharedPtr application) {
   return MockMessageHelper::message_helper_mock()
       ->CreateUIResetGlobalPropertiesRequest(reset_result, application);
 }
 
-smart_objects::SmartObjectSPtr MessageHelper::CreateTTSResetGlobalPropertiesRequest(
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateTTSResetGlobalPropertiesRequest(
     const ResetGlobalPropertiesResult& reset_result,
-    ApplicationSharedPtr application){
+    ApplicationSharedPtr application) {
   return MockMessageHelper::message_helper_mock()
       ->CreateTTSResetGlobalPropertiesRequest(reset_result, application);
 }
 
-smart_objects::SmartObjectList MessageHelper::CreateGlobalPropertiesRequestsToHMI(
-    ApplicationConstSharedPtr app, const uint32_t correlation_id){
+smart_objects::SmartObjectList
+MessageHelper::CreateGlobalPropertiesRequestsToHMI(
+    ApplicationConstSharedPtr app, const uint32_t correlation_id) {
   return MockMessageHelper::message_helper_mock()
       ->CreateGlobalPropertiesRequestsToHMI(app, correlation_id);
 }
@@ -589,9 +592,10 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
     uint32_t app_id,
     hmi_apis::Common_ButtonName::eType button,
     bool is_subscribed,
-    ApplicationManager& app_mngr){
+    ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()
-      ->SendOnButtonSubscriptionNotification(app_id, button, is_subscribed, app_mngr);
+      ->SendOnButtonSubscriptionNotification(
+          app_id, button, is_subscribed, app_mngr);
 }
 
 }  // namespace application_manager

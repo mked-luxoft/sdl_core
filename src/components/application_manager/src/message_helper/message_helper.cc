@@ -844,68 +844,78 @@ void MessageHelper::CreateGetVehicleDataRequest(
   app_mngr.GetRPCService().ManageHMICommand(request);
 }
 
-smart_objects::SmartObjectSPtr MessageHelper::CreateUIResetGlobalPropertiesRequest(const ResetGlobalPropertiesResult& reset_result,
-                                                                               ApplicationSharedPtr application) {
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateUIResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    const ApplicationSharedPtr application) {
   smart_objects::SmartObjectSPtr ui_reset_global_prop_request =
-    std::make_shared<smart_objects::SmartObject>(smart_objects::SmartType_Map);
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
 
   if (reset_result.help_prompt) {
-      (*ui_reset_global_prop_request)[strings::help_prompt] = application->help_prompt();
-    }
+    (*ui_reset_global_prop_request)[strings::help_prompt] =
+        application->help_prompt();
+  }
 
   if (reset_result.timeout_prompt) {
-      (*ui_reset_global_prop_request)[strings::timeout_prompt] = application->timeout_prompt();
-    }
+    (*ui_reset_global_prop_request)[strings::timeout_prompt] =
+        application->timeout_prompt();
+  }
 
   (*ui_reset_global_prop_request)[strings::app_id] = application->app_id();
-    
+
   return ui_reset_global_prop_request;
 }
 
-smart_objects::SmartObjectSPtr MessageHelper::CreateTTSResetGlobalPropertiesRequest(const ResetGlobalPropertiesResult& reset_result,
-                                                                                ApplicationSharedPtr application) {
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateTTSResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    const ApplicationSharedPtr application) {
   smart_objects::SmartObjectSPtr tts_reset_global_prop_request =
-   std::make_shared<smart_objects::SmartObject>(smart_objects::SmartType_Map);
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
 
   if (reset_result.vr_help_title_items) {
-      smart_objects::SmartObjectSPtr vr_help =
-          MessageHelper::CreateAppVrHelp(application);
-      if (!vr_help) {
-        LOG4CXX_WARN(logger_, "Failed to create vr_help");
-      } else {
-        tts_reset_global_prop_request = vr_help;
-      }
+    smart_objects::SmartObjectSPtr vr_help =
+        MessageHelper::CreateAppVrHelp(application);
+    if (!vr_help) {
+      LOG4CXX_WARN(logger_, "Failed to create vr_help");
+    } else {
+      tts_reset_global_prop_request = vr_help;
     }
-    if (reset_result.menu_name) {
-      (*tts_reset_global_prop_request)[hmi_request::menu_title] = "";
-      application->set_menu_title((*tts_reset_global_prop_request)[hmi_request::menu_title]);
-    }
-    // TODO(DT): clarify the sending parameter menuIcon
-    // if (menu_icon) {
-    //}
-    if (reset_result.keyboard_properties) {
-      smart_objects::SmartObject key_board_properties =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
-      key_board_properties[strings::language] =
-          static_cast<int32_t>(hmi_apis::Common_Language::EN_US);
-      key_board_properties[hmi_request::keyboard_layout] =
-          static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
+  }
+  if (reset_result.menu_name) {
+    (*tts_reset_global_prop_request)[hmi_request::menu_title] = "";
+    application->set_menu_title(
+        (*tts_reset_global_prop_request)[hmi_request::menu_title]);
+  }
+  // TODO(DT): clarify the sending parameter menuIcon
+  // if (menu_icon) {
+  //}
+  if (reset_result.keyboard_properties) {
+    smart_objects::SmartObject key_board_properties =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    key_board_properties[strings::language] =
+        static_cast<int32_t>(hmi_apis::Common_Language::EN_US);
+    key_board_properties[hmi_request::keyboard_layout] =
+        static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
 
-      // Look for APPLINK-4432 for details.
-      /*smart_objects::SmartObject limited_character_list =
-      smart_objects::SmartObject(
-            smart_objects::SmartType_Array);
-      limited_character_list[0] = "";
-      key_board_properties[hmi_request::limited_character_list] =
-        limited_character_list;*/
+    // Look for APPLINK-4432 for details.
+    /*smart_objects::SmartObject limited_character_list =
+    smart_objects::SmartObject(
+          smart_objects::SmartType_Array);
+    limited_character_list[0] = "";
+    key_board_properties[hmi_request::limited_character_list] =
+      limited_character_list;*/
 
-      key_board_properties[hmi_request::auto_complete_text] = "";
-      (*tts_reset_global_prop_request)[hmi_request::keyboard_properties] = key_board_properties;
-    }
+    key_board_properties[hmi_request::auto_complete_text] = "";
+    (*tts_reset_global_prop_request)[hmi_request::keyboard_properties] =
+        key_board_properties;
+  }
 
-    (*tts_reset_global_prop_request)[strings::app_id] = application->app_id();
+  (*tts_reset_global_prop_request)[strings::app_id] = application->app_id();
 
-    return tts_reset_global_prop_request;
+  return tts_reset_global_prop_request;
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
