@@ -53,7 +53,7 @@ class MockAppExtension : public application_manager::AppExtension {
   MOCK_METHOD2(ProcessResumption,
                void(const NsSmartDeviceLink::NsSmartObjects::SmartObject&
                         resumption_data,
-                    NsSmartDeviceLink::NsSmartObjects::resumption::Subscriber
+                    resumption::Subscriber
                         subscriber));
 
   MOCK_METHOD1(RevertResumption,
