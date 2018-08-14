@@ -1465,6 +1465,7 @@ class ApplicationManagerImpl
    * @brief Set AppIDs of subscribed apps for way points
    */
   std::set<int32_t> subscribed_way_points_apps_list_;
+  int32_t number_of_active_subbed_apps_for_way_points_;
 
   /**
    * @brief Map contains applications which

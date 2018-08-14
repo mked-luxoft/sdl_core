@@ -146,6 +146,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , applications_list_lock_ptr_(
           std::make_shared<sync_primitives::RecursiveLock>())
     , apps_to_register_list_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , number_of_active_subbed_apps_for_way_points_(0)
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(hmi_apis::Common_DriverDistractionState::DD_OFF)
@@ -2531,18 +2532,35 @@ void ApplicationManagerImpl::UnregisterApplication(
                             << "; is_resuming = " << is_resuming
                             << "; is_unexpected_disconnect = "
                             << is_unexpected_disconnect);
-  size_t subscribed_for_way_points_app_count = 0;
+
+  if (IsAppSubscribedForWayPoints(app_id)) {
+    if (is_unexpected_disconnect) {
+      --number_of_active_subbed_apps_for_way_points_;
+    } else {
+      UnsubscribeAppFromWayPoints(app_id);
+    }
+     // SDL sends UnsubscribeWayPoints to HMI only for last application
+    if (0 == number_of_active_subbed_apps_for_way_points_) {
+      MessageHelper::SendUnsubscribedWayPoints(*this);
+    }
+     if (0 > number_of_active_subbed_apps_for_way_points_) {
+      LOG4CXX_ERROR(logger_,
+          "Error! Number of active subscribed apps for way points is less than "
+          "zero.");
+    }
+  }                            
+  //size_t subscribed_for_way_points_app_count = 0;
 
   // SDL sends UnsubscribeWayPoints only for last application
-  {
-    sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-    subscribed_for_way_points_app_count =
-        subscribed_way_points_apps_list_.size();
-  }
-  if (1 == subscribed_for_way_points_app_count) {
-    LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
-    MessageHelper::SendUnsubscribedWayPoints(*this);
-  }
+  // {
+  //   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  //   subscribed_for_way_points_app_count =
+  //       subscribed_way_points_apps_list_.size();
+  // }
+  // if (1 == subscribed_for_way_points_app_count) {
+  //   LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
+  //   MessageHelper::SendUnsubscribedWayPoints(*this);
+  // }
 
   {
     sync_primitives::AutoLock lock(navi_service_status_lock_);
@@ -3626,6 +3644,7 @@ void ApplicationManagerImpl::SubscribeAppForWayPoints(const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   subscribed_way_points_apps_list_.insert(app_id);
+  ++number_of_active_subbed_apps_for_way_points_;
 }
 
 void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
@@ -3633,6 +3652,12 @@ void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   subscribed_way_points_apps_list_.erase(app_id);
+  --number_of_active_subbed_apps_for_way_points_;
+  if (0 > number_of_active_subbed_apps_for_way_points_) {
+    LOG4CXX_ERROR(logger_,
+        "Error! Number of active subscribed apps for way points is less than "
+        "zero.");
+  }
 }
 
 bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
@@ -3654,6 +3679,7 @@ void ApplicationManagerImpl::SubscribeAppForWayPoints(
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   subscribed_way_points_apps_list_.insert(app->app_id());
+  ++number_of_active_subbed_apps_for_way_points_;
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
@@ -3664,6 +3690,12 @@ void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   subscribed_way_points_apps_list_.erase(app->app_id());
+  --number_of_active_subbed_apps_for_way_points_;
+  if (0 > number_of_active_subbed_apps_for_way_points_) {
+    LOG4CXX_ERROR(logger_,
+        "Error! Number of active subscribed apps for way points is less than "
+        "zero.");
+  }
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
