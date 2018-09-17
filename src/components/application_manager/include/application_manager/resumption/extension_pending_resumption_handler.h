@@ -7,6 +7,7 @@
 namespace resumption {
 
 namespace app_mngr = application_manager;
+
 class ExtensionPendingResumptionHandler
     : public application_manager::event_engine::EventObserver {
  public:
@@ -21,22 +22,8 @@ class ExtensionPendingResumptionHandler
 
   virtual void HandleResumptionSubscriptionRequest(
       app_mngr::AppExtension& extension,
-      Subscriber subscriber,
+      Subscriber& subscriber,
       application_manager::Application& app) = 0;
-
-  virtual std::map<std::string, bool> ExtractSubscribeResults(
-      const smart_objects::SmartObject& response,
-      const smart_objects::SmartObject& request) const = 0;
-
-  virtual bool IsResumptionResultSuccessful(
-      std::map<std::string, bool>& subscription_results) = 0;
-
-  virtual void RemoveSucessfulSubscriptions(
-      std::set<std::string>& subscriptions,
-      std::set<std::string>& successful_subscriptions) = 0;
-
-  virtual smart_objects::SmartObjectSPtr CreateSubscribeRequestToHMI(
-      const std::set<std::string>& subscriptions) = 0;
 
   virtual void ClearPendingResumptionRequests() = 0;
 

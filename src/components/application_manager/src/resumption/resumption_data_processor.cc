@@ -67,7 +67,6 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
   AddChoicesets(application, saved_app);
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
-  AddWayPointsSubscription(application, saved_app);
   register_callbacks_[application->app_id()] = callback;
 }
 
@@ -237,7 +236,6 @@ void ResumptionDataProcessor::RevertRestoredData(
   DeleteChoicesets(application);
   DeleteGlobalProperties(application);
   DeleteSubscriptions(application);
-  DeleteWayPointsSubscription(application);
   resumption_status_.erase(application->app_id());
   register_callbacks_.erase(application->app_id());
 }
@@ -585,49 +583,6 @@ void ResumptionDataProcessor::DeleteGlobalProperties(
 
     (*msg)[strings::msg_params] = *msg_params;
     ProcessHMIRequest(msg, false);
-  }
-}
-
-void ResumptionDataProcessor::AddWayPointsSubscription(
-    app_mngr::ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (!saved_app.keyExists(strings::subscribed_for_way_points)) {
-    LOG4CXX_ERROR(logger_, "subscribed_for_way_points section is not exists");
-    return;
-  }
-
-  const bool subscribed_for_way_points_so =
-      saved_app[strings::subscribed_for_way_points].asBool();
-  if (subscribed_for_way_points_so) {
-    application_manager_.SubscribeAppForWayPoints(application);
-    auto subscribe_waypoints_msg = MessageHelper::CreateMessageForHMI(
-        hmi_apis::FunctionID::Navigation_SubscribeWayPoints,
-        application_manager_.GetNextHMICorrelationID());
-    (*subscribe_waypoints_msg)[strings::params][strings::message_type] =
-        hmi_apis::messageType::request;
-    (*subscribe_waypoints_msg)[strings::msg_params][strings::app_id] =
-        application->app_id();
-    ProcessHMIRequest(subscribe_waypoints_msg, true);
-  }
-}
-
-void ResumptionDataProcessor::DeleteWayPointsSubscription(
-    ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (application_manager_.IsAppSubscribedForWayPoints(application)) {
-    LOG4CXX_DEBUG(logger_, "App is subscribed");
-    application_manager_.UnsubscribeAppFromWayPoints(application);
-    auto subscribe_waypoints_msg = MessageHelper::CreateMessageForHMI(
-        hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints,
-        application_manager_.GetNextHMICorrelationID());
-    (*subscribe_waypoints_msg)[strings::params][strings::message_type] =
-        hmi_apis::messageType::request;
-    (*subscribe_waypoints_msg)[strings::msg_params][strings::app_id] =
-        application->app_id();
-    ProcessHMIRequest(subscribe_waypoints_msg, false);
   }
 }
 

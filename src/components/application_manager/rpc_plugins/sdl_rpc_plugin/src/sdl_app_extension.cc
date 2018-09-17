@@ -52,14 +52,27 @@ SDLAppExtension::~SDLAppExtension() {
 }
 
 void SDLAppExtension::SaveResumptionData(
-    smart_objects::SmartObject& resumption_data) {}
+    smart_objects::SmartObject& resumption_data) {
+  plugin_.SaveResumptionData(app_, resumption_data);
+}
 
 void SDLAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app,
     resumption::Subscriber subscriber) {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!saved_app.keyExists(strings::subscribed_for_way_points)) {
+    LOG4CXX_ERROR(logger_, "subscribed_for_way_points section does not exist");
+    return;
+  }
+  const bool subscribed_for_way_points_so =
+      saved_app[strings::subscribed_for_way_points].asBool();
+  if (subscribed_for_way_points_so) {
+    plugin_.ProcessResumptionSubscription(app_, *this, subscriber);
+  }
 }
 
 void SDLAppExtension::RevertResumption(
-    const smart_objects::SmartObject& subscriptions) {}
+    const smart_objects::SmartObject& subscriptions) {
+  plugin_.RevertResumption(app_);
+}
 }

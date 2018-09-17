@@ -18,25 +18,25 @@ class VehicleInfoPendingResumptionHandler
   void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   void HandleResumptionSubscriptionRequest(app_mngr::AppExtension& extension,
-                                           resumption::Subscriber subscriber,
+                                           resumption::Subscriber& subscriber,
                                            app_mngr::Application& app) OVERRIDE;
 
   std::map<std::string, bool> ExtractSubscribeResults(
       const smart_objects::SmartObject& response,
-      const smart_objects::SmartObject& request) const OVERRIDE;
+      const smart_objects::SmartObject& request) const;
 
   bool IsResumptionResultSuccessful(
-      std::map<std::string, bool>& subscription_results) OVERRIDE;
+      std::map<std::string, bool>& subscription_results);
 
   void RemoveSucessfulSubscriptions(
       std::set<std::string>& subscriptions,
-      std::set<std::string>& successful_subscriptions) OVERRIDE;
+      std::set<std::string>& successful_subscriptions);
 
   std::set<std::string> GetExtensionSubscriptions(
       VehicleInfoAppExtension& extension);
 
   smart_objects::SmartObjectSPtr CreateSubscribeRequestToHMI(
-      const std::set<std::string>& subscriptions) OVERRIDE;
+      const std::set<std::string>& subscriptions);
 
   void ClearPendingResumptionRequests() OVERRIDE;
 

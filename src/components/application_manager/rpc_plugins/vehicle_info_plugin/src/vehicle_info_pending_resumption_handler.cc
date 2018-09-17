@@ -199,7 +199,7 @@ VehicleInfoPendingResumptionHandler::ExtractSubscribeResults(
 
 void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     application_manager::AppExtension& extension,
-    resumption::Subscriber subscriber,
+    resumption::Subscriber& subscriber,
     application_manager::Application& app) {
   LOG4CXX_AUTO_TRACE(logger_);
 
