@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2016, Ford Motor Company
+ Copyright (c) 2018, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,36 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/event_engine/event_observer.h"
-#include "application_manager/event_engine/event.h"
-#include "application_manager/event_engine/event_dispatcher.h"
+#include "sdl_rpc_plugin/sdl_app_extension.h"
+#include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 
-namespace application_manager {
-namespace event_engine {
+CREATE_LOGGERPTR_GLOBAL(logger_, "SDLAppExtension")
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "EventObserver")
+namespace sdl_rpc_plugin {
+namespace strings = application_manager::strings;
+unsigned SDLAppExtension::SDLAppExtensionUID = 138;
 
-EventObserver::EventObserver(EventDispatcher& event_dispatcher)
-    : id_(0), event_dispatcher_(event_dispatcher) {
-  // Get unique id based on this
-  id_ = reinterpret_cast<unsigned long>(this);
+SDLAppExtension::SDLAppExtension(SDLRPCPlugin& plugin,
+                                 application_manager::Application& app)
+    : app_mngr::AppExtension(SDLAppExtension::SDLAppExtensionUID)
+    , plugin_(plugin)
+    , app_(app) {
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
-EventObserver::~EventObserver() {
-  unsubscribe_from_all_events();
+SDLAppExtension::~SDLAppExtension() {
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
-void EventObserver::subscribe_on_event(const Event::EventID& event_id,
-                                       int32_t hmi_correlation_id) {
-  if (event_id == 115) {
-    LOG4CXX_DEBUG(logger_,
-                  "Subscribing for event with id: " << event_id
-                                                    << " and correlation id: "
-                                                    << hmi_correlation_id);
-  }
-  event_dispatcher_.add_observer(event_id, hmi_correlation_id, *this);
+void SDLAppExtension::SaveResumptionData(
+    smart_objects::SmartObject& resumption_data) {}
+
+void SDLAppExtension::ProcessResumption(
+    const smart_objects::SmartObject& saved_app,
+    resumption::Subscriber subscriber) {
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
-void EventObserver::unsubscribe_from_event(const Event::EventID& event_id) {
-  event_dispatcher_.remove_observer(event_id, *this);
+void SDLAppExtension::RevertResumption(
+    const smart_objects::SmartObject& subscriptions) {}
 }
-
-void EventObserver::unsubscribe_from_all_events() {
-  event_dispatcher_.remove_observer(*this);
-}
-
-}  // namespace event_engine
-}  // namespace application_manager

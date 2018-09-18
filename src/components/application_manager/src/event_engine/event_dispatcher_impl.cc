@@ -39,6 +39,8 @@ namespace application_manager {
 namespace event_engine {
 using namespace sync_primitives;
 
+CREATE_LOGGERPTR_GLOBAL(disp_logger_, "EventDispatcherImpl")
+
 EventDispatcherImpl::EventDispatcherImpl() : observers_event_() {}
 
 EventDispatcherImpl::~EventDispatcherImpl() {}
@@ -61,13 +63,23 @@ void EventDispatcherImpl::raise_event(const Event& event) {
     }
   }
 
-  // Call observers
-  while (!observers_.empty()) {
-    EventObserver* temp = *observers_.begin();
-    observers_.erase(observers_.begin());
-    AutoUnlock unlock_observer(observer_lock);
-    temp->on_event(event);
+  if (static_cast<int>(event.id()) == 115) {
+    LOG4CXX_DEBUG(disp_logger_, "Observers size: " << observers_.size());
   }
+
+  // Call observers
+  // while (!observers_.empty()) {
+  //   EventObserver* temp = *observers_.begin();
+  //   // observers_.erase(observers_.begin());
+  //   AutoUnlock unlock_observer(observer_lock);
+  //   temp->on_event(event);
+  // }
+
+  for (auto observer : observers_) {
+    AutoUnlock unlock_observer(observer_lock);
+    observer->on_event(event);
+  }
+  observers_.clear();
 }
 
 void EventDispatcherImpl::add_observer(const Event::EventID& event_id,

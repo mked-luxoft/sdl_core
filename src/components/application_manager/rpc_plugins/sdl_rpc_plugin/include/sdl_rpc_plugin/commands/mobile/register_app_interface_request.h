@@ -120,7 +120,8 @@ class RegisterAppInterfaceRequest
    **/
   void SendRegisterAppInterfaceResponseToMobile(ApplicationType app_type,
                                                 const std::string& add_info,
-                                                bool need_restore_vr);
+                                                bool need_restore_vr,
+                                                const uint32_t connection_key);
 
   smart_objects::SmartObjectSPtr GetLockScreenIconUrlNotification(
       const uint32_t connection_key, app_mngr::ApplicationSharedPtr app);

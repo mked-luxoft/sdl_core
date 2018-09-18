@@ -56,6 +56,10 @@ void VISubscribeVehicleDataResponse::Run() {
   event_engine::Event event(
       hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(*message_);
+  LOG4CXX_DEBUG(logger_,
+                "Raising event with function id: "
+                    << event.id() << " and correlation id: "
+                    << event.smart_object_correlation_id());
   event.raise(application_manager_.event_dispatcher());
 }
 

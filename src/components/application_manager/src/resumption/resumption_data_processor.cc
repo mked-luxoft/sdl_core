@@ -76,9 +76,49 @@ bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
          function_id < other.function_id;
 }
 
-void ResumptionDataProcessor::HandleOnTimeOut(const int32_t app_id) {
+void ResumptionDataProcessor::HandleOnTimeOut(
+    const uint32_t corr_id, const hmi_apis::FunctionID::eType function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  RevertRestoredData(application_manager_.application(app_id));
+  LOG4CXX_DEBUG(logger_,
+                "Handling timeout with corr id: "
+                    << corr_id << " and function_id: " << function_id);
+  uint32_t app_id = 0;
+  ApplicationSharedPtr app;
+  //   for (auto it : request_app_ids_) {
+  //       LOG4CXX_DEBUG(logger_, "cid: "
+  //       << it.first.correlation_id
+  //       << "fid: "
+  //       << it.first.function_id
+  //       << "app_id"
+  //       << it.second);
+  //       if(it.first.correlation_id == (int32_t)corr_id &&
+  //       it.first.function_id == function_id) {
+  //           app_id = it.second;
+  //           app = application_manager_.application(app_id);
+  //           LOG4CXX_DEBUG(logger_, "found app id: " << app_id );
+  //           break;
+  //       }
+  //   }
+
+  auto it = std::find_if(
+      request_app_ids_.begin(),
+      request_app_ids_.end(),
+      [corr_id, function_id](
+          const std::pair<ResumptionRequestIDs, std::uint32_t>& item) {
+        return item.first.function_id == function_id &&
+               item.first.correlation_id == static_cast<int32_t>(corr_id);
+      });
+  if (it != request_app_ids_.end()) {
+    app_id = it->second;
+    app = application_manager_.application(app_id);
+  }
+  if (app && app->is_resuming()) {
+    LOG4CXX_DEBUG(logger_, "Unsubscribing from event: " << function_id);
+    auto callback = register_callbacks_[app_id];
+    callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
+    unsubscribe_from_event(function_id);
+    RevertRestoredData(application_manager_.application(app_id));
+  }
 }
 
 void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
@@ -110,6 +150,8 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   }
 
   const uint32_t app_id = app_id_ptr->second;
+
+  LOG4CXX_DEBUG(logger_, "app_id is: " << app_id);
 
   LOG4CXX_DEBUG(logger_,
                 "Found function id: " << app_id_ptr->first.function_id
@@ -161,27 +203,34 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   }
 
   auto it = register_callbacks_.find(app_id);
-  DCHECK_OR_RETURN_VOID(it != register_callbacks_.end());
+  if (it == register_callbacks_.end()) {
+    LOG4CXX_WARN(logger_, "Callback for app_id: " << app_id << " not found");
+
+    return;
+  }
   auto callback = it->second;
   const bool successful_resumption =
       status.error_requests.empty() &&
       status.unsuccesfull_vehicle_data_subscriptions_.empty();
+
   if (successful_resumption) {
     LOG4CXX_DEBUG(logger_, "Resumption for app " << app_id << " successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
   }
   if (!successful_resumption) {
-    LOG4CXX_ERROR(logger_, "Resumption for app " << app_id << "failed");
-    RevertRestoredData(application_manager_.application(app_id));
+    LOG4CXX_ERROR(logger_, "Resumption for app " << app_id << " failed");
     callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
+    RevertRestoredData(application_manager_.application(app_id));
   }
   resumption_status_.erase(app_id);
   request_app_ids_.erase(app_id_ptr);
+  register_callbacks_.erase(app_id);
 }
 
 void ResumptionDataProcessor::RevertRestoredData(
     ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Reverting for app: " << application->app_id());
   DeleteFiles(application);
   DeleteSubmenues(application);
   DeleteCommands(application);
@@ -189,6 +238,8 @@ void ResumptionDataProcessor::RevertRestoredData(
   DeleteGlobalProperties(application);
   DeleteSubscriptions(application);
   DeleteWayPointsSubscription(application);
+  resumption_status_.erase(application->app_id());
+  register_callbacks_.erase(application->app_id());
 }
 
 void ResumptionDataProcessor::WaitForResponse(
@@ -663,6 +714,9 @@ void ResumptionDataProcessor::DeleteButtonsSubscriptions(
   smart_objects::SmartObjectSPtr notification;
   for (auto& btn : button_subscriptions) {
     const auto hmi_btn = static_cast<hmi_apis::Common_ButtonName::eType>(btn);
+    if (hmi_apis::Common_ButtonName::CUSTOM_BUTTON == hmi_btn) {
+      continue;
+    }
     notification = MessageHelper::CreateOnButtonSubscriptionNotification(
         application->hmi_app_id(),
         hmi_btn,
@@ -671,14 +725,6 @@ void ResumptionDataProcessor::DeleteButtonsSubscriptions(
     ProcessHMIRequest(notification, false);
     application->UnsubscribeFromButton(btn);
   }
-
-  notification = MessageHelper::CreateOnButtonSubscriptionNotification(
-      application->hmi_app_id(),
-      hmi_apis::Common_ButtonName::CUSTOM_BUTTON,
-      /*is_subscribed = */ false,
-      application_manager_);
-  ProcessHMIRequest(notification, false);
-  application->SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
 }
 
 void ResumptionDataProcessor::DeletePluginsSubscriptions(
@@ -736,10 +782,11 @@ void ResumptionDataProcessor::CheckVehicleDataResponse(
             : response_params[ivi][strings::result_code].asInt();
     if (kSuccess != vd_result_code) {
       LOG4CXX_TRACE(logger_,
-                    "ivi " << ivi << " was not successfuly subscribed");
+                    "ivi " << ivi << " was NOT successfuly subscribed");
 
       status.unsuccesfull_vehicle_data_subscriptions_.push_back(ivi);
     } else {
+      LOG4CXX_TRACE(logger_, "ivi " << ivi << " was successfuly subscribed");
       status.succesfull_vehicle_data_subscriptions_.push_back(ivi);
     }
   }
