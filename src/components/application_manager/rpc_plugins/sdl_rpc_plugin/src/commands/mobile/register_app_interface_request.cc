@@ -225,8 +225,11 @@ bool RegisterAppInterfaceRequest::ProcessApplicationTransportSwitching() {
   }
   const auto& msg_params = (*message_)[strings::msg_params];
 
-  const auto& policy_app_id = msg_params[strings::app_id].asString();
+  const std::string& policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
+
   auto app = application_manager_.application_by_policy_id(policy_app_id);
+
   DCHECK_OR_RETURN(app, false);
   if (!application_manager_.IsAppInReconnectMode(policy_app_id)) {
     LOG4CXX_DEBUG(logger_,
@@ -532,18 +535,19 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   // Version negotiation
+  utils::SemanticVersion ver_4_5(4, 5, 0);
   utils::SemanticVersion module_version(
       major_version, minor_version, patch_version);
-  if (mobile_version < utils::rpc_version_5) {
+  if (mobile_version <= ver_4_5) {
     // Mobile versioning did not exist for
-    // versions before 5.0
-    application->set_msg_version(utils::base_rpc_version);
+    // versions 4.5 and prior.
+    application_->set_msg_version(ver_4_5);
   } else if (mobile_version < module_version) {
     // Use mobile RPC version as negotiated version
-    application->set_msg_version(mobile_version);
+    application_->set_msg_version(mobile_version);
   } else {
     // Use module version as negotiated version
-    application->set_msg_version(module_version);
+    application_->set_msg_version(module_version);
   }
 
   FillApplicationParams(application_);
@@ -593,7 +597,6 @@ void RegisterAppInterfaceRequest::Run() {
   if (mobile_apis::Result::INVALID_ENUM == result_code_) {
     result_code_ = mobile_apis::Result::SUCCESS;
   }
-
   if (DataResumeResult::WRONG_HASH == resume_data_result) {
     add_info = "Hash from RAI does not match to saved resume data.";
     result_code_ = mobile_apis::Result::RESUME_FAILED;
@@ -999,6 +1002,7 @@ void RegisterAppInterfaceRequest::FinishSendingRegisterAppInterfaceToMobile(
 
   resume_ctrl.StartResumptionOnlyHMILevel(application);
 }
+
 
 DEPRECATED void
 RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
