@@ -863,7 +863,6 @@ class ApplicationManagerImpl
   ResetGlobalPropertiesResult ResetAllApplicationGlobalProperties(
       const uint32_t app_id) OVERRIDE;
 
-
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;
