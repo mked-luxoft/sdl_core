@@ -549,6 +549,9 @@ void SetInteriorVehicleDataRequest::on_event(
           *message_)[app_mngr::strings::msg_params][message_params::kModuleData]
                     [message_params::kAudioControlData]);
     }
+    // Implement subscription handling here
+    //
+
   }
   std::string info;
   GetInfo(hmi_response, info);
