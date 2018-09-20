@@ -31,10 +31,19 @@
  */
 
 #include "rc_rpc_plugin/rc_app_extension.h"
+#include "smart_objects/smart_object.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "RCAppExtension")
 
 namespace rc_rpc_plugin {
-RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid)
-    : AppExtension(uid) {}
+
+namespace strings = application_manager::strings;
+
+RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid,
+                               RCRPCPlugin* plugin,
+                               application_manager::Application& app)
+    : AppExtension(uid), plugin_(plugin), app_(app) {}
 
 void RCAppExtension::SubscribeToInteriorVehicleData(
     const std::string& module_type) {
@@ -59,16 +68,44 @@ bool RCAppExtension::IsSubscibedToInteriorVehicleData(
 }
 
 void RCAppExtension::SaveResumptionData(
-    smart_objects::SmartObject& resumption_data) {}
+    smart_objects::SmartObject& resumption_data) {
+  const char* application_interior_data = "moduleData";
+  resumption_data[application_interior_data] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  int i = 0;
+  for (const auto& module_type : subscribed_interior_vehicle_data_) {
+    resumption_data[application_interior_data][i++] = module_type;
+  }
+}
 
 void RCAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app,
-    resumption::Subscriber subscriber) {}
+    resumption::Subscriber subscriber) {
+  if (!saved_app.keyExists(strings::application_subscriptions)) {
+    LOG4CXX_DEBUG(logger_, "application_subscriptions section is not exists");
+    return;
+  }
+
+  const smart_objects::SmartObject& resumption_data =
+      saved_app[strings::application_subscriptions];
+
+  const char* application_interior_data = "moduleData";
+  if (resumption_data.keyExists(application_interior_data)) {
+    const smart_objects::SmartObject& interior_data_subscriptions =
+        resumption_data[application_interior_data];
+    for (size_t i = 0; i < interior_data_subscriptions.length(); ++i) {
+      const std::string module_type =
+          static_cast<std::string>((resumption_data[i]).asString());
+      SubscribeToInteriorVehicleData(module_type);
+    }
+    plugin_->ProcessResumptionSubscription(app_, *this, subscriber);
+  }
+}
 
 void RCAppExtension::RevertResumption(
     const smart_objects::SmartObject& subscriptions) {}
 
-std::set<std::string> RCAppExtension::InteriorVehicleDataSubscriptions() const {
+std::set<std::string> RCAppExtension::Subscriptions() const {
   return subscribed_interior_vehicle_data_;
 }
 
