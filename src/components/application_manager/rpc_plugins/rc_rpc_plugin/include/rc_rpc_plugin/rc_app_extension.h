@@ -80,6 +80,8 @@ class RCAppExtension : public application_manager::AppExtension {
    */
   std::set<std::string> Subscriptions() const;
 
+  static RCAppExtension& ExtractInteriorVehicleDataExtension(application_manager::Application& app);
+
  private:
   std::set<std::string> subscribed_interior_vehicle_data_;
   RCRPCPlugin* plugin_;

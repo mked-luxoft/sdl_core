@@ -70,7 +70,8 @@ bool RCRPCPlugin::Init(
   command_factory_.reset(new rc_rpc_plugin::RCCommandFactory(params));
   rpc_service_ = &rpc_service;
   app_mngr_ = &app_manager;
-  pending_resumption_handler_ = std::make_shared<RCPendingResumptionHandler>(app_manager);
+  pending_resumption_handler_ =
+      std::make_shared<RCPendingResumptionHandler>(app_manager);
   return true;
 }
 
@@ -132,6 +133,64 @@ void RCRPCPlugin::ProcessResumptionSubscription(
 
   pending_resumption_handler_->HandleResumptionSubscriptionRequest(
       ext, subscriber, app);
+}
+
+void RCRPCPlugin::RevertResumption(
+    application_manager::Application& app,
+    const std::set<std::string>& list_of_subscriptions) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  pending_resumption_handler_->ClearPendingResumptionRequests();
+
+  std::set<std::string> subscriptions_to_revert;
+  for (auto& ivi_data : list_of_subscriptions) {
+    if (!IsSubscribedAppExist(ivi_data)) {
+      subscriptions_to_revert.insert(ivi_data);
+    }
+  }
+
+  if (subscriptions_to_revert.empty()) {
+    LOG4CXX_DEBUG(logger_, "No data to unsubscribe");
+    return;
+  }
+  smart_objects::SmartObjectSPtr request =
+      CreateUnsubscriptionRequest(subscriptions_to_revert);
+  app_mngr_->GetRPCService().ManageHMICommand(request);
+}
+
+bool RCRPCPlugin::IsSubscribedAppExist(const std::string& subscription) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto applications = app_mngr_->applications();
+
+  DCHECK_OR_RETURN(
+      it != application_manager::MessageHelper::vehicle_data().end(), false);
+  auto ivi_enum = it->second;
+  for (auto& app : applications.GetData()) {
+    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+    if (ext.isSubscribedToVehicleInfo(ivi_enum)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+smart_objects::SmartObjectSPtr RCRPCPlugin::CreateUnsubscriptionRequest(
+    const std::set<std::string>& list_of_subscriptions) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  for (auto& ivi_data : list_of_subscriptions) {
+    msg_params[ivi_data] = true;
+  }
+
+  smart_objects::SmartObjectSPtr request =
+      application_manager::MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData,
+          *app_mngr_);
+  (*request)[strings::msg_params] = msg_params;
+
+  return request;
 }
 
 RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
