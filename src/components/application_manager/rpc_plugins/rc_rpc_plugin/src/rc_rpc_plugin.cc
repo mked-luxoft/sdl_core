@@ -41,6 +41,7 @@
 #include "utils/helpers.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"
+#include "rc_rpc_plugin/rc_pending_resumption_handler.h"
 
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
@@ -69,6 +70,7 @@ bool RCRPCPlugin::Init(
   command_factory_.reset(new rc_rpc_plugin::RCCommandFactory(params));
   rpc_service_ = &rpc_service;
   app_mngr_ = &app_manager;
+  pending_resumption_handler_ = std::make_shared<RCPendingResumptionHandler>(app_manager);
   return true;
 }
 
@@ -127,26 +129,9 @@ void RCRPCPlugin::ProcessResumptionSubscription(
     RCAppExtension& ext,
     resumption::Subscriber subscriber) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = app.app_id();
-  const auto& subscriptions = ext.Subscriptions();
-  const char* module_type_key = "moduleType";
-  const char* intended_action_key = "subscribe";
 
-  for (auto& module_type : subscriptions) {
-    msg_params[module_type_key] = module_type;
-    msg_params[intended_action_key] = true;
-    smart_objects::SmartObjectSPtr request =
-        application_manager::MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::RC_GetInteriorVehicleData, *app_mngr_);
-    (*request)[strings::msg_params] = msg_params;
-    app_mngr_->GetRPCService().ManageHMICommand(request);
-  }
-  UNUSED(subscriber);
-  // Use the following code instead of code above. Needs ti be implemented
-  //  pending_resumption_handler_->HandleResumptionSubscriptionRequest(
-  //      ext, subscriber, app);
+  pending_resumption_handler_->HandleResumptionSubscriptionRequest(
+      ext, subscriber, app);
 }
 
 RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
