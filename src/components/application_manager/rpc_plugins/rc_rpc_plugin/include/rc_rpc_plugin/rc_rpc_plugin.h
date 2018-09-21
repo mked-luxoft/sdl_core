@@ -106,11 +106,24 @@ class RCRPCPlugin : public plugins::RPCPlugin {
                                      RCAppExtension& ext,
                                      resumption::Subscriber subscriber);
 
+  /**
+  * @brief Revert the data to the state before Resumption.
+  * @param app application for which revert sould be performed
+  * @param list_of_subscriptions Subscriptions to be returned
+  **/
+  void RevertResumption(application_manager::Application& app,
+                        const std::set<std::string>& list_of_subscriptions);
+
   static const uint32_t kRCPluginID = 153;
 
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
   static Apps GetRCApplications(
       application_manager::ApplicationManager& app_mngr);
+
+  bool IsSubscribedAppExist(const std::string& subscription);
+
+  smart_objects::SmartObjectSPtr CreateUnsubscriptionRequest(
+      const std::set<std::string>& list_of_subscriptions);
 
  private:
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);

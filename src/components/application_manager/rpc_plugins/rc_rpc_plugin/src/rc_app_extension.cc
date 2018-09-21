@@ -69,6 +69,7 @@ bool RCAppExtension::IsSubscibedToInteriorVehicleData(
 
 void RCAppExtension::SaveResumptionData(
     smart_objects::SmartObject& resumption_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* application_interior_data = "moduleData";
   resumption_data[application_interior_data] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -81,6 +82,7 @@ void RCAppExtension::SaveResumptionData(
 void RCAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app,
     resumption::Subscriber subscriber) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!saved_app.keyExists(strings::application_subscriptions)) {
     LOG4CXX_DEBUG(logger_, "application_subscriptions section is not exists");
     return;
@@ -102,8 +104,26 @@ void RCAppExtension::ProcessResumption(
   }
 }
 
+RCAppExtension& RCAppExtension::ExtractInteriorVehicleDataExtension(
+    application_manager::Application& app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto ext_ptr =
+      app.QueryInterface(RCAppExtension::RCAppExtensionUID);
+  DCHECK(ext_ptr);
+  DCHECK(dynamic_cast<VehicleInfoAppExtension*>(ext_ptr.get()));
+  auto vi_app_extension =
+      std::static_pointer_cast<VehicleInfoAppExtension>(ext_ptr);
+  DCHECK(vi_app_extension);
+  return *vi_app_extension;
+}
+
 void RCAppExtension::RevertResumption(
-    const smart_objects::SmartObject& subscriptions) {}
+    const smart_objects::SmartObject& subscriptions) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  UnsubscribeFromInteriorVehicleData();
+  plugin_->RevertResumption(app_, subscriptions.enumerate());
+}
 
 std::set<std::string> RCAppExtension::Subscriptions() const {
   return subscribed_interior_vehicle_data_;
