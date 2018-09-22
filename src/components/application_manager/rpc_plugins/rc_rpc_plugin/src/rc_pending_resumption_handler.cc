@@ -2,7 +2,10 @@
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resumption_data_processor.h"
+#include "smart_objects/smart_object.h"
 #include "utils/helpers.h"
+
+#include <vector>
 
 namespace rc_rpc_plugin {
 
@@ -148,10 +151,21 @@ RCPendingResumptionHandler::CreateSubscriptionRequests(
   for (auto& module_type : subscriptions) {
     msg_params[module_type_key] = module_type;
     msg_params[intended_action_key] = true;
+
     smart_objects::SmartObjectSPtr request =
-        application_manager::MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::RC_GetInteriorVehicleData,
-            application_manager_);
+         application_manager::MessageHelper::CreateModuleInfoSO(
+             hmi_apis::FunctionID::RC_GetInteriorVehicleData,
+             application_manager_);
+
+    smart_objects::SmartObject& object = *request;
+    object[strings::params][strings::message_type] = static_cast<int>(kRequest);
+    object[strings::params][strings::function_id] =
+        static_cast<int>(hmi_apis::FunctionID::RC_GetInteriorVehicleData);
+    object[strings::params][strings::correlation_id] =
+        application_manager_.GetNextHMICorrelationID();
+    object[strings::msg_params] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
     (*request)[strings::msg_params] = msg_params;
     subscription_requests.push_back(request);
   }
@@ -180,14 +194,14 @@ void RCPendingResumptionHandler::ProcessSubscriptionRequests(
       const uint32_t correlation_id =
           (*subscription_request)[strings::params][strings::correlation_id]
               .asUInt();
-      pending_subscription_requests_[correlation_id] = subscription_request;
+      pending_subscription_requests_[correlation_id] = *subscription_request;
       const auto function_id = static_cast<hmi_apis::FunctionID::eType>(
           (*subscription_request)[application_manager::strings::params]
                                  [application_manager::strings::function_id]
                                      .asInt());
       auto resumption_request =
           ExtensionPendingResumptionHandler::MakeResumptionRequest(
-              correlation_id, function_id, subscription_request);
+              correlation_id, function_id, *subscription_request);
 
       subscribe_on_event(function_id, correlation_id);
       // TODO
