@@ -46,6 +46,10 @@
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
 
+
+static const char* module_type_key = "moduleType";
+static const char* intended_action_key = "subscribe";
+
 namespace plugins = application_manager::plugin_manager;
 namespace strings = application_manager::strings;
 
@@ -140,54 +144,54 @@ void RCRPCPlugin::RevertResumption(
     const std::set<std::string>& list_of_subscriptions) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  UNUSED(app);
+
   pending_resumption_handler_->ClearPendingResumptionRequests();
 
-  std::set<std::string> subscriptions_to_revert;
-  for (auto& ivi_data : list_of_subscriptions) {
-    if (!IsSubscribedAppExist(ivi_data)) {
-      subscriptions_to_revert.insert(ivi_data);
+  for (auto& module_type : list_of_subscriptions) {
+    if (!IsSubscribedAppExist(module_type)) {
+      smart_objects::SmartObjectSPtr request =
+          CreateUnsubscriptionRequest(module_type);
+      app_mngr_->GetRPCService().ManageHMICommand(request);
     }
   }
-
-  if (subscriptions_to_revert.empty()) {
-    LOG4CXX_DEBUG(logger_, "No data to unsubscribe");
-    return;
-  }
-  smart_objects::SmartObjectSPtr request =
-      CreateUnsubscriptionRequest(subscriptions_to_revert);
-  app_mngr_->GetRPCService().ManageHMICommand(request);
 }
 
-bool RCRPCPlugin::IsSubscribedAppExist(const std::string& subscription) {
+bool RCRPCPlugin::IsSubscribedAppExist(const std::string& module_type) {
   LOG4CXX_AUTO_TRACE(logger_);
   auto applications = app_mngr_->applications();
 
-  DCHECK_OR_RETURN(
-      it != application_manager::MessageHelper::vehicle_data().end(), false);
-  auto ivi_enum = it->second;
   for (auto& app : applications.GetData()) {
-    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-    if (ext.isSubscribedToVehicleInfo(ivi_enum)) {
+    auto& ext = ExtractInteriorVehicleDataExtension(*app);
+    if (ext.IsSubscibedToInteriorVehicleData(module_type)) {
       return true;
     }
   }
   return false;
 }
 
+RCAppExtension& RCRPCPlugin::ExtractInteriorVehicleDataExtension(
+    application_manager::Application& app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto ext_ptr = app.QueryInterface(kRCPluginID);
+  DCHECK(ext_ptr);
+  DCHECK(dynamic_cast<RCAppExtension*>(ext_ptr.get()));
+  auto rc_app_extension = std::static_pointer_cast<RCAppExtension>(ext_ptr);
+  DCHECK(rc_app_extension);
+  return *rc_app_extension;
+}
+
 smart_objects::SmartObjectSPtr RCRPCPlugin::CreateUnsubscriptionRequest(
-    const std::set<std::string>& list_of_subscriptions) {
+    const std::string& module_type) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  for (auto& ivi_data : list_of_subscriptions) {
-    msg_params[ivi_data] = true;
-  }
-
+  msg_params[module_type_key] = module_type;
+  msg_params[intended_action_key] = false;
   smart_objects::SmartObjectSPtr request =
       application_manager::MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData,
-          *app_mngr_);
+          hmi_apis::FunctionID::RC_GetInteriorVehicleData, *app_mngr_);
   (*request)[strings::msg_params] = msg_params;
 
   return request;

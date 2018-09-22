@@ -105,6 +105,13 @@ void ResumptionDataProcessor::HandleOnTimeOut(
   }
 }
 
+void ResumptionDataProcessor::CheckInteriorVehicleDataResponse(
+    const smart_objects::SmartObject& request,
+    const smart_objects::SmartObject& response,
+    ApplicationResumptionStatus& status) {
+  LOG4CXX_AUTO_TRACE(logger_);
+}
+
 void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& response = event.smart_object();
@@ -174,6 +181,11 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
       request_ids.function_id) {
     CheckVehicleDataResponse(request_ptr->message, response, status);
+  }
+
+  if (hmi_apis::FunctionID::RC_GetInteriorVehicleData ==
+      request_ids.function_id) {
+    CheckInteriorVehicleDataResponse(request_ptr->message, response, status);
   }
 
   {

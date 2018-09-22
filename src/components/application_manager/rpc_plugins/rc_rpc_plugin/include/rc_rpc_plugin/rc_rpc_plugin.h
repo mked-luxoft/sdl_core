@@ -122,11 +122,11 @@ class RCRPCPlugin : public plugins::RPCPlugin {
 
   bool IsSubscribedAppExist(const std::string& subscription);
 
-  smart_objects::SmartObjectSPtr CreateUnsubscriptionRequest(
-      const std::set<std::string>& list_of_subscriptions);
-
- private:
+  smart_objects::SmartObjectSPtr CreateUnsubscriptionRequest(const std::string &module_type);
+private:
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
+
+  RCAppExtension& ExtractInteriorVehicleDataExtension(application_manager::Application& app);
 
   application_manager::rpc_service::RPCService* rpc_service_;
   application_manager::ApplicationManager* app_mngr_;
