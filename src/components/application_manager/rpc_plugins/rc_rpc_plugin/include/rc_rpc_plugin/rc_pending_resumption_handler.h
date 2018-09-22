@@ -23,7 +23,8 @@ class RCPendingResumptionHandler
   void ClearPendingResumptionRequests() OVERRIDE;
 
  private:
-  smart_objects::SmartObjectList CreateSubscriptionRequests(
+  smart_objects::SmartObjectList
+  CreateSubscriptionRequests(
       const std::set<std::string> subscriptions, const uint32_t application_id);
 
   void ProcessSubscriptionRequests(

@@ -74,7 +74,11 @@ void RCAppExtension::SaveResumptionData(
   resumption_data[application_interior_data] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   int i = 0;
+  LOG4CXX_DEBUG(logger_,
+                "subscribed_interior_vehicle_data_.size(): "
+                    << subscribed_interior_vehicle_data_.size());
   for (const auto& module_type : subscribed_interior_vehicle_data_) {
+    LOG4CXX_DEBUG(logger_, "Saving module type: " << module_type.c_str());
     resumption_data[application_interior_data][i++] = module_type;
   }
 }
@@ -102,19 +106,6 @@ void RCAppExtension::ProcessResumption(
     }
     plugin_->ProcessResumptionSubscription(app_, *this, subscriber);
   }
-}
-
-RCAppExtension& RCAppExtension::ExtractInteriorVehicleDataExtension(
-    application_manager::Application& app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  auto ext_ptr =
-      app.QueryInterface(RCAppExtension::RCAppExtensionUID);
-  DCHECK(ext_ptr);
-  DCHECK(dynamic_cast<VehicleInfoAppExtension*>(ext_ptr.get()));
-  auto vi_app_extension =
-      std::static_pointer_cast<VehicleInfoAppExtension>(ext_ptr);
-  DCHECK(vi_app_extension);
-  return *vi_app_extension;
 }
 
 void RCAppExtension::RevertResumption(
