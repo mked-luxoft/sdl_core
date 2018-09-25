@@ -46,7 +46,6 @@
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
 
-
 static const char* module_type_key = "moduleType";
 static const char* intended_action_key = "subscribe";
 
@@ -74,8 +73,8 @@ bool RCRPCPlugin::Init(
   command_factory_.reset(new rc_rpc_plugin::RCCommandFactory(params));
   rpc_service_ = &rpc_service;
   app_mngr_ = &app_manager;
-  pending_resumption_handler_ =
-      std::make_shared<RCPendingResumptionHandler>(app_manager, interior_data_cache_);
+  pending_resumption_handler_ = std::make_shared<RCPendingResumptionHandler>(
+      app_manager, interior_data_cache_);
   return true;
 }
 
@@ -133,7 +132,7 @@ void RCRPCPlugin::ProcessResumptionSubscription(
     application_manager::Application& app,
     RCAppExtension& ext,
     resumption::Subscriber subscriber,
-          const std::set<std::string>& hmi_requests) {
+    const std::set<std::string>& hmi_requests) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   pending_resumption_handler_->HandleResumptionSubscriptionRequest(
@@ -149,10 +148,18 @@ void RCRPCPlugin::RevertResumption(
 
   pending_resumption_handler_->ClearPendingResumptionRequests();
 
+  const auto& mapping = RCHelpers::GetModuleTypeToEnumMapping();
+
   for (auto& module_type : list_of_subscriptions) {
-    if (!IsSubscribedAppExist(module_type)) {
+    std::string module_type_str =
+        mapping(static_cast<RCModuleTypeIDs>(std::stoi(module_type)));
+    LOG4CXX_DEBUG(logger_, "Processing unsubscription of " << module_type_str);
+    if (!IsSubscribedAppExist(module_type_str)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Creating unsubscription request for " << module_type_str);
+      interior_data_cache_->Remove(module_type_str);
       smart_objects::SmartObjectSPtr request =
-          CreateUnsubscriptionRequest(module_type);
+          CreateUnsubscriptionRequest(module_type_str);
       app_mngr_->GetRPCService().ManageHMICommand(request);
     }
   }

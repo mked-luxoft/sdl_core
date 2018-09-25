@@ -127,7 +127,7 @@ void VehicleInfoAppExtension::ProcessResumption(
 void VehicleInfoAppExtension::RevertResumption(
     const smart_objects::SmartObject& subscriptions) {
   unsubscribeFromVehicleInfo();
-  plugin_.RevertResumption(app_, subscriptions.enumerate());
+  plugin_.RevertResumption(app_, subscriptions["ivi"].enumerate());
 }
 
 VehicleInfoAppExtension& VehicleInfoAppExtension::ExtractVIExtension(

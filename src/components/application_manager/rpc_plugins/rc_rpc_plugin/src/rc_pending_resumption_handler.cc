@@ -134,6 +134,7 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
       app.app_id(), rc_app_extension, subscriber);
 
   if (pending_subscription_requests_.empty()) {
+    LOG4CXX_DEBUG(logger_, "There are NO pending resumptions");
     smart_objects::SmartObjectList subscription_requests =
         CreateSubscriptionRequests(hmi_requests, app.app_id());
     ProcessSubscriptionRequests(subscription_requests,
