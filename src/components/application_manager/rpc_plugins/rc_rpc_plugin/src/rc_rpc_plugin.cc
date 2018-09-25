@@ -75,7 +75,7 @@ bool RCRPCPlugin::Init(
   rpc_service_ = &rpc_service;
   app_mngr_ = &app_manager;
   pending_resumption_handler_ =
-      std::make_shared<RCPendingResumptionHandler>(app_manager);
+      std::make_shared<RCPendingResumptionHandler>(app_manager, interior_data_cache_);
   return true;
 }
 

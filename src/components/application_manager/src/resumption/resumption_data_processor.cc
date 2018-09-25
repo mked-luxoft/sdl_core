@@ -83,12 +83,10 @@ bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
 }
 
 bool ResumptionDataProcessor::HasNoHMIRequestsSent(const int32_t app_id) {
-    return ((resumption_status_.find(app_id) ==
-             resumption_status_.end())) ||
-           (resumption_status_[app_id].successful_requests.empty() &&
-            resumption_status_[app_id].error_requests.empty() &&
-            resumption_status_[app_id]
-                .list_of_sent_requests.empty());
+  return ((resumption_status_.find(app_id) == resumption_status_.end())) ||
+         (resumption_status_[app_id].successful_requests.empty() &&
+          resumption_status_[app_id].error_requests.empty() &&
+          resumption_status_[app_id].list_of_sent_requests.empty());
 }
 
 void ResumptionDataProcessor::HandleOnTimeOut(

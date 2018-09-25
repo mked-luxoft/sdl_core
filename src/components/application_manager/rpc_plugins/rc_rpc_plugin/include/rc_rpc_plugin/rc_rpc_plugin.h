@@ -133,7 +133,7 @@ private:
   application_manager::ApplicationManager* app_mngr_;
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
   std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;
-  std::unique_ptr<InteriorDataCache> interior_data_cache_;
+  std::shared_ptr<InteriorDataCache> interior_data_cache_;
   std::unique_ptr<InteriorDataManager> interior_data_manager_;
   using ExtensionPendingResumptionHandlerSPtr =
       std::shared_ptr<resumption::ExtensionPendingResumptionHandler>;
