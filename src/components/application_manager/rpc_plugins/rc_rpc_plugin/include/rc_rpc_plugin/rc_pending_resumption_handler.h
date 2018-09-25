@@ -18,17 +18,12 @@ class RCPendingResumptionHandler
 
   void HandleResumptionSubscriptionRequest(app_mngr::AppExtension& extension,
                                            resumption::Subscriber& subscriber,
-                                           app_mngr::Application& app) OVERRIDE;
+                                           app_mngr::Application& app,
+                                           const std::set<std::string>& hmi_requests) OVERRIDE;
 
   void ClearPendingResumptionRequests() OVERRIDE;
 
  private:
-  smart_objects::SmartObjectList
-  CreateSubscriptionRequests(
-      const std::set<std::string> subscriptions, const uint32_t application_id);
-
-  void ProcessSubscriptionRequests(
-      const smart_objects::SmartObjectList& subscription_requests);
 
   struct ResumptionAwaitingHandling {
     app_mngr::AppExtension& extension;
@@ -40,6 +35,13 @@ class RCPendingResumptionHandler
                                app_mngr::AppExtension& ext,
                                resumption::Subscriber sub);
   };
+
+  smart_objects::SmartObjectList CreateSubscriptionRequests(
+      const std::set<std::string> subscriptions, const uint32_t application_id);
+
+  void ProcessSubscriptionRequests(
+      const smart_objects::SmartObjectList& subscription_requests,
+      const ResumptionAwaitingHandling& resumption);
 
   std::set<std::string> GetFrozenResumptionUnhandledSubscriptions(
       const ResumptionAwaitingHandling& frozen_resumption);

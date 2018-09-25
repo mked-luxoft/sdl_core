@@ -104,7 +104,8 @@ class RCRPCPlugin : public plugins::RPCPlugin {
    */
   void ProcessResumptionSubscription(app_mngr::Application& app,
                                      RCAppExtension& ext,
-                                     resumption::Subscriber subscriber);
+                                     resumption::Subscriber subscriber,
+          const std::set<std::string>& hmi_requests);
 
   /**
   * @brief Revert the data to the state before Resumption.

@@ -23,7 +23,8 @@ class ExtensionPendingResumptionHandler
   virtual void HandleResumptionSubscriptionRequest(
       app_mngr::AppExtension& extension,
       Subscriber& subscriber,
-      application_manager::Application& app) = 0;
+      application_manager::Application& app,
+          const std::set<std::string>& hmi_requests) = 0;
 
   virtual void ClearPendingResumptionRequests() = 0;
 
