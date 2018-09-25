@@ -68,6 +68,14 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
   register_callbacks_[application->app_id()] = callback;
+  if (resumption_status_.find(application->app_id()) !=
+      resumption_status_.end()) {
+    if (resumption_status_[application->app_id()].successful_requests.empty() &&
+        resumption_status_[application->app_id()].error_requests.empty() &&
+        resumption_status_[application->app_id()].list_of_sent_requests.empty())
+      callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
+    return;
+  }
 }
 
 bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
@@ -350,7 +358,11 @@ void ResumptionDataProcessor::DeleteSubmenues(
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t app_id = application->app_id();
   ApplicationResumptionStatus& status = resumption_status_[app_id];
-  for (auto request : status.successful_requests) {
+  auto requests = status.successful_requests;
+  requests.insert(requests.begin(),
+                  status.error_requests.begin(),
+                  status.error_requests.end());
+  for (auto request : requests) {
     if (hmi_apis::FunctionID::UI_AddSubMenu ==
         request.request_ids.function_id) {
       smart_objects::SmartObjectSPtr ui_sub_menu =
@@ -406,8 +418,11 @@ void ResumptionDataProcessor::DeleteCommands(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t app_id = application->app_id();
   ApplicationResumptionStatus& status = resumption_status_[app_id];
-
-  for (auto request : status.successful_requests) {
+  auto requests = status.successful_requests;
+  requests.insert(requests.begin(),
+                  status.error_requests.begin(),
+                  status.error_requests.end());
+  for (auto request : requests) {
     const uint32_t cmd_id =
         request.message[strings::msg_params][strings::cmd_id].asUInt();
 
