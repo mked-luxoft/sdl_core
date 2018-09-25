@@ -19,7 +19,8 @@ class VehicleInfoPendingResumptionHandler
 
   void HandleResumptionSubscriptionRequest(app_mngr::AppExtension& extension,
                                            resumption::Subscriber& subscriber,
-                                           app_mngr::Application& app) OVERRIDE;
+                                           app_mngr::Application& app,
+                                           const std::set<std::string>& hmi_requests) OVERRIDE;
 
   std::map<std::string, bool> ExtractSubscribeResults(
       const smart_objects::SmartObject& response,

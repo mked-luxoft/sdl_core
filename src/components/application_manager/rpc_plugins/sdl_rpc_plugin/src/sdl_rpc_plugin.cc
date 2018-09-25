@@ -94,8 +94,9 @@ void SDLRPCPlugin::ProcessResumptionSubscription(
   std::set<int32_t> apps =
       application_manager_->GetAppsSubscribedForWayPoints();
   application_manager_->SubscribeAppForWayPoints(application);
+  std::set<std::string> hmi_requests;
   pending_resumption_handler_->HandleResumptionSubscriptionRequest(
-      ext, subscriber, app);
+      ext, subscriber, app, hmi_requests);
 }
 
 void SDLRPCPlugin::SaveResumptionData(

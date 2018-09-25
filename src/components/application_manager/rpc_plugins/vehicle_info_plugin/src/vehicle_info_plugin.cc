@@ -91,8 +91,9 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
     resumption::Subscriber subscriber) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  std::set<std::string> hmi_requests;
   pending_resumption_handler_->HandleResumptionSubscriptionRequest(
-      ext, subscriber, app);
+      ext, subscriber, app, hmi_requests);
 }
 
 void VehicleInfoPlugin::RevertResumption(

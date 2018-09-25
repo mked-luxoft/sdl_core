@@ -183,11 +183,6 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
     CheckVehicleDataResponse(request_ptr->message, response, status);
   }
 
-  if (hmi_apis::FunctionID::RC_GetInteriorVehicleData ==
-      request_ids.function_id) {
-    CheckInteriorVehicleDataResponse(request_ptr->message, response, status);
-  }
-
   {
     sync_primitives::AutoLock lock(resumption_data_procesoor_lock_);
     list_of_sent_requests.erase(request_ptr);
