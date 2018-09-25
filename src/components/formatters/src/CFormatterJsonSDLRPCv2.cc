@@ -38,6 +38,8 @@ namespace ns_smart_device_link {
 namespace ns_json_handler {
 namespace formatters {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "CFormatterJsonSDLRPCv2")
+
 // ----------------------------------------------------------------------------
 
 bool CFormatterJsonSDLRPCv2::toString(const smart_objects_ns::SmartObject& obj,
