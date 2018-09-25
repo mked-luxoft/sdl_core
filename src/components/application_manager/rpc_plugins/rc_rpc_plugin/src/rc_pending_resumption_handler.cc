@@ -1,6 +1,7 @@
 #include "rc_rpc_plugin/rc_pending_resumption_handler.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resumption_data_processor.h"
 #include "smart_objects/smart_object.h"
@@ -65,11 +66,10 @@ void RCPendingResumptionHandler::on_event(
       (result_code == hmi_apis::Common_Result::SUCCESS ||
        result_code == hmi_apis::Common_Result::WARNINGS);
 
-  LOG4CXX_DEBUG(logger_, "is_subscription_successful: "
-                << is_subscription_successful);
+  LOG4CXX_DEBUG(logger_,
+                "is_subscription_successful: " << is_subscription_successful);
 
-  LOG4CXX_DEBUG(logger_, "result_code: "
-                << result_code);
+  LOG4CXX_DEBUG(logger_, "result_code: " << result_code);
 
   const std::string subscription_module_type =
       pending_subscription_request[app_mngr::strings::msg_params]
@@ -104,11 +104,10 @@ void RCPendingResumptionHandler::on_event(
   }
 
   if (is_subscription_successful) {
-    app_mngr::MessageHelper::PrintSmartObject(response);
-    app_mngr::MessageHelper::PrintSmartObject(response[app_mngr::strings::msg_params]);
-    app_mngr::MessageHelper::PrintSmartObject(response[app_mngr::strings::msg_params][message_params::kModuleData]);
+    const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
     auto& moduleData =
-        response[app_mngr::strings::msg_params][message_params::kModuleData];
+        response[app_mngr::strings::msg_params][message_params::kModuleData]
+                [data_mapping(subscription_module_type)];
     app_mngr::MessageHelper::PrintSmartObject(moduleData);
     interior_data_cache_->Add(subscription_module_type, moduleData);
   }
