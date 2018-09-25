@@ -315,6 +315,8 @@ void CommandRequestImpl::SendResponse(
 
   is_success_result_ = success;
 
+  application_manager::MessageHelper::PrintSmartObject(response);
+
   rpc_service_.ManageMobileCommand(result, SOURCE_SDL);
 }
 

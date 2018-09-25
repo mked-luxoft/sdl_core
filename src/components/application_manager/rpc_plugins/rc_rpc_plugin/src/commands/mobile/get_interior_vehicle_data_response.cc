@@ -32,6 +32,7 @@
 
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_response.h"
 #include "utils/macro.h"
+#include "application_manager/message_helper.h"
 
 namespace rc_rpc_plugin {
 namespace commands {
@@ -49,6 +50,7 @@ GetInteriorVehicleDataResponse::~GetInteriorVehicleDataResponse() {}
 
 void GetInteriorVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::MessageHelper::PrintSmartObject(*message_);
   application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 

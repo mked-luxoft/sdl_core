@@ -2,29 +2,33 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_PENDING_RESUMPTION_HANDLER_H
 
 #include "application_manager/resumption/extension_pending_resumption_handler.h"
+#include "rc_rpc_plugin.h"
 
 namespace rc_rpc_plugin {
 
 namespace app_mngr = application_manager;
 
+using InteriorDataCacheSptr = std::shared_ptr<InteriorDataCache>;
+
 class RCPendingResumptionHandler
     : public resumption::ExtensionPendingResumptionHandler {
  public:
-  RCPendingResumptionHandler(app_mngr::ApplicationManager& application_manager);
+  RCPendingResumptionHandler(app_mngr::ApplicationManager& application_manager,
+                             InteriorDataCacheSptr interior_data_cache);
 
   ~RCPendingResumptionHandler() {}
 
   void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
-  void HandleResumptionSubscriptionRequest(app_mngr::AppExtension& extension,
-                                           resumption::Subscriber& subscriber,
-                                           app_mngr::Application& app,
-                                           const std::set<std::string>& hmi_requests) OVERRIDE;
+  void HandleResumptionSubscriptionRequest(
+      app_mngr::AppExtension& extension,
+      resumption::Subscriber& subscriber,
+      app_mngr::Application& app,
+      const std::set<std::string>& hmi_requests) OVERRIDE;
 
   void ClearPendingResumptionRequests() OVERRIDE;
 
  private:
-
   struct ResumptionAwaitingHandling {
     app_mngr::AppExtension& extension;
     const uint32_t application_id;
@@ -46,6 +50,7 @@ class RCPendingResumptionHandler
   std::set<std::string> GetFrozenResumptionUnhandledSubscriptions(
       const ResumptionAwaitingHandling& frozen_resumption);
 
+  std::shared_ptr<InteriorDataCache> interior_data_cache_;
   std::map<uint32_t, smart_objects::SmartObject> pending_subscription_requests_;
   std::deque<ResumptionAwaitingHandling> frozen_resumptions_;
 };

@@ -102,6 +102,8 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
   response_msg_params[message_params::kModuleData]
                      [message_params::kModuleType] = ModuleType();
 
+  application_manager::MessageHelper::PrintSmartObject(response_msg_params);
+
   const auto& request_msg_params = (*message_)[app_mngr::strings::msg_params];
   LOG4CXX_DEBUG(logger_,
                 "kSubscribe exist" << request_msg_params.keyExists(
@@ -116,6 +118,7 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
       app->UpdateHash();
     }
   }
+  LOG4CXX_DEBUG(logger_, "sending response to mobile");
   SendResponse(
       true, mobile_apis::Result::SUCCESS, nullptr, &response_msg_params);
   if (AppShouldBeUnsubscribed()) {
@@ -172,6 +175,9 @@ void GetInteriorVehicleDataRequest::Execute() {
 
   LOG4CXX_DEBUG(logger_, "interior_data_cache_.Contains(ModuleType()): "
                 << interior_data_cache_.Contains(ModuleType()));
+
+  LOG4CXX_DEBUG(logger_, "TheLastAppShouldBeUnsubscribed(app): "
+                << TheLastAppShouldBeUnsubscribed(app));
 
   if (TheLastAppShouldBeUnsubscribed(app) ||
       !interior_data_cache_.Contains(ModuleType())) {
