@@ -105,6 +105,9 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
 
   LOG4CXX_DEBUG(logger_, "received app_id: "
                 << app.app_id());
+  if(hmi_requests.empty()){
+      return;
+  }
   // TODO create Subscriptions method in AppExtension
   RCAppExtension& rc_app_extension = dynamic_cast<RCAppExtension&>(extension);
   //std::set<std::string> subscriptions = rc_app_extension.Subscriptions();
