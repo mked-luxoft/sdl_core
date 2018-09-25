@@ -48,6 +48,9 @@ using app_mngr::ButtonSubscriptions;
 namespace strings = app_mngr::strings;
 namespace event_engine = app_mngr::event_engine;
 
+static const char* kModuleType = "moduleType";
+static const char* kModuleData = "moduleData";
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumptionDataProcessor::ResumptionDataProcessor(
@@ -130,6 +133,8 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& response = event.smart_object();
 
+  MessageHelper::PrintSmartObject(response);
+
   ResumptionRequestIDs request_ids;
   request_ids.function_id = event.id();
   request_ids.correlation_id = event.smart_object_correlation_id();
@@ -195,6 +200,15 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
       request_ids.function_id) {
     CheckVehicleDataResponse(request_ptr->message, response, status);
+  }
+
+  if (hmi_apis::FunctionID::RC_GetInteriorVehicleData ==
+      request_ids.function_id) {
+    const auto& module_type =
+        response[app_mngr::strings::msg_params][kModuleData][kModuleType].asString();
+    if (IsRequestSuccessful(response)) {
+      status.successful_ivd_subscriptions_.push_back(module_type);
+    }
   }
 
   {
@@ -710,8 +724,15 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
   smart_objects::SmartObject extension_subscriptions;
   for (auto ivi : status.succesfull_vehicle_data_subscriptions_) {
     LOG4CXX_DEBUG(logger_, "ivi " << ivi << " should be deleted");
-    extension_subscriptions[ivi] = true;
+    extension_subscriptions["ivi"][ivi] = true;
   }
+
+  for (auto ivd : status.successful_ivd_subscriptions_) {
+    LOG4CXX_DEBUG(logger_, "ivd " << ivd << " should be deleted");
+    extension_subscriptions["ivd"][ivd] = true;
+  }
+
+  MessageHelper::PrintSmartObject(extension_subscriptions);
 
   for (auto& extension : application->Extensions()) {
     extension->RevertResumption(extension_subscriptions);

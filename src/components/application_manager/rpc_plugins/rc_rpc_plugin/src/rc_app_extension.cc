@@ -122,7 +122,7 @@ void RCAppExtension::RevertResumption(
   LOG4CXX_AUTO_TRACE(logger_);
 
   UnsubscribeFromInteriorVehicleData();
-  plugin_->RevertResumption(app_, subscriptions.enumerate());
+  plugin_->RevertResumption(app_, subscriptions["ivd"].enumerate());
 }
 
 std::set<std::string> RCAppExtension::Subscriptions() const {
