@@ -41,6 +41,9 @@ void RCPendingResumptionHandler::on_event(
   const smart_objects::SmartObject& response = event.smart_object();
   const uint32_t correlation_id = event.smart_object_correlation_id();
 
+  LOG4CXX_DEBUG(logger_, "Received corr id: "
+                << correlation_id);
+
   if (pending_subscription_requests_.find(correlation_id) ==
       pending_subscription_requests_.end()) {
     LOG4CXX_WARN(logger_,
@@ -54,6 +57,7 @@ void RCPendingResumptionHandler::on_event(
 
   if (frozen_resumptions_.empty()) {
     LOG4CXX_DEBUG(logger_, "There are no frozen resumptions");
+    pending_subscription_requests_.erase(correlation_id);
     return;
   }
 
@@ -88,27 +92,33 @@ void RCPendingResumptionHandler::on_event(
     std::set<std::string> unhandled_subscriptions =
         GetFrozenResumptionUnhandledSubscriptions(freezed_resumption);
     ProcessSubscriptionRequests(CreateSubscriptionRequests(
-        unhandled_subscriptions, freezed_resumption.application_id));
+        unhandled_subscriptions, freezed_resumption.application_id), freezed_resumption);
   }
 }
 
 void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     app_mngr::AppExtension& extension,
     resumption::Subscriber& subscriber,
-    app_mngr::Application& app) {
+    app_mngr::Application& app,
+        const std::set<std::string>& hmi_requests) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  LOG4CXX_DEBUG(logger_, "received app_id: "
+                << app.app_id());
   // TODO create Subscriptions method in AppExtension
   RCAppExtension& rc_app_extension = dynamic_cast<RCAppExtension&>(extension);
-  std::set<std::string> subscriptions = rc_app_extension.Subscriptions();
+  //std::set<std::string> subscriptions = rc_app_extension.Subscriptions();
+  ResumptionAwaitingHandling resumption_awaiting_handling(
+      app.app_id(), rc_app_extension, subscriber);
 
   if (pending_subscription_requests_.empty()) {
     smart_objects::SmartObjectList subscription_requests =
-        CreateSubscriptionRequests(subscriptions, app.app_id());
-    ProcessSubscriptionRequests(subscription_requests);
+        CreateSubscriptionRequests(hmi_requests, app.app_id());
+    ProcessSubscriptionRequests(subscription_requests,
+                                resumption_awaiting_handling);
   } else {
-    ResumptionAwaitingHandling frozen_resumption(
-        app.app_id(), rc_app_extension, subscriber);
-    frozen_resumptions_.push_back(frozen_resumption);
+     LOG4CXX_DEBUG(logger_, "There are pending resumptions");
+    frozen_resumptions_.push_back(resumption_awaiting_handling);
   }
 }
 
@@ -131,7 +141,7 @@ void RCPendingResumptionHandler::ClearPendingResumptionRequests() {
     std::set<std::string> unhandled_subscriptions =
         GetFrozenResumptionUnhandledSubscriptions(freezed_resumption);
     ProcessSubscriptionRequests(CreateSubscriptionRequests(
-        unhandled_subscriptions, freezed_resumption.application_id));
+        unhandled_subscriptions, freezed_resumption.application_id), freezed_resumption);
   }
 }
 
@@ -149,13 +159,14 @@ RCPendingResumptionHandler::CreateSubscriptionRequests(
   msg_params[strings::app_id] = application_id;
 
   for (auto& module_type : subscriptions) {
+    LOG4CXX_DEBUG(logger_, "processing module type: " << module_type.c_str());
     msg_params[module_type_key] = module_type;
     msg_params[intended_action_key] = true;
 
     smart_objects::SmartObjectSPtr request =
-         application_manager::MessageHelper::CreateModuleInfoSO(
-             hmi_apis::FunctionID::RC_GetInteriorVehicleData,
-             application_manager_);
+        application_manager::MessageHelper::CreateModuleInfoSO(
+            hmi_apis::FunctionID::RC_GetInteriorVehicleData,
+            application_manager_);
 
     smart_objects::SmartObject& object = *request;
     object[strings::params][strings::message_type] = static_cast<int>(kRequest);
@@ -174,7 +185,8 @@ RCPendingResumptionHandler::CreateSubscriptionRequests(
 }
 
 void RCPendingResumptionHandler::ProcessSubscriptionRequests(
-    const smart_objects::SmartObjectList& subscription_requests) {
+    const smart_objects::SmartObjectList& subscription_requests,
+    const ResumptionAwaitingHandling& resumption) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
   using namespace resumption;
@@ -205,7 +217,7 @@ void RCPendingResumptionHandler::ProcessSubscriptionRequests(
 
       subscribe_on_event(function_id, correlation_id);
       // TODO
-      // subscriber(app.app_id(), resumption_request);
+      resumption.subscriber(resumption.application_id, resumption_request);
 
       application_manager_.GetRPCService().ManageHMICommand(
           subscription_request);

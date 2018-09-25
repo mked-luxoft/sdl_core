@@ -198,7 +198,8 @@ VehicleInfoPendingResumptionHandler::ExtractSubscribeResults(
 void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     application_manager::AppExtension& extension,
     resumption::Subscriber& subscriber,
-    application_manager::Application& app) {
+    application_manager::Application& app,
+        const std::set<std::string>& hmi_requests) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   VehicleInfoAppExtension& ext =

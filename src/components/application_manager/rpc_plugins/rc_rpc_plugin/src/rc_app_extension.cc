@@ -33,6 +33,7 @@
 #include "rc_rpc_plugin/rc_app_extension.h"
 #include "smart_objects/smart_object.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
+#include "application_manager/message_helper.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RCAppExtension")
 
@@ -99,12 +100,20 @@ void RCAppExtension::ProcessResumption(
   if (resumption_data.keyExists(application_interior_data)) {
     const smart_objects::SmartObject& interior_data_subscriptions =
         resumption_data[application_interior_data];
+
+    std::set<std::string> hmi_requests;
+
     for (size_t i = 0; i < interior_data_subscriptions.length(); ++i) {
-      const std::string module_type =
-          static_cast<std::string>((resumption_data[i]).asString());
+      const std::string module_type((interior_data_subscriptions[i]).asString());
+      if(!plugin_->IsSubscribedAppExist(module_type)){
+        hmi_requests.insert(module_type);
+      }
+
+      LOG4CXX_DEBUG(logger_,
+                    "Subscribing for module type: " << module_type.c_str());
       SubscribeToInteriorVehicleData(module_type);
     }
-    plugin_->ProcessResumptionSubscription(app_, *this, subscriber);
+    plugin_->ProcessResumptionSubscription(app_, *this, subscriber, hmi_requests);
   }
 }
 
