@@ -68,12 +68,11 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
   register_callbacks_[application->app_id()] = callback;
-  if (resumption_status_.find(application->app_id()) !=
-      resumption_status_.end()) {
-    if (resumption_status_[application->app_id()].successful_requests.empty() &&
-        resumption_status_[application->app_id()].error_requests.empty() &&
-        resumption_status_[application->app_id()].list_of_sent_requests.empty())
-      callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
+
+  if (HasNoHMIRequestsSent(application->app_id())) {
+    LOG4CXX_DEBUG(logger_,
+                  "No HMI requests sent, but resumption is successful");
+    callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
     return;
   }
 }
@@ -81,6 +80,15 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
 bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
   return correlation_id < other.correlation_id ||
          function_id < other.function_id;
+}
+
+bool ResumptionDataProcessor::HasNoHMIRequestsSent(const int32_t app_id) {
+    return ((resumption_status_.find(app_id) ==
+             resumption_status_.end())) ||
+           (resumption_status_[app_id].successful_requests.empty() &&
+            resumption_status_[app_id].error_requests.empty() &&
+            resumption_status_[app_id]
+                .list_of_sent_requests.empty());
 }
 
 void ResumptionDataProcessor::HandleOnTimeOut(
