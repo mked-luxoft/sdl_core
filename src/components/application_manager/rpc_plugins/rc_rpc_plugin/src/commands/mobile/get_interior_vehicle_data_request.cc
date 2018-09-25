@@ -238,6 +238,9 @@ void GetInteriorVehicleDataRequest::on_event(
 
     DCHECK_OR_RETURN_VOID(app);
     if (TheLastAppShouldBeUnsubscribed(app)) {
+       LOG4CXX_DEBUG(logger_, "removing module type "
+                     << ModuleType()
+                     << "from cache");
       interior_data_cache_.Remove(ModuleType());
     }
     ProccessSubscription(hmi_response);
