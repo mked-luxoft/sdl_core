@@ -34,6 +34,7 @@
 #include "smart_objects/smart_object.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RCAppExtension")
 
@@ -86,7 +87,7 @@ void RCAppExtension::SaveResumptionData(
 
 void RCAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app,
-    resumption::Subscriber subscriber) {
+    resumption::ResumptionHandlingCallbacks callbacks) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!saved_app.keyExists(strings::application_subscriptions)) {
     LOG4CXX_DEBUG(logger_, "application_subscriptions section is not exists");
@@ -113,7 +114,8 @@ void RCAppExtension::ProcessResumption(
                     "Subscribing for module type: " << module_type.c_str());
       SubscribeToInteriorVehicleData(module_type);
     }
-    plugin_->ProcessResumptionSubscription(app_, *this, subscriber, hmi_requests);
+    plugin_->ProcessResumptionSubscription(
+        app_, *this, callbacks);
   }
 }
 

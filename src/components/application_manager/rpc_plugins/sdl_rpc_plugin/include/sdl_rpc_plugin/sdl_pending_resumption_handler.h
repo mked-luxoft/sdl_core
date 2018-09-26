@@ -52,9 +52,8 @@ class SDLPendingResumptionHandler
 
   void HandleResumptionSubscriptionRequest(
       app_mngr::AppExtension& extension,
-      resumption::Subscriber& subscriber,
-      application_manager::Application& app,
-          const std::set<std::string>& hmi_requests) OVERRIDE;
+      app_mngr::Application& app,
+      resumption::ResumptionHandlingCallbacks callbacks) OVERRIDE;
 
   void ClearPendingResumptionRequests() OVERRIDE;
 

@@ -64,25 +64,49 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
                                       smart_objects::SmartObject& saved_app,
                                       ResumeCtrl::ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
+  register_callbacks_[application->app_id()] = callback;
   AddFiles(application, saved_app);
   AddSubmenues(application, saved_app);
   AddCommands(application, saved_app);
   AddChoicesets(application, saved_app);
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
-  register_callbacks_[application->app_id()] = callback;
-
-  if (HasNoHMIRequestsSent(application->app_id())) {
-    LOG4CXX_DEBUG(logger_,
-                  "No HMI requests sent, but resumption is successful");
-    callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
-    return;
-  }
 }
 
 bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
   return correlation_id < other.correlation_id ||
          function_id < other.function_id;
+}
+
+ResumptionHandlingCallbacks
+ResumptionDataProcessor::GetResumptionHandlingCallbacks() {
+  ResumptionHandlingCallbacks callbacks;
+
+  callbacks.subscriber_ =
+      [this](const int32_t app_id, const ResumptionRequest request) {
+        WaitForResponse(app_id, request);
+      };
+
+  callbacks.conclude_resumption_callback_ = [this](const int32_t app_id) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Entered conclude resumption callback with app id: " << app_id);
+    auto it = resumption_status_.find(app_id);
+    if (it != resumption_status_.end()) {
+      if (it->second.list_of_sent_requests.empty()) {
+        ConcludeResumption(app_id, it->second);
+      }
+    } else {
+    LOG4CXX_DEBUG(logger_,
+                  "No HMI requests sent, but resumption is successful");
+    callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
+      } else {
+        LOG4CXX_WARN(logger_, "Callback not found");
+  }
+}
+  };
+
+  return callbacks;
 }
 
 bool ResumptionDataProcessor::HasNoHMIRequestsSent(const int32_t app_id) {
@@ -205,7 +229,8 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
   if (hmi_apis::FunctionID::RC_GetInteriorVehicleData ==
       request_ids.function_id) {
     const auto& module_type =
-        response[app_mngr::strings::msg_params][kModuleData][kModuleType].asString();
+        response[app_mngr::strings::msg_params][kModuleData][kModuleType]
+            .asString();
     if (IsRequestSuccessful(response)) {
       status.successful_ivd_subscriptions_.push_back(module_type);
     }
@@ -223,6 +248,15 @@ void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
                       << list_of_sent_requests.size());
     return;
   }
+
+  ConcludeResumption(app_id, status);
+
+  request_app_ids_.erase(app_id_ptr);
+}
+
+void ResumptionDataProcessor::ConcludeResumption(
+    const uint32_t app_id, const ApplicationResumptionStatus& status) {
+  LOG4CXX_AUTO_TRACE(logger_);
 
   auto it = register_callbacks_.find(app_id);
   if (it == register_callbacks_.end()) {
@@ -676,12 +710,10 @@ void ResumptionDataProcessor::AddPluginsSubscriptions(
     const smart_objects::SmartObject& saved_app) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  auto callbacks = GetResumptionHandlingCallbacks();
+
   for (auto& extension : application->Extensions()) {
-    extension->ProcessResumption(
-        saved_app,
-        [this](const int32_t app_id, const ResumptionRequest request) {
-          this->WaitForResponse(app_id, request);
-        });
+    extension->ProcessResumption(saved_app, callbacks);
   }
 }
 

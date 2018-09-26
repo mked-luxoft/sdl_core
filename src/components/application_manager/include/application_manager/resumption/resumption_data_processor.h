@@ -67,6 +67,14 @@ struct ApplicationResumptionStatus {
   std::vector<std::string> successful_ivd_subscriptions_;
 };
 
+
+struct ResumptionHandlingCallbacks {
+    using Subscriber = std::function<void(const int32_t, const ResumptionRequest)>;
+    using ConcludeResumptionCallback = std::function<void(const int32_t)>;
+    Subscriber subscriber_;
+    ConcludeResumptionCallback conclude_resumption_callback_;
+};
+
 /**
  * @brief Contains logic for the resumption and revert resumption data of
  *  applications.
@@ -300,11 +308,13 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
                                 const smart_objects::SmartObject& response,
                                 ApplicationResumptionStatus& status);
 
-  void CheckInteriorVehicleDataResponse(const smart_objects::SmartObject& request,
-                                        const smart_objects::SmartObject& response,
-                                        ApplicationResumptionStatus& status);
 
   bool HasNoHMIRequestsSent(const int32_t app_id);
+
+  void ConcludeResumption(const uint32_t app_id,
+                          const ApplicationResumptionStatus& status);
+
+  ResumptionHandlingCallbacks GetResumptionHandlingCallbacks();
   /**
    * @brief A map of the IDs and Application Resumption Status for these ID
    **/
