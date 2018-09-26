@@ -102,10 +102,10 @@ class RCRPCPlugin : public plugins::RPCPlugin {
    * @param ext application extension
    * @param subscriber callback for subscription
    */
-  void ProcessResumptionSubscription(app_mngr::Application& app,
-                                     RCAppExtension& ext,
-                                     resumption::Subscriber subscriber,
-          const std::set<std::string>& hmi_requests);
+  void ProcessResumptionSubscription(
+      app_mngr::Application& app,
+      RCAppExtension& ext,
+      resumption::ResumptionHandlingCallbacks callbacks);
 
   /**
   * @brief Revert the data to the state before Resumption.
@@ -123,11 +123,14 @@ class RCRPCPlugin : public plugins::RPCPlugin {
 
   bool IsSubscribedAppExist(const std::string& subscription);
 
-  smart_objects::SmartObjectSPtr CreateUnsubscriptionRequest(const std::string &module_type);
-private:
+  smart_objects::SmartObjectSPtr CreateUnsubscriptionRequest(
+      const std::string& module_type);
+
+ private:
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
 
-  RCAppExtension& ExtractInteriorVehicleDataExtension(application_manager::Application& app);
+  RCAppExtension& ExtractInteriorVehicleDataExtension(
+      application_manager::Application& app);
 
   application_manager::rpc_service::RPCService* rpc_service_;
   application_manager::ApplicationManager* app_mngr_;

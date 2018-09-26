@@ -124,9 +124,11 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
   if (AppShouldBeUnsubscribed()) {
     auto extension = RCHelpers::GetRCExtension(*app);
     DCHECK(extension);
+    if (extension->IsSubscibedToInteriorVehicleData(ModuleType())) {
     extension->UnsubscribeFromInteriorVehicleData(ModuleType());
     app->UpdateHash();
   }
+}
 }
 
 bool GetInteriorVehicleDataRequest::CheckRateLimits() {
@@ -186,7 +188,6 @@ void GetInteriorVehicleDataRequest::Execute() {
       is_subscribed =
           (*message_)[app_mngr::strings::msg_params][message_params::kSubscribe]
               .asBool();
-      //RemoveExcessiveSubscription();
     }
     if (!CheckRateLimits()) {
       LOG4CXX_WARN(logger_, "GetInteriorVehicleData frequency is too high.");

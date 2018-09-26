@@ -131,12 +131,11 @@ void RCRPCPlugin::OnApplicationEvent(
 void RCRPCPlugin::ProcessResumptionSubscription(
     application_manager::Application& app,
     RCAppExtension& ext,
-    resumption::Subscriber subscriber,
-    const std::set<std::string>& hmi_requests) {
+    resumption::ResumptionHandlingCallbacks callbacks) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   pending_resumption_handler_->HandleResumptionSubscriptionRequest(
-      ext, subscriber, app, hmi_requests);
+      ext, app, callbacks);
 }
 
 void RCRPCPlugin::RevertResumption(
