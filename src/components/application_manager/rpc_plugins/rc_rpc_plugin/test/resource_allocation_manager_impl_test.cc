@@ -425,7 +425,9 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
   RCAppExtensionPtr rc_extention_ptr =
       std::make_shared<rc_rpc_plugin::RCAppExtension>(
           application_manager::AppExtensionUID(
-              rc_rpc_plugin::RCRPCPlugin::kRCPluginID), nullptr, *(mock_app_1_.get()));
+              rc_rpc_plugin::RCRPCPlugin::kRCPluginID),
+          nullptr,
+          *(mock_app_1_.get()));
 
   EXPECT_CALL(*mock_app_1_, QueryInterface(RCRPCPlugin::kRCPluginID))
       .WillRepeatedly(Return(rc_extention_ptr));

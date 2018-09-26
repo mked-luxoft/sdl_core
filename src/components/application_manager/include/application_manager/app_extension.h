@@ -78,7 +78,7 @@ class AppExtension {
    */
   virtual void ProcessResumption(
       const smart_objects::SmartObject& resumption_data,
-          resumption::ResumptionHandlingCallbacks) = 0;
+      resumption::ResumptionHandlingCallbacks) = 0;
 
   /**
    * @brief RevertResumption Method called by SDL during revert resumption.

@@ -540,8 +540,7 @@ bool RPCServiceImpl::ConvertSOtoMessage(
   const int64_t protocol_version = message.getElement(jhs::S_PARAMS)
                                        .getElement(jhs::S_PROTOCOL_VERSION)
                                        .asInt();
-  LOG4CXX_DEBUG(logger_, "protocol_version: "
-                << protocol_version);
+  LOG4CXX_DEBUG(logger_, "protocol_version: " << protocol_version);
 
   switch (protocol_type) {
     case 0: {

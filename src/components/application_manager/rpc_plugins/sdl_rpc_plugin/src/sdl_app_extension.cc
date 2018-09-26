@@ -68,8 +68,7 @@ void SDLAppExtension::ProcessResumption(
   const bool subscribed_for_way_points_so =
       saved_app[strings::subscribed_for_way_points].asBool();
   if (subscribed_for_way_points_so) {
-    plugin_.ProcessResumptionSubscription(
-        app_, *this, callbacks);
+    plugin_.ProcessResumptionSubscription(app_, *this, callbacks);
   }
 }
 

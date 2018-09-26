@@ -126,7 +126,7 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
 
   // TODO create Subscriptions method in AppExtension
   RCAppExtension& rc_app_extension = dynamic_cast<RCAppExtension&>(extension);
-   std::set<std::string> subscriptions = rc_app_extension.Subscriptions();
+  std::set<std::string> subscriptions = rc_app_extension.Subscriptions();
   ResumptionAwaitingHandling resumption_awaiting_handling(
       app.app_id(), rc_app_extension, callbacks);
 
@@ -224,13 +224,16 @@ void RCPendingResumptionHandler::ProcessSubscriptionRequests(
                      .asString();
         });
     if (it == pending_subscription_requests_.end()) {
-        if(NeedsToConcludeResumption(resumption)) {
-            LOG4CXX_DEBUG(logger_, "application "
-                          << resumption.application_id
-                          << " will conclude resumption without sending HMI requests");
-            resumption.callbacks.conclude_resumption_callback_(resumption.application_id);
-            return;
-        }
+      if (NeedsToConcludeResumption(resumption)) {
+        LOG4CXX_DEBUG(
+            logger_,
+            "application "
+                << resumption.application_id
+                << " will conclude resumption without sending HMI requests");
+        resumption.callbacks.conclude_resumption_callback_(
+            resumption.application_id);
+        return;
+      }
       const uint32_t correlation_id =
           (*subscription_request)[app_mngr::strings::params]
                                  [app_mngr::strings::correlation_id].asUInt();
@@ -245,7 +248,8 @@ void RCPendingResumptionHandler::ProcessSubscriptionRequests(
 
       subscribe_on_event(function_id, correlation_id);
 
-      resumption.callbacks.subscriber_(resumption.application_id, resumption_request);
+      resumption.callbacks.subscriber_(resumption.application_id,
+                                       resumption_request);
 
       application_manager_.GetRPCService().ManageHMICommand(
           subscription_request);
@@ -270,16 +274,17 @@ RCPendingResumptionHandler::GetFrozenResumptionUnhandledSubscriptions(
 
 bool RCPendingResumptionHandler::NeedsToConcludeResumption(
     const ResumptionAwaitingHandling& resumption_awaiting_handling) const {
-    LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
-    RCAppExtension& ext = dynamic_cast<RCAppExtension&>(resumption_awaiting_handling.extension);
+  RCAppExtension& ext =
+      dynamic_cast<RCAppExtension&>(resumption_awaiting_handling.extension);
 
-    for(const auto& subscription : ext.Subscriptions()){
-        if(!interior_data_cache_->Contains(subscription))
-            return false;
-    }
+  for (const auto& subscription : ext.Subscriptions()) {
+    if (!interior_data_cache_->Contains(subscription))
+      return false;
+  }
 
-    return true;
+  return true;
 }
 
 }  // namespace rc_rpc_plugin

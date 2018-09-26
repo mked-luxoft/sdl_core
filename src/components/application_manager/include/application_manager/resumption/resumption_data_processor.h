@@ -67,12 +67,12 @@ struct ApplicationResumptionStatus {
   std::vector<std::string> successful_ivd_subscriptions_;
 };
 
-
 struct ResumptionHandlingCallbacks {
-    using Subscriber = std::function<void(const int32_t, const ResumptionRequest)>;
-    using ConcludeResumptionCallback = std::function<void(const int32_t)>;
-    Subscriber subscriber_;
-    ConcludeResumptionCallback conclude_resumption_callback_;
+  using Subscriber =
+      std::function<void(const int32_t, const ResumptionRequest)>;
+  using ConcludeResumptionCallback = std::function<void(const int32_t)>;
+  Subscriber subscriber_;
+  ConcludeResumptionCallback conclude_resumption_callback_;
 };
 
 /**
@@ -307,7 +307,6 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   void CheckVehicleDataResponse(const smart_objects::SmartObject& request,
                                 const smart_objects::SmartObject& response,
                                 ApplicationResumptionStatus& status);
-
 
   bool HasNoHMIRequestsSent(const int32_t app_id);
 
