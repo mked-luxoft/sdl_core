@@ -97,13 +97,15 @@ ResumptionDataProcessor::GetResumptionHandlingCallbacks() {
         ConcludeResumption(app_id, it->second);
       }
     } else {
-    LOG4CXX_DEBUG(logger_,
-                  "No HMI requests sent, but resumption is successful");
-    callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
+      if (register_callbacks_.find(app_id) != register_callbacks_.end()) {
+        auto callback = register_callbacks_[app_id];
+        LOG4CXX_DEBUG(logger_,
+                      "No HMI requests sent, but resumption is successful");
+        callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
       } else {
         LOG4CXX_WARN(logger_, "Callback not found");
-  }
-}
+      }
+    }
   };
 
   return callbacks;
@@ -144,13 +146,6 @@ void ResumptionDataProcessor::HandleOnTimeOut(
     unsubscribe_from_event(function_id);
     RevertRestoredData(application_manager_.application(app_id));
   }
-}
-
-void ResumptionDataProcessor::CheckInteriorVehicleDataResponse(
-    const smart_objects::SmartObject& request,
-    const smart_objects::SmartObject& response,
-    ApplicationResumptionStatus& status) {
-  LOG4CXX_AUTO_TRACE(logger_);
 }
 
 void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
@@ -279,7 +274,6 @@ void ResumptionDataProcessor::ConcludeResumption(
     RevertRestoredData(application_manager_.application(app_id));
   }
   resumption_status_.erase(app_id);
-  request_app_ids_.erase(app_id_ptr);
   register_callbacks_.erase(app_id);
 }
 
