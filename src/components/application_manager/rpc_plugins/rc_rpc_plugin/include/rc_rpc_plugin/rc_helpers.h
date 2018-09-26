@@ -73,7 +73,6 @@ class RCHelpers {
   static const std::function<std::string(const std::string& module_type)>
   GetModuleTypeToCapabilitiesMapping();
 
-
   static const std::function<std::string(const RCModuleTypeIDs module_type)>
   GetModuleTypeToEnumMapping();
 

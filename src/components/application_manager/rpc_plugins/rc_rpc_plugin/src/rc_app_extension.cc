@@ -105,8 +105,9 @@ void RCAppExtension::ProcessResumption(
     std::set<std::string> hmi_requests;
 
     for (size_t i = 0; i < interior_data_subscriptions.length(); ++i) {
-      const std::string module_type((interior_data_subscriptions[i]).asString());
-      if(!plugin_->IsSubscribedAppExist(module_type)){
+      const std::string module_type(
+          (interior_data_subscriptions[i]).asString());
+      if (!plugin_->IsSubscribedAppExist(module_type)) {
         hmi_requests.insert(module_type);
       }
 
@@ -114,8 +115,7 @@ void RCAppExtension::ProcessResumption(
                     "Subscribing for module type: " << module_type.c_str());
       SubscribeToInteriorVehicleData(module_type);
     }
-    plugin_->ProcessResumptionSubscription(
-        app_, *this, callbacks);
+    plugin_->ProcessResumptionSubscription(app_, *this, callbacks);
   }
 }
 

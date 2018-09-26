@@ -551,7 +551,6 @@ void SetInteriorVehicleDataRequest::on_event(
     }
     // Implement subscription handling here
     //
-
   }
   std::string info;
   GetInfo(hmi_response, info);

@@ -165,7 +165,8 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
   }
   LOG4CXX_DEBUG(logger_,
                 "There are pending requests for app_id: " << app.app_id());
-  ResumptionAwaitingHandling frozen_res(app.app_id(), ext, callbacks.subscriber_);
+  ResumptionAwaitingHandling frozen_res(
+      app.app_id(), ext, callbacks.subscriber_);
   freezed_resumptions_.push(frozen_res);
 }
 }
