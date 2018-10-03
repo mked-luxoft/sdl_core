@@ -88,6 +88,10 @@ bool HmiState::is_mobile_projection_app() const {
   return app_->mobile_projection_enabled();
 }
 
+bool HmiState::is_remote_control_supported() const {
+  return app_->is_remote_control_supported();
+}
+
 mobile_apis::AudioStreamingState::eType VRHmiState::audio_streaming_state()
     const {
   using namespace mobile_apis;
@@ -207,7 +211,8 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   if (mobile_apis::HMILevel::HMI_NONE == parent()->hmi_level()) {
     return mobile_apis::HMILevel::HMI_NONE;
   }
-  if (mobile_apis::HMILevel::HMI_FULL == parent()->hmi_level()) {
+  if ((mobile_apis::HMILevel::HMI_FULL == parent()->hmi_level()) &&
+      is_remote_control_supported()) {
     return mobile_apis::HMILevel::HMI_FULL;
   }
 

@@ -2861,7 +2861,7 @@ TEST_F(StateControllerImplTest, OnEventChangedAudioSourceAppRemainInFull) {
 
   state_ctrl_->on_event(event);
 
-  EXPECT_EQ(new_state->hmi_level(), mobile_apis::HMILevel::HMI_FULL);
+  EXPECT_EQ(new_state->hmi_level(), mobile_apis::HMILevel::HMI_BACKGROUND);
   EXPECT_EQ(new_state->audio_streaming_state(),
             mobile_apis::AudioStreamingState::NOT_AUDIBLE);
 }

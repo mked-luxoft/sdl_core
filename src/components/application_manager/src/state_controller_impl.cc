@@ -481,12 +481,6 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
       result = app_mngr_.GetDefaultHmiLevel(app);
     } else if (is_active_app_exist) {
       result = mobile_apis::HMILevel::HMI_LIMITED;
-    } else if (app->is_navi() &&
-               IsTempStateActive(HmiState::StateID::STATE_ID_AUDIO_SOURCE)) {
-      LOG4CXX_DEBUG(logger_,
-                    "Navigation app will be resumed to LIMITED, "
-                    "because of AUDIO_SOURCE ia active.");
-      result = mobile_apis::HMILevel::HMI_LIMITED;
     } else if (app->is_media_application() &&
                IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI)) {
       LOG4CXX_DEBUG(logger_,

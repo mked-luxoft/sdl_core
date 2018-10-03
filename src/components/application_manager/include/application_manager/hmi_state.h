@@ -242,6 +242,13 @@ class HmiState {
    */
   bool is_mobile_projection_app() const;
 
+  /**
+   * @brief is_remote_control_supported checks if application supports
+   * RC
+   * @return True if application supports RC, otherwise - false
+   */
+  bool is_remote_control_supported() const;
+
  private:
   void operator=(const HmiState&);
 };
