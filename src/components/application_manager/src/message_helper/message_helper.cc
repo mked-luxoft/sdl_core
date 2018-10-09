@@ -1040,7 +1040,7 @@ MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
   SmartObject& request = *request_ptr;
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = app_id;
-  msg_params[strings::name] = button;
+  msg_params[strings::button_name] = button;
   request[strings::params][strings::function_id] = function;
   request[strings::msg_params] = msg_params;
   return request_ptr;
