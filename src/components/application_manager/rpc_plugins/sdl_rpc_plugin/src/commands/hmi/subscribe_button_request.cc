@@ -83,11 +83,6 @@ void SubscribeButtonRequest::Run() {
 
   app->PendingSubscriptionButtons()[correlation_id()] = button_name_;
 
-  for (const auto& it : app->PendingSubscriptionButtons()) {
-    LOG4CXX_DEBUG(logger_,
-                  "corr id : " << it.first << " button name: " << it.second);
-  }
-
   SendRequest();
 }
 
