@@ -1070,7 +1070,7 @@ MessageHelper::CreateButtonSubscriptionsHandlingRequestsList(
 
     button_subscription_requests.push_back(
         CreateButtonSubscriptionHandlingRequestToHmi(
-            app->hmi_app_id(), btn, function, app_mngr));
+            app->app_id(), btn, function, app_mngr));
   }
 
   return button_subscription_requests;
