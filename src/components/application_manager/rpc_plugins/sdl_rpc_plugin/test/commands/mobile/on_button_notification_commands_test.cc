@@ -327,6 +327,8 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_SUCCESS) {
               SendMessageToMobile(
                   CheckNotificationMessage(TestFixture::kFunctionId), _));
 
+  EXPECT_CALL(this->app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
+
   command->Run();
 }
 

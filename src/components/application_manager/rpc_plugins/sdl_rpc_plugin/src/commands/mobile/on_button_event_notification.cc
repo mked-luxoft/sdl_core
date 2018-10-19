@@ -67,6 +67,11 @@ void OnButtonEventNotification::Run() {
       (*message_)[strings::msg_params].keyExists(strings::app_id);
   ApplicationSharedPtr app;
 
+  if (is_app_id_exists) {
+    app = application_manager_.application(
+        (*message_)[strings::msg_params][strings::app_id].asUInt());
+  }
+
   // CUSTOM_BUTTON notification
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
     // app_id is mandatory for CUSTOM_BUTTON notification
@@ -74,9 +79,6 @@ void OnButtonEventNotification::Run() {
       LOG4CXX_ERROR(logger_, "CUSTOM_BUTTON OnButtonEvent without app_id.");
       return;
     }
-
-    app = application_manager_.application(
-        (*message_)[strings::msg_params][strings::app_id].asUInt());
 
     // custom_button_id is mandatory for CUSTOM_BUTTON notification
     if (false ==
@@ -136,13 +138,17 @@ void OnButtonEventNotification::Run() {
       continue;
     }
     // if "app_id" absent send notification only in HMI_FULL mode
-    if (is_app_id_exists || subscribed_app->IsFullscreen()) {
+    const bool is_app_in_message =
+        app && (app->app_id() == subscribed_app->app_id());
+    if (is_app_in_message || subscribed_app->IsFullscreen()) {
       SendButtonEvent(subscribed_app);
+      return;
     }
   }
 }
 
 void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!app) {
     LOG4CXX_ERROR(logger_, "OnButtonEvent NULL pointer");
     return;
@@ -161,9 +167,28 @@ void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
   (*on_btn_event)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnButtonEventID);
 
-  mobile_apis::ButtonName::eType btn_id =
-      static_cast<mobile_apis::ButtonName::eType>(
-          (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+  mobile_apis::ButtonName::eType btn_id;
+
+  if ((*message_)[strings::msg_params].keyExists(hmi_response::button_name)) {
+    btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+
+  } else if ((*message_)[strings::msg_params].keyExists(strings::button_name)) {
+    btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        (*message_)[strings::msg_params][strings::button_name].asInt());
+  }
+
+  mobile_apis::ButtonEventMode::eType btn_event_mode;
+
+  if ((*message_)[strings::msg_params].keyExists(hmi_response::button_mode)) {
+    btn_event_mode = static_cast<mobile_apis::ButtonEventMode::eType>(
+        (*message_)[strings::msg_params][hmi_response::button_mode].asInt());
+
+  } else if ((*message_)[strings::msg_params].keyExists(
+                 strings::button_event_mode)) {
+    btn_event_mode = static_cast<mobile_apis::ButtonEventMode::eType>(
+        (*message_)[strings::msg_params][strings::button_event_mode].asInt());
+  }
 
   if (btn_id == mobile_apis::ButtonName::PLAY_PAUSE &&
       app->msg_version() <= utils::version_4_5) {
@@ -172,7 +197,7 @@ void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
 
   (*on_btn_event)[strings::msg_params][strings::button_name] = btn_id;
   (*on_btn_event)[strings::msg_params][strings::button_event_mode] =
-      (*message_)[strings::msg_params][hmi_response::button_mode];
+      btn_event_mode;
 
   if ((*message_)[strings::msg_params].keyExists(
           hmi_response::custom_button_id)) {
