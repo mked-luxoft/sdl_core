@@ -39,13 +39,13 @@
 #include <inttypes.h>
 #undef __STDC_FORMAT_MACROS
 
-#include <set>
-#include <string>
 #include <strings.h>
 #include <algorithm>
-#include <utility>
-#include <map>
 #include <functional>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
 
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
@@ -55,18 +55,18 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/rpc_service.h"
 #include "connection_handler/connection_handler_impl.h"
-#include "transport_manager/common.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/enum_schema_item.h"
+#include "transport_manager/common.h"
 #include "utils/file_system.h"
-#include "utils/macro.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 
-#include "formatters/formatter_json_rpc.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
-#include "formatters/CFormatterJsonSDLRPCv1.h"
-#include "json/json.h"
 #include "formatters/CFormatterJsonBase.h"
+#include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/formatter_json_rpc.h"
+#include "json/json.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
@@ -1044,6 +1044,53 @@ MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
   request[strings::params][strings::function_id] = function;
   request[strings::msg_params] = msg_params;
   return request_ptr;
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
+    ApplicationManager& app_mngr,
+    ApplicationSharedPtr app,
+    const smart_objects::SmartObject& source_message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "application NULL pointer");
+    return nullptr;
+  }
+
+  smart_objects::SmartObjectSPtr msg =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& ref = *msg;
+  ref[strings::params][strings::connection_key] = app->app_id();
+
+  mobile_apis::ButtonName::eType btn_id = mobile_apis::ButtonName::INVALID_ENUM;
+
+  if (source_message[strings::msg_params].keyExists(
+          hmi_response::button_name)) {
+    btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        source_message[strings::msg_params][hmi_response::button_name].asInt());
+
+  } else if (source_message[strings::msg_params].keyExists(
+                 strings::button_name)) {
+    btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        source_message[strings::msg_params][strings::button_name].asInt());
+  }
+
+  if (btn_id == mobile_apis::ButtonName::PLAY_PAUSE &&
+      app->msg_version() <= utils::version_4_5) {
+    btn_id = mobile_apis::ButtonName::OK;
+  }
+
+  ref[strings::msg_params][strings::button_name] = btn_id;
+
+  if (source_message[strings::msg_params].keyExists(
+          hmi_response::custom_button_id)) {
+    ref[strings::msg_params][strings::custom_button_id] =
+        source_message[strings::msg_params][strings::custom_button_id];
+  }
+
+  return msg;
 }
 
 smart_objects::SmartObjectList

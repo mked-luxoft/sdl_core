@@ -35,10 +35,10 @@
 #include <string>
 #include "utils/macro.h"
 
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -438,9 +438,9 @@ uint32_t CommandRequestImpl::SendHMIRequest(
   }
 
   if (use_events) {
-    LOG4CXX_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << hmi_correlation_id);
+    LOG4CXX_DEBUG(
+        logger_,
+        "subscribe_on_event " << function_id << " " << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
@@ -826,8 +826,11 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
     return true;
   }
 
+  LOG4CXX_DEBUG(logger_, "result code is: " << result_code);
+
   const HmiInterfaces::InterfaceState state =
       application_manager_.hmi_interfaces().GetInterfaceState(interface);
+  LOG4CXX_DEBUG(logger_, "hmi state is: " << state);
   if ((hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code) &&
       (HmiInterfaces::STATE_NOT_AVAILABLE != state)) {
     return true;
