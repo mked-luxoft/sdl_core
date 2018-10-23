@@ -194,9 +194,28 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
   (*on_btn_press)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnButtonPressID);
 
-  mobile_apis::ButtonName::eType btn_id =
-      static_cast<mobile_apis::ButtonName::eType>(
-          (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+  mobile_apis::ButtonName::eType btn_id;
+
+  if ((*message_)[strings::msg_params].keyExists(hmi_response::button_name)) {
+    btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+
+  } else if ((*message_)[strings::msg_params].keyExists(strings::button_name)) {
+    btn_id = static_cast<mobile_apis::ButtonName::eType>(
+        (*message_)[strings::msg_params][strings::button_name].asInt());
+  }
+
+  mobile_apis::ButtonPressMode::eType btn_press_mode;
+
+  if ((*message_)[strings::msg_params].keyExists(hmi_response::button_mode)) {
+    btn_press_mode = static_cast<mobile_apis::ButtonPressMode::eType>(
+        (*message_)[strings::msg_params][hmi_response::button_mode].asInt());
+
+  } else if ((*message_)[strings::msg_params].keyExists(
+                 strings::button_press_mode)) {
+    btn_press_mode = static_cast<mobile_apis::ButtonPressMode::eType>(
+        (*message_)[strings::msg_params][strings::button_press_mode].asInt());
+  }
 
   if (btn_id == mobile_apis::ButtonName::PLAY_PAUSE &&
       app->msg_version() <= utils::version_4_5) {
@@ -205,7 +224,7 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
 
   (*on_btn_press)[strings::msg_params][strings::button_name] = btn_id;
   (*on_btn_press)[strings::msg_params][strings::button_press_mode] =
-      (*message_)[strings::msg_params][hmi_response::button_mode];
+      btn_press_mode;
 
   if ((*message_)[strings::msg_params].keyExists(
           hmi_response::custom_button_id)) {
