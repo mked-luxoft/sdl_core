@@ -20,12 +20,18 @@ ButtonNotificationToMobile::ButtonNotificationToMobile(
 
 ButtonNotificationToMobile::~ButtonNotificationToMobile() {}
 
+bool ButtonNotificationToMobile::IsAppIDExist() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace application_manager;
+  return (*message_)[strings::msg_params].keyExists(strings::app_id);
+}
+
 void ButtonNotificationToMobile::HandleCustomButton(
-    const bool is_app_id_exist, app_mngr::ApplicationSharedPtr app) {
+    app_mngr::ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
   // app_id is mandatory for CUSTOM_BUTTON notification
-  if (!is_app_id_exist) {
+  if (!IsAppIDExist()) {
     LOG4CXX_ERROR(logger_, "CUSTOM_BUTTON OnButtonEvent without app_id.");
     return;
   }
@@ -67,9 +73,7 @@ void ButtonNotificationToMobile::HandleCustomButton(
 }
 
 void ButtonNotificationToMobile::HandleOKButton(
-    const bool is_app_id_exist,
-    app_mngr::ApplicationSharedPtr app,
-    const uint32_t btn_id) {
+    app_mngr::ApplicationSharedPtr app, const uint32_t btn_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
   LOG4CXX_DEBUG(logger_, "OK button received");
@@ -143,20 +147,18 @@ void ButtonNotificationToMobile::Run() {
 
   LOG4CXX_DEBUG(logger_, "reveived button id: " << btn_id);
 
-  const bool is_app_id_exists =
-      (*message_)[strings::msg_params].keyExists(strings::app_id);
   ApplicationSharedPtr app;
 
-  if (is_app_id_exists) {
+  if (IsAppIDExist()) {
     app = application_manager_.application(
         (*message_)[strings::msg_params][strings::app_id].asUInt());
   }
 
   // CUSTOM_BUTTON notification
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
-    HandleCustomButton(is_app_id_exists, app);
+    HandleCustomButton(app);
   } else if (static_cast<uint32_t>(mobile_apis::ButtonName::OK) == btn_id) {
-    HandleOKButton(is_app_id_exists, app, btn_id);
+    HandleOKButton(app, btn_id);
   } else {
     HandleMediaButton(btn_id);
   }

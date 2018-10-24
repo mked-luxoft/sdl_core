@@ -27,12 +27,14 @@ class ButtonNotificationToMobile
 
   virtual void Run();
 
-  void HandleCustomButton(const bool is_app_id_exist,
+  void HandleCustomButton(
                           app_mngr::ApplicationSharedPtr app);
-  void HandleOKButton(const bool is_app_id_exist,
+  void HandleOKButton(
                       app_mngr::ApplicationSharedPtr app,
                       const uint32_t btn_id);
   void HandleMediaButton(const uint32_t btn_id);
+
+  bool IsAppIDExist() const;
 };
 }  // namespace commands
 }  // namespace application_manager
