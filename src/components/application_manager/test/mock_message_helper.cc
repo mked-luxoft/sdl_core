@@ -30,12 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/message_helper.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
-#include "transport_manager/common.h"
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "transport_manager/common.h"
 
 namespace application_manager {
 
@@ -616,6 +616,14 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()
       ->CreateGlobalPropertiesRequestsToHMI(app, app_mngr);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateButtonNotificationToMobile(
+    ApplicationManager& app_mngr,
+    ApplicationSharedPtr app,
+    const smart_objects::SmartObject& source_message) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateButtonNotificationToMobile(app_mngr, app, source_message);
 }
 
 }  // namespace application_manager

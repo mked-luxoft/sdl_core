@@ -31,8 +31,9 @@ void ButtonNotificationToMobile::HandleCustomButton(
   }
 
   // custom_button_id is mandatory for CUSTOM_BUTTON notification
-  if (false == (*message_)[app_mngr::strings::msg_params].keyExists(
-                   hmi_response::custom_button_id)) {
+  if (false ==
+      (*message_)[app_mngr::strings::msg_params].keyExists(
+          hmi_response::custom_button_id)) {
     LOG4CXX_ERROR(logger_,
                   "CUSTOM_BUTTON OnButtonEvent without custom_button_id.");
     return;
@@ -75,21 +76,22 @@ void ButtonNotificationToMobile::HandleOKButton(
 
   const auto subscribed_apps =
       application_manager_.applications_by_button(btn_id);
-  auto app_ptr =
-      std::find_if(subscribed_apps.begin(),
-                   subscribed_apps.end(),
-                   [&app](const ApplicationSharedPtr subscribed_app) {
-                     return app->app_id() == subscribed_app->app_id();
-                   });
-  if (app_ptr != subscribed_apps.end()) {
-    LOG4CXX_DEBUG(
-        logger_,
-        "Sending button press for this app  id: " << (*app_ptr)->app_id());
-    SendButtonNotification(*app_ptr);
-    return;
+  auto app_ptr = subscribed_apps.end();
+  if (app) {
+    app_ptr = std::find_if(subscribed_apps.begin(),
+                           subscribed_apps.end(),
+                           [&app](const ApplicationSharedPtr subscribed_app) {
+                             return app->app_id() == subscribed_app->app_id();
+                           });
+    if (app_ptr != subscribed_apps.end()) {
+      LOG4CXX_DEBUG(
+          logger_,
+          "Sending button press for this app  id: " << (*app_ptr)->app_id());
+      SendButtonNotification(*app_ptr);
+      return;
+    }
   }
 
-  app_ptr = subscribed_apps.end();
   app_ptr = std::find_if(subscribed_apps.begin(),
                          subscribed_apps.end(),
                          [](const ApplicationSharedPtr subscribed_app) {

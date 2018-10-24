@@ -32,13 +32,13 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_MESSAGE_HELPER_H_
-#include "gmock/gmock.h"
 #include "application_manager/application.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "gmock/gmock.h"
 #include "interfaces/HMI_API.h"
 #include "policy/policy_types.h"
-#include "application_manager/policies/policy_handler_interface.h"
-#include "application_manager/application_manager.h"
 #include "smart_objects/smart_object.h"
 #include "transport_manager/common.h"
 
@@ -340,6 +340,11 @@ class MockMessageHelper {
   MOCK_METHOD2(CreateGlobalPropertiesRequestsToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr));
+  MOCK_METHOD3(CreateButtonNotificationToMobile,
+               smart_objects::SmartObjectSPtr(
+                   ApplicationManager& app_mngr,
+                   ApplicationSharedPtr app,
+                   const smart_objects::SmartObject& source_message));
 
   static MockMessageHelper* message_helper_mock();
 };
