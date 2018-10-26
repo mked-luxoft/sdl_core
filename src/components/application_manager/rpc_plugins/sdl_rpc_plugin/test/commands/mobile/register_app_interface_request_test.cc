@@ -224,20 +224,18 @@ class RegisterAppInterfaceRequestTest
 
     EXPECT_CALL(mock_rpc_service_,
                 ManageHMICommand(HMIResultCodeIs(
-                    hmi_apis::FunctionID::Buttons_OnButtonSubscription)))
+                    hmi_apis::FunctionID::UI_ChangeRegistration)))
         .Times(0);
 
     EXPECT_CALL(mock_rpc_service_,
                 ManageHMICommand(HMIResultCodeIs(
-                    hmi_apis::FunctionID::UI_ChangeRegistration))).Times(0);
+                    hmi_apis::FunctionID::TTS_ChangeRegistration)))
+        .Times(0);
 
     EXPECT_CALL(mock_rpc_service_,
                 ManageHMICommand(HMIResultCodeIs(
-                    hmi_apis::FunctionID::TTS_ChangeRegistration))).Times(0);
-
-    EXPECT_CALL(mock_rpc_service_,
-                ManageHMICommand(HMIResultCodeIs(
-                    hmi_apis::FunctionID::VR_ChangeRegistration))).Times(0);
+                    hmi_apis::FunctionID::VR_ChangeRegistration)))
+        .Times(0);
 
     EXPECT_CALL(app_mngr_,
                 OnApplicationSwitched(
@@ -506,7 +504,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
       mock_resume_crt_,
       CheckApplicationHash(
           std::static_pointer_cast<application_manager::Application>(mock_app),
-          request_hash_id)).WillOnce(Return(false));
+          request_hash_id))
+      .WillOnce(Return(false));
 
   EXPECT_CALL(
       mock_application_helper_,
