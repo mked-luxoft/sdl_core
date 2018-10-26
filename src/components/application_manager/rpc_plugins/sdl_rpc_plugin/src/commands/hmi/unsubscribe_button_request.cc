@@ -116,6 +116,8 @@ void UnsubscribeButtonRequest::on_event(const event_engine::Event& event) {
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(application_id());
 
+  const smart_objects::SmartObject& message = event.smart_object();
+
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer.");
     return;
@@ -127,13 +129,14 @@ void UnsubscribeButtonRequest::on_event(const event_engine::Event& event) {
 
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_response::code].asInt());
+          message[strings::params][hmi_response::code].asInt());
 
   if (hmi_apis::Common_Result::SUCCESS == hmi_result && is_in_pending) {
     const mobile_apis::ButtonName::eType btn_id =
         static_cast<mobile_apis::ButtonName::eType>(
             (*message_)[strings::msg_params][strings::button_name].asInt());
-    app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
+    app->UnsubscribeFromButton(
+        static_cast<mobile_apis::ButtonName::eType>(btn_id));
     app->PendingUnsubscriptionButtons().erase(correlation_id());
   } else if (!is_in_pending) {
     smart_objects::SmartObjectSPtr msg =

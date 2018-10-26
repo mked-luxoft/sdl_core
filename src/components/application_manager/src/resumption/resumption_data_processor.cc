@@ -665,7 +665,7 @@ void ResumptionDataProcessor::DeleteButtonsSubscriptions(
     }
     smart_objects::SmartObjectSPtr unsubscribe_request =
         MessageHelper::CreateButtonSubscriptionHandlingRequestToHmi(
-            application->hmi_app_id(),
+            application->app_id(),
             hmi_btn,
             hmi_apis::FunctionID::Buttons_UnsubscribeButton,
             application_manager_);
