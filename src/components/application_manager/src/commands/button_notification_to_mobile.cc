@@ -32,7 +32,7 @@ void ButtonNotificationToMobile::HandleCustomButton(
   using namespace application_manager;
   // app_id is mandatory for CUSTOM_BUTTON notification
   if (!IsAppIDExist()) {
-    LOG4CXX_ERROR(logger_, "CUSTOM_BUTTON OnButtonEvent without app_id.");
+    LOG4CXX_ERROR(logger_, "CUSTOM_BUTTON mobile notification without app_id.");
     return;
   }
 
@@ -40,8 +40,8 @@ void ButtonNotificationToMobile::HandleCustomButton(
   if (false ==
       (*message_)[app_mngr::strings::msg_params].keyExists(
           hmi_response::custom_button_id)) {
-    LOG4CXX_ERROR(logger_,
-                  "CUSTOM_BUTTON OnButtonEvent without custom_button_id.");
+    LOG4CXX_ERROR(
+        logger_, "CUSTOM_BUTTON mobile notification without custom_button_id.");
     return;
   }
 
@@ -60,11 +60,10 @@ void ButtonNotificationToMobile::HandleCustomButton(
     return;
   }
 
-  if ((mobile_api::HMILevel::HMI_FULL != app->hmi_level()) &&
-      (mobile_api::HMILevel::HMI_LIMITED != app->hmi_level())) {
+  if ((mobile_api::HMILevel::HMI_NONE == app->hmi_level())) {
     LOG4CXX_WARN(logger_,
-                 "CUSTOM_BUTTON OnButtonEvent notification is allowed only "
-                     << "in FULL or LIMITED hmi level");
+                 "CUSTOM_BUTTON mobile notification is allowed only "
+                     << "in FULL, LIMITED or BACKGROUND hmi level");
     return;
   }
 
@@ -130,7 +129,7 @@ void ButtonNotificationToMobile::HandleMediaButton(const uint32_t btn_id) {
     if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
         (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
       LOG4CXX_WARN(logger_,
-                   "OnButtonEvent notification is allowed only"
+                   "Mobile button notification is allowed only"
                        << "in FULL or LIMITED hmi level");
       continue;
     }
