@@ -123,20 +123,24 @@ bool ResumptionDataProcessor::HasSubscriptionsToRestore(
     const smart_objects::SmartObject& saved_app) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const smart_objects::SmartObject& suscriptions =
+  const smart_objects::SmartObject& subscriptions =
       saved_app[strings::application_subscriptions];
 
   const bool has_ivi_subscriptions =
-      !suscriptions[strings::application_vehicle_info].empty();
+      !subscriptions[strings::application_vehicle_info].empty();
 
   const bool has_button_subscriptions =
-      !(suscriptions[strings::application_buttons].length() == 1 &&
+      !(subscriptions[strings::application_buttons].length() == 1 &&
         static_cast<hmi_apis::Common_ButtonName::eType>(
-            suscriptions[strings::application_buttons][0].asInt()) ==
+            subscriptions[strings::application_buttons][0].asInt()) ==
             hmi_apis::Common_ButtonName::CUSTOM_BUTTON);
 
-  const bool has_subscriptions_to_restore =
-      has_ivi_subscriptions || has_button_subscriptions;
+  const bool has_waypoints_subscriptions =
+      subscriptions[strings::subscribed_for_way_points].asBool();
+
+  const bool has_subscriptions_to_restore = has_ivi_subscriptions ||
+                                            has_button_subscriptions ||
+                                            has_waypoints_subscriptions;
 
   LOG4CXX_DEBUG(logger_,
                 std::boolalpha << "Application has subscriptions to restore: "
@@ -479,9 +483,6 @@ void ResumptionDataProcessor::DeleteCommands(ApplicationSharedPtr application) {
   const uint32_t app_id = application->app_id();
   ApplicationResumptionStatus& status = resumption_status_[app_id];
   auto requests = status.successful_requests;
-  requests.insert(requests.begin(),
-                  status.error_requests.begin(),
-                  status.error_requests.end());
   for (auto request : requests) {
     const uint32_t cmd_id =
         request.message[strings::msg_params][strings::cmd_id].asUInt();
