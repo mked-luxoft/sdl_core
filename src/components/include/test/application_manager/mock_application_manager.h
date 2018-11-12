@@ -275,7 +275,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                bool(const hmi_apis::StructIdentifiers::eType struct_id,
                     const smart_objects::SmartObject& display_capabilities));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
-                     bool(application_manager::ApplicationSharedPtr));
+                     bool(application_manager::Application&));
   MOCK_METHOD1(SubscribeAppForWayPoints,
                void(application_manager::ApplicationSharedPtr));
   MOCK_METHOD1(UnsubscribeAppFromWayPoints,
@@ -311,6 +311,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(GetCommandFactory, application_manager::CommandFactory&());
   MOCK_CONST_METHOD0(get_current_audio_source, uint32_t());
   MOCK_METHOD1(set_current_audio_source, void(const uint32_t));
+  MOCK_METHOD1(
+      ResetAllApplicationGlobalProperties,
+      application_manager::ResetGlobalPropertiesResult(const uint32_t app_id));
+  MOCK_METHOD2(ResetGlobalProperties,
+               application_manager::ResetGlobalPropertiesResult(
+                   const smart_objects::SmartObject& global_properties,
+                   const uint32_t app_id));
 };
 
 }  // namespace application_manager_test
