@@ -79,7 +79,7 @@ void SubscribeButtonRequest::Run() {
 
   const utils::SemanticVersion app_msg_version = app->msg_version();
 
-  if (app_msg_version <= utils::version_4_5 &&
+  if (app_msg_version <= utils::base_rpc_version &&
       btn_id == mobile_apis::ButtonName::OK && app->is_media_application()) {
     bool ok_supported = CheckHMICapabilities(mobile_apis::ButtonName::OK);
     bool play_pause_supported =

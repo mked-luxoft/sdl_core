@@ -1147,7 +1147,7 @@ void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
                                       << ". Changing device id to "
                                       << device_id);
 
-  bool is_subscribed_to_way_points = IsAppSubscribedForWayPoints(app);
+  bool is_subscribed_to_way_points = IsAppSubscribedForWayPoints(*app);
   if (is_subscribed_to_way_points) {
     UnsubscribeAppFromWayPoints(app);
   }

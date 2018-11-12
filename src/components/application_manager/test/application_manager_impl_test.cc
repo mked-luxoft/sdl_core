@@ -245,7 +245,7 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(*app_ptr));
   app_manager_impl_->UnsubscribeAppFromWayPoints(app_ptr);
   EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(*app_ptr));
-  const std::set<int32_t> result =
+  const std::set<uint32_t> result =
       app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_TRUE(result.empty());
 }

@@ -223,7 +223,6 @@ bool RegisterAppInterfaceRequest::ProcessApplicationTransportSwitching() {
   if (!IsApplicationSwitched()) {
     return false;
   }
-  const auto& msg_params = (*message_)[strings::msg_params];
 
   const std::string& policy_app_id =
       application_manager_.GetCorrectMobileIDFromMessage(message_);
@@ -974,35 +973,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   FinishSendingRegisterAppInterfaceToMobile(
       msg_params_copy, application_manager_, key, notify_upd_manager);
 }
-
-void RegisterAppInterfaceRequest::FinishSendingRegisterAppInterfaceToMobile(
-    const smart_objects::SmartObject& msg_params,
-    ApplicationManager& app_manager,
-    const uint32_t connection_key,
-    policy::StatusNotifier notify_upd_manager) {
-  policy::PolicyHandlerInterface& policy_handler =
-      app_manager.GetPolicyHandler();
-  resumption::ResumeCtrl& resume_ctrl = app_manager.resume_controller();
-  auto application = app_manager.application(connection_key);
-
-  if (msg_params.keyExists(strings::app_hmi_type)) {
-    policy_handler_.SetDefaultHmiTypes(application->policy_app_id(),
-                                       &(msg_params[strings::app_hmi_type]));
-  }
-
-  // Default HMI level should be set before any permissions validation, since it
-  // relies on HMI level.
-  app_manager.OnApplicationRegistered(application);
-  (*notify_upd_manager)();
-
-  // Start PTU after successfull registration
-  // Sends OnPermissionChange notification to mobile right after RAI response
-  // and HMI level set-up
-  policy_handler.OnAppRegisteredOnMobile(application->policy_app_id());
-
-  resume_ctrl.StartResumptionOnlyHMILevel(application);
-}
-
 
 DEPRECATED void
 RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
