@@ -840,6 +840,25 @@ class ApplicationManagerImpl
    */
   void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) OVERRIDE;
 
+  /**
+   * @brief Resets application's global properties to default values
+   * returning struct that indicates which properties have been
+   * successfully reset.
+   * @param container with global properties to reset
+   * @return struct with flags indicating global properties reset
+   */
+  ResetGlobalPropertiesResult ResetGlobalProperties(
+      const smart_objects::SmartObject& global_properties_ids,
+      const uint32_t app_id) OVERRIDE;
+
+  /**
+    * @brief Resets all application's global properties to default values
+    * @param id of app which properties to reset
+    * @return struct with flags indicating success global properties reset
+    */
+  ResetGlobalPropertiesResult ResetAllApplicationGlobalProperties(
+      const uint32_t app_id) OVERRIDE;
+
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;
@@ -1164,6 +1183,39 @@ class ApplicationManagerImpl
    * notification.
    */
   void SendMobileMessage(smart_objects::SmartObjectSPtr message);
+
+  /*
+   * @brief Sets default value of the HELPPROMT global property
+   * to the first vrCommand of each Command Menu registered in application
+   *
+   * @param app Registered application
+   * @param is_timeout_promp Flag indicating that timeout prompt
+   * should be reset
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool ResetHelpPromt(ApplicationSharedPtr app) const;
+
+  /*
+   * @brief  Sets default value of the TIMEOUTPROMT global property
+   * to the first vrCommand of each Command Menu registered in application
+   *
+   * @param app Registered application
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool ResetTimeoutPromt(ApplicationSharedPtr app) const;
+
+  /*
+   * @brief Sets default value of the VRHELPTITLE global property
+   * to the application name and value of the VRHELPITEMS global property
+   * to value equal to registered command -1(default command “Help / Cancel”.)
+   *
+   * @param app Registered application
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool ResetVrHelpTitleItems(ApplicationSharedPtr app) const;
 
  private:
   /*
