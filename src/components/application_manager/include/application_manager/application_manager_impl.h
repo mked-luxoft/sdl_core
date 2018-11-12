@@ -228,12 +228,12 @@ class ApplicationManagerImpl
   bool IsAppTypeExistsInFullOrLimited(ApplicationConstSharedPtr app) const;
 
   /**
-   * @brief Checks if Application is subscribed for way points
-   * @param Application pointer
+   * @brief Checks if application is subscribed for way points
+   * @param app - application reference
    * @return true if Application is subscribed for way points
    * otherwise false
    */
-  bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const OVERRIDE;
+  bool IsAppSubscribedForWayPoints(Application& app) const OVERRIDE;
 
   /**
    * @brief Subscribe Application for way points

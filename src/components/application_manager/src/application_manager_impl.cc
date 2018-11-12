@@ -1126,7 +1126,7 @@ void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
                                       << ". Changing device id to "
                                       << device_id);
 
-  bool is_subscribed_to_way_points = IsAppSubscribedForWayPoints(app);
+  bool is_subscribed_to_way_points = IsAppSubscribedForWayPoints(*app);
   if (is_subscribed_to_way_points) {
     UnsubscribeAppFromWayPoints(app);
   }
@@ -2393,8 +2393,13 @@ void ApplicationManagerImpl::UnregisterApplication(
     subscribed_for_way_points_app_count =
         subscribed_way_points_apps_list_.size();
   }
+  ApplicationSharedPtr app_ptr = application(app_id);
   if (1 == subscribed_for_way_points_app_count) {
-    LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
+    LOG4CXX_DEBUG(logger_, "Send UnsubscribeWayPoints");
+    if (!is_resuming) {
+      LOG4CXX_DEBUG(logger_, "Unsubscribe App from WayPoints");
+      UnsubscribeAppFromWayPoints(app_ptr);
+    }
     MessageHelper::SendUnsubscribedWayPoints(*this);
   }
 
@@ -2422,7 +2427,6 @@ void ApplicationManagerImpl::UnregisterApplication(
     case mobile_apis::Result::EXPIRED_CERT:
       break;
     case mobile_apis::Result::TOO_MANY_PENDING_REQUESTS: {
-      ApplicationSharedPtr app_ptr = application(app_id);
       if (app_ptr) {
         app_ptr->usage_report().RecordRemovalsForBadBehavior();
         if (reason == mobile_apis::Result::TOO_MANY_PENDING_REQUESTS) {
@@ -2466,6 +2470,7 @@ void ApplicationManagerImpl::UnregisterApplication(
 
     if (is_resuming) {
       resume_controller().SaveApplication(app_to_remove);
+      UnsubscribeAppFromWayPoints(app_ptr);
     } else {
       resume_controller().RemoveApplicationFromSaved(app_to_remove);
     }
@@ -3613,13 +3618,13 @@ void ApplicationManagerImpl::ClearTTSGlobalPropertiesList() {
 }
 
 bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
-    ApplicationSharedPtr app) const {
+    Application& app) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
-  if (subscribed_way_points_apps_list_.find(app->app_id()) ==
+  if (subscribed_way_points_apps_list_.find(app.app_id()) ==
       subscribed_way_points_apps_list_.end()) {
     return false;
   }
