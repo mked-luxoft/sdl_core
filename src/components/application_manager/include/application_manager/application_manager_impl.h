@@ -346,6 +346,10 @@ class ApplicationManagerImpl
    * @brief Closes all registered applications
    */
   void UnregisterAllApplications();
+
+  DEPRECATED bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
+
+  DEPRECATED bool LoadAppDataToHMI(ApplicationSharedPtr app);
   bool ActivateApplication(ApplicationSharedPtr app) OVERRIDE;
 
   /**
@@ -1239,6 +1243,16 @@ class ApplicationManagerImpl
    */
   std::string GetHashedAppID(uint32_t connection_key,
                              const std::string& policy_app_id) const;
+
+  /**
+   * @brief CreateAllAppGlobalPropsIDList creates an array of all application
+   * global properties IDs. Used as utility to call
+   * ApplicationManger::ResetGlobalProperties
+   * with all global properties.
+   * @return array smart object with global properties identifiers.
+   */
+  const smart_objects::SmartObjectSPtr CreateAllAppGlobalPropsIDList(
+      const uint32_t app_id) const;
 
   /**
    * @brief Removes suspended and stopped timers from timer pool
