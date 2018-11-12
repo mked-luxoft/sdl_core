@@ -267,14 +267,33 @@ ApplicationSharedPtr ApplicationManagerImpl::active_application() const {
   return FindApp(accessor, ActiveAppPredicate);
 }
 
-bool LimitedAppPredicate(const ApplicationSharedPtr app) {
-  return app ? app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED : false;
-}
-
 ApplicationSharedPtr ApplicationManagerImpl::get_limited_media_application()
     const {
   DataAccessor<ApplicationSet> accessor = applications();
-  return FindApp(accessor, LimitedAppPredicate);
+  auto is_limited_media_app = [](const ApplicationSharedPtr app) {
+    if (!app) {
+      return false;
+    }
+
+    if (app->is_media_application()) {
+      return true;
+    }
+
+    const auto app_types = app->app_types();
+    if (!app_types) {
+      return false;
+    }
+
+    for (size_t i = 0; i < app_types->length(); i++) {
+      const auto app_type = app_types->getElement(i).asUInt();
+      if (mobile_apis::AppHMIType::MEDIA == app_type) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  return FindApp(accessor, is_limited_media_app);
 }
 
 bool LimitedNaviAppPredicate(const ApplicationSharedPtr app) {
@@ -373,12 +392,6 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
   sync_primitives::AutoLock lock(applications_list_lock_ptr_);
   const mobile_apis::HMILevel::eType default_level = GetDefaultHmiLevel(app);
   state_ctrl_.OnApplicationRegistered(app, default_level);
-
-  std::function<void(plugin_manager::RPCPlugin&)> on_app_registered =
-      [app](plugin_manager::RPCPlugin& plugin) {
-        plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered, app);
-      };
-  plugin_manager_->ForEachPlugin(on_app_registered);
 
   // TODO(AOleynik): Is neccessary to be able to know that registration process
   // has been completed and default HMI level is set, otherwise policy will
