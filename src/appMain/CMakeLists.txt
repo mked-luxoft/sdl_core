@@ -57,6 +57,7 @@ target_link_libraries(${PROJECT_NAME}
     Policy::usage_statistics
     boost::filesystem
     boost::system
+    $<$<BOOL:${QNXNTO}>:stdc++>
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -98,23 +99,6 @@ install(
   COMPONENT sdl_core
 )
 
-# Print/Generate SDL dependencies file only for QNX platform
-if (QNXNTO)
-  if (CMAKE_HOST_UNIX) # Available only for unix-based operation systems
-    set(BUILD_IDS_FILE ${CMAKE_BINARY_DIR}/build_ids.txt)
-    set(BUILD_IDS_SEARCH_PATH ${CMAKE_BINARY_DIR} ${CMAKE_FIND_ROOT_PATH})
-
-    add_custom_command(
-      TARGET ${PROJECT_NAME}
-      POST_BUILD
-      COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/check_build_ids.sh
-        ARGS ${BUILD_IDS_SEARCH_PATH} > ${BUILD_IDS_FILE}
-      COMMAND cat ${BUILD_IDS_FILE}
-      COMMENT "Checking build ids of SDL dependencies"
-      VERBATIM
-    )
-  endif(CMAKE_HOST_UNIX)
-endif(QNXNTO)
 
 get_property(GIT_COMMIT GLOBAL PROPERTY SDL_VERSION_GIT_COMMIT)
 
