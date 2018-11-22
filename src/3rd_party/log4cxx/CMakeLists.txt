@@ -5,18 +5,6 @@ if(TARGET log4cxx::log4cxx)
   return()
 endif()
 
-set(LOG4CXX_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/apache-log4cxx-0.10.0)
-set(LOG4CXX_BUILD_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/apache-log4cxx-build)
-
-set(LOG4CXX_SOURCE_INCLUDE_DIRECTORY ${LOG4CXX_SOURCE_DIRECTORY}/src/main/include)
-set(LOG4CXX_BUILD_INCLUDE_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}/src/main/include)
-
-set(LOG4CXX_LIBS_DIRECTORY ${LOG4CXX_BUILD_DIRECTORY}/src/main/cpp/.libs)
-
-file(MAKE_DIRECTORY
-  ${LOG4CXX_BUILD_DIRECTORY}
-)
-
 include("./${PLATFORM}.cmake")
 
 add_library(log4cxx::log4cxx UNKNOWN IMPORTED GLOBAL)
