@@ -80,6 +80,28 @@ A quick guide to installing, configuring, and running an instance of the SDL Cor
   2. Copy all the built third party libs to a target machine
   <b>Note:</b> SDL Core on target machine should be started as usual.
 
+### QNX7 specific build
+  SDL Core supports building for QNX7. Such build requires additional environment setup:
+  1. Install QNX7 SDP into `/opt/qnx700` using QNX Software Center (with [myQNX account](https://www.qnx.com/account))
+  2. Setup SDL specific envionment variables:
+  ```
+  % export THIRD_PARTY_INSTALL_PREFIX=<path_to_3rd_party_libs_to_be_installed>
+  % export THIRD_PARTY_INSTALL_PREFIX_ARCH=<path_to_3rd_party_libs_to_be_installed>/
+  ```
+  3. Clone SDL Core repository
+  4. Run cmake with `CMAKE_TOOLCHAIN_FILE` option within build directory
+  ```
+  % cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_src>/toolchains/Toolchain-QNX7-ACC-x86.cmake <path_to_src>
+  ```
+  5. Build the project
+  ```
+  % make install
+  ```
+
+### Project deployment to QNX7 machine
+  1. Copy <build_dir>/bin directory to a target machine
+  2. Copy all the built third party libs to a target machine
+
 ## Start SDL Core
 Once SDL Core is compiled and installed you can start it from the executable in the bin folder
 
