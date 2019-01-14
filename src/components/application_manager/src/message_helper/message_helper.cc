@@ -1990,6 +1990,26 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
   return std::make_shared<smart_objects::SmartObject>(response_data);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateOnStatusUpdateNotification(
+    const uint32_t app_id,
+    ApplicationManager& app_mngr,
+    const hmi_apis::Common_ServiceType::eType service_type,
+    const hmi_apis::Common_ServiceEvent::eType service_event,
+    const hmi_apis::Common_ServiceUpdateReason::eType reason) {
+  auto on_status_update_notification = CreateHMINotification(
+      hmi_apis::FunctionID::BasicCommunication_OnServiceUpdate);
+
+  auto& msg_ref = (*on_status_update_notification);
+
+  msg_ref[strings::msg_params][hmi_notification::service_type] =
+      (uint32_t)service_type;
+  msg_ref[strings::msg_params][hmi_notification::service_event] =
+      (uint32_t)service_event;
+  msg_ref[strings::msg_params][hmi_notification::reason] = (uint32_t)reason;
+
+  return on_status_update_notification;
+}
+
 void MessageHelper::SendNaviSetVideoConfig(
     int32_t app_id,
     ApplicationManager& app_mngr,

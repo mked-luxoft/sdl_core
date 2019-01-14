@@ -89,6 +89,23 @@ class MessageHelper {
       hmi_apis::FunctionID::eType function_id);
 
   /**
+   * @brief CreateOnStatusUpdateNotification creates on status update hmi
+   * notification smart object
+   * @param app_id  - application id
+   * @param app_mngr - application manager
+   * @param service_type - enum value representing service_type
+   * @param service_event - enum value representing service_event
+   * @param update_reason - enum value representing update_reason
+   * @return smart object containing on status update notification
+   */
+  static smart_objects::SmartObjectSPtr CreateOnStatusUpdateNotification(
+      const uint32_t app_id,
+      ApplicationManager& app_mngr,
+      const hmi_apis::Common_ServiceType::eType service_type,
+      const hmi_apis::Common_ServiceEvent::eType service_event,
+      const hmi_apis::Common_ServiceUpdateReason::eType update_reason);
+
+  /**
    * @brief Creates request for different interfaces(JSON)
    * @param correlation_id unique ID
    * @param params Vector of arguments that we need in GetVehicleData request
