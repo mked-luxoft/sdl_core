@@ -388,6 +388,18 @@ void SecurityManagerImpl::OnSystemTimeArrived(const time_t utc_time) {
   awaiting_time_connections_.clear();
 }
 
+void SecurityManagerImpl::ProcessFailedPTU() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (listeners_.empty()) {
+    LOG4CXX_ERROR(logger_, "listeners arrays IS EMPTY!");
+  }
+  std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
+  while (it != listeners_.end()) {
+    (*it)->OnPTUFailed();
+    ++it;
+  }
+}
+
 void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
     const uint32_t& connection_key, SSLContext::HandshakeResult error) {
   LOG4CXX_AUTO_TRACE(logger_);

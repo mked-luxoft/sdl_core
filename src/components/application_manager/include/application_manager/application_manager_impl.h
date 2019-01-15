@@ -59,6 +59,7 @@
 
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/service_status_update_handler_listener.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
 #include "application_manager/policies/policy_handler_interface.h"
@@ -123,7 +124,8 @@ typedef std::shared_ptr<timer::Timer> TimerSPtr;
 class ApplicationManagerImpl
     : public ApplicationManager,
       public connection_handler::ConnectionHandlerObserver,
-      public policy::PolicyHandlerObserver
+      public policy::PolicyHandlerObserver,
+      public protocol_handler::ServiceStatusUpdateHandlerListener
 #ifdef ENABLE_SECURITY
       ,
       public security_manager::SecurityManagerListener
@@ -508,6 +510,19 @@ class ApplicationManagerImpl
    * @param ptu_result True if PTU is succeeded, otherwise - false
    */
   void OnPTUFinished(const bool ptu_result) FINAL;
+
+  void ProcessFailedPTU() OVERRIDE;
+
+  void ProcessFailedStatusUpdate(
+      hmi_apis::Common_ServiceType::eType service_type,
+      hmi_apis::Common_ServiceEvent::eType service_event,
+      hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) FINAL;
+
+  void ProcessSuccessfulStatusUpdate(
+      hmi_apis::Common_ServiceType::eType service_type,
+      hmi_apis::Common_ServiceEvent::eType service_event) FINAL;
+
+  void OnPTUFailed() FINAL {}
 
   /*
    * @brief Starts audio pass thru thread

@@ -507,6 +507,11 @@ void ApplicationImpl::StartStreaming(
     if (!video_streaming_approved()) {
       LOG4CXX_TRACE(logger_, "Video streaming not approved");
       MessageHelper::SendNaviStartStream(app_id(), application_manager_);
+      auto on_service_status_update_notification =
+          MessageHelper::CreateOnServiceStatusUpdateNotification(
+              hmi_apis::Common_ServiceType::VIDEO);
+      application_manager_.GetRPCService().ManageHMICommand(
+          on_service_status_update_notification);
       set_video_stream_retry_number(0);
     }
   } else if (ServiceType::kAudio == service_type) {
@@ -514,6 +519,11 @@ void ApplicationImpl::StartStreaming(
     if (!audio_streaming_approved()) {
       LOG4CXX_TRACE(logger_, "Audio streaming not approved");
       MessageHelper::SendAudioStartStream(app_id(), application_manager_);
+      auto on_service_status_update_notification =
+          MessageHelper::CreateOnServiceStatusUpdateNotification(
+              hmi_apis::Common_ServiceType::AUDIO);
+      application_manager_.GetRPCService().ManageHMICommand(
+          on_service_status_update_notification);
       set_audio_stream_retry_number(0);
     }
   }

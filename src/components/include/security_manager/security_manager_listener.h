@@ -59,6 +59,8 @@ class SecurityManagerListener {
    */
   virtual void OnCertificateUpdateRequired() = 0;
 
+  virtual void OnPTUFailed() = 0;
+
   /**
    * @brief Get certificate data from policy
    * @param reference to string where to save certificate data

@@ -138,6 +138,24 @@ namespace jhs = ns_smart_device_link::ns_json_handler::strings;
 
 using namespace ns_smart_device_link::ns_smart_objects;
 
+hmi_apis::Common_ServiceType::eType GetHMIServiceType(
+    protocol_handler::ServiceType service_type) {
+  using namespace hmi_apis;
+  using namespace protocol_handler;
+  switch (service_type) {
+    case SERVICE_TYPE_RPC: {
+      return Common_ServiceType::RPC;
+    }
+    case SERVICE_TYPE_AUDIO: {
+      return Common_ServiceType::AUDIO;
+    }
+    case SERVICE_TYPE_NAVI: {
+      return Common_ServiceType::VIDEO;
+    }
+    default: { return Common_ServiceType::INVALID_ENUM; }
+  }
+}
+
 ApplicationManagerImpl::ApplicationManagerImpl(
     const ApplicationManagerSettings& am_settings,
     const policy::PolicySettings& policy_settings)
@@ -1444,6 +1462,9 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   } else {
     LOG4CXX_WARN(logger_, "Refuse unknown service");
   }
+
+  ProcessSuccessfulStatusUpdate(
+      GetHMIServiceType(type), hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED);
   connection_handler().NotifyServiceStartedResult(session_key, false, empty);
 }
 
@@ -1524,6 +1545,37 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
           type, ServiceType::kMobileNav, ServiceType::kAudio)) {
     StopNaviService(session_key, type);
   }
+}
+
+void ApplicationManagerImpl::ProcessFailedStatusUpdate(
+    hmi_apis::Common_ServiceType::eType service_type,
+    hmi_apis::Common_ServiceEvent::eType service_event,
+    hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto notification =
+      MessageHelper::CreateOnServiceStatusUpdateNotification(service_type);
+  (*notification)[strings::params][hmi_notification::service_event] =
+      service_event;
+  (*notification)[strings::msg_params][hmi_notification::reason] =
+      service_update_reason;
+
+  rpc_service_->ManageHMICommand(notification);
+}
+
+void ApplicationManagerImpl::ProcessSuccessfulStatusUpdate(
+    hmi_apis::Common_ServiceType::eType service_type,
+    hmi_apis::Common_ServiceEvent::eType service_event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto notification =
+      MessageHelper::CreateOnServiceStatusUpdateNotification(service_type);
+  (*notification)[strings::params][hmi_notification::service_event] =
+      service_event;
+
+  rpc_service_->ManageHMICommand(notification);
+}
+
+void ApplicationManagerImpl::ProcessFailedPTU() {
+  protocol_handler_->ProcessFailedPTU();
 }
 
 void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
@@ -3361,6 +3413,9 @@ void ApplicationManagerImpl::ProcessReconnection(
 void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!ptu_result) {
+    // auto notification =
+    // MessageHelper::CreateOnServiceStatusUpdateNotification(0, this,
+    // hmi_apis::Common_ServiceType::VIDEO);
     return;
   }
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {

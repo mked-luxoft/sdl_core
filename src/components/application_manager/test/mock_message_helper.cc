@@ -572,15 +572,11 @@ void MessageHelper::SendUnsubscribeButtonNotification(
       ->SendUnsubscribeButtonNotification(button, application, app_mngr);
 }
 
-smart_objects::SmartObject MessageHelper::CreateOnStatusUpdateNotification(
-    const uint32_t app_id,
-    ApplicationManager& app_mngr,
-    const hmi_apis::Common_ServiceType::eType service_type,
-    const hmi_apis::Common_ServiceEvent::eType service_event,
-    const hmi_apis::Common_ServiceUpdateReason::eType update_reason) {
+smart_objects::SmartObject
+MessageHelper::CreateOnServiceStatusUpdateNotification(
+    const hmi_apis::Common_ServiceType::eType service_type) {
   return MockMessageHelper::message_helper_mock()
-      ->CreateOnStatusUpdateNotification(
-          app_id, app_mngr, service_type, service_event, update_reason);
+      ->CreateOnStatusUpdateNotification(service_type);
 }
 
 }  // namespace application_manager

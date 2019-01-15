@@ -168,6 +168,9 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
    */
   virtual void NotifyListenersOnHandshakeFailed() = 0;
 
+  virtual void ProcessFailedPTU() = 0;
+
+
   /**
    * @brief Check if policy certificate data is empty
    * @return true if policy certificate data is empty otherwise false

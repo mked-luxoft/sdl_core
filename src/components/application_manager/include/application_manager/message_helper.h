@@ -98,12 +98,8 @@ class MessageHelper {
    * @param update_reason - enum value representing update_reason
    * @return smart object containing on status update notification
    */
-  static smart_objects::SmartObjectSPtr CreateOnStatusUpdateNotification(
-      const uint32_t app_id,
-      ApplicationManager& app_mngr,
-      const hmi_apis::Common_ServiceType::eType service_type,
-      const hmi_apis::Common_ServiceEvent::eType service_event,
-      const hmi_apis::Common_ServiceUpdateReason::eType update_reason);
+  static smart_objects::SmartObjectSPtr CreateOnServiceStatusUpdateNotification(
+      const hmi_apis::Common_ServiceType::eType service_type);
 
   /**
    * @brief Creates request for different interfaces(JSON)

@@ -43,18 +43,21 @@ namespace protocol_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 
-HandshakeHandler::HandshakeHandler(ProtocolHandlerImpl& protocol_handler,
-                                   SessionObserver& session_observer,
-                                   utils::SemanticVersion& full_version,
-                                   const SessionContext& context,
-                                   const uint8_t protocol_version,
-                                   std::shared_ptr<BsonObject> payload)
+HandshakeHandler::HandshakeHandler(
+    ProtocolHandlerImpl& protocol_handler,
+    SessionObserver& session_observer,
+    utils::SemanticVersion& full_version,
+    const SessionContext& context,
+    const uint8_t protocol_version,
+    std::shared_ptr<BsonObject> payload,
+    std::shared_ptr<ServiceStatusUpdateHandler> service_status_update_handler)
     : protocol_handler_(protocol_handler)
     , session_observer_(session_observer)
     , context_(context)
     , full_version_(full_version)
     , protocol_version_(protocol_version)
-    , payload_(payload) {}
+    , payload_(payload)
+    , service_status_update_handler_(service_status_update_handler) {}
 
 HandshakeHandler::~HandshakeHandler() {
   LOG4CXX_DEBUG(logger_, "Destroying of HandshakeHandler: " << this);
@@ -72,6 +75,9 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
 void HandshakeHandler::OnCertificateUpdateRequired() {}
 
 bool HandshakeHandler::OnHandshakeFailed() {
+  service_status_update_handler_->OnGetSystemTimeExpired(
+      context_.service_type_);
+
   if (payload_) {
     ProcessFailedHandshake(*payload_);
   } else {
@@ -82,6 +88,10 @@ bool HandshakeHandler::OnHandshakeFailed() {
   }
 
   return true;
+}
+
+void HandshakeHandler::OnPTUFailed() {
+  service_status_update_handler_->OnPTUFailed(context_.service_type_);
 }
 
 bool HandshakeHandler::OnHandshakeDone(
@@ -101,6 +111,13 @@ bool HandshakeHandler::OnHandshakeDone(
 
   const bool success =
       result == security_manager::SSLContext::Handshake_Result_Success;
+
+  if (!success) {
+    service_status_update_handler_->OnCertInvalid(context_.service_type_);
+  } else {
+    service_status_update_handler_->OnSuccessfulServiceUpdate(
+        context_.service_type_, true);
+  }
 
   if (payload_) {
     if (success) {

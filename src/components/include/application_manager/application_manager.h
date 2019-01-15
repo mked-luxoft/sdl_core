@@ -699,6 +699,10 @@ class ApplicationManager {
   virtual void ForbidStreaming(uint32_t app_id) = 0;
 
   /**
+   * @brief ProcessFailedPTU process PTU failure.
+   */
+  virtual void ProcessFailedPTU() = 0;
+  /**
    * @brief Called when application completes streaming configuration
    * @param app_id Streaming application id
    * @param service_type Streaming service type

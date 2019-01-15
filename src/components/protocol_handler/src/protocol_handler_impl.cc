@@ -1115,6 +1115,10 @@ void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
 #endif  // ENABLE_SECURITY
 }
 
+void ProtocolHandlerImpl::ProcessFailedPTU() {
+  security_manager_->ProcessFailedPTU();
+}
+
 void ProtocolHandlerImpl::OnTransportConfigUpdated(
     const transport_manager::transport_adapter::TransportConfig& configs) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1763,7 +1767,8 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                                            *fullVersion,
                                            context,
                                            packet->protocol_version(),
-                                           start_session_ack_params);
+                                           start_session_ack_params,
+                                           service_status_update_handler_);
 
     security_manager::SSLContext* ssl_context =
         security_manager_->CreateSSLContext(
@@ -2017,6 +2022,11 @@ void ProtocolHandlerImpl::Stop() {
 
   sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
   start_session_frame_map_.clear();
+}
+
+void ProtocolHandlerImpl::set_service_status_update_handler(
+    std::shared_ptr<ServiceStatusUpdateHandler> handler) {
+  service_status_update_handler_ = handler;
 }
 
 #ifdef ENABLE_SECURITY
