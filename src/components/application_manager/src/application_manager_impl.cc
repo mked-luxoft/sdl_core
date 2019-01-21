@@ -1554,7 +1554,7 @@ void ApplicationManagerImpl::ProcessFailedStatusUpdate(
   LOG4CXX_AUTO_TRACE(logger_);
   auto notification =
       MessageHelper::CreateOnServiceStatusUpdateNotification(service_type);
-  (*notification)[strings::params][hmi_notification::service_event] =
+  (*notification)[strings::msg_params][hmi_notification::service_event] =
       service_event;
   (*notification)[strings::msg_params][hmi_notification::reason] =
       service_update_reason;
@@ -1568,7 +1568,7 @@ void ApplicationManagerImpl::ProcessSuccessfulStatusUpdate(
   LOG4CXX_AUTO_TRACE(logger_);
   auto notification =
       MessageHelper::CreateOnServiceStatusUpdateNotification(service_type);
-  (*notification)[strings::params][hmi_notification::service_event] =
+  (*notification)[strings::msg_params][hmi_notification::service_event] =
       service_event;
 
   rpc_service_->ManageHMICommand(notification);
