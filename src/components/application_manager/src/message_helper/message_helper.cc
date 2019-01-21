@@ -1996,9 +1996,8 @@ MessageHelper::CreateOnServiceStatusUpdateNotification(
   auto on_status_update_notification = CreateHMINotification(
       hmi_apis::FunctionID::BasicCommunication_OnServiceUpdate);
 
-  auto& msg_ref = (*on_status_update_notification);
-
-  msg_ref[strings::msg_params][hmi_notification::service_type] = service_type;
+  (*on_status_update_notification)
+      [strings::msg_params][hmi_notification::service_type] = service_type;
 
   return on_status_update_notification;
 }

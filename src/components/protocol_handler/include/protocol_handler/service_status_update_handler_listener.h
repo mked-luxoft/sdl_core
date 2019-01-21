@@ -38,6 +38,9 @@
 
 namespace protocol_handler {
 
+hmi_apis::Common_ServiceType::eType GetHMIServiceType(
+    protocol_handler::ServiceType service_type);
+
 class ServiceStatusUpdateHandlerListener {
  public:
   virtual void ProcessFailedStatusUpdate(

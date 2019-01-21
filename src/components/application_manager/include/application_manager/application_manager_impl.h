@@ -511,7 +511,7 @@ class ApplicationManagerImpl
    */
   void OnPTUFinished(const bool ptu_result) FINAL;
 
-  void ProcessFailedPTU() OVERRIDE;
+  void ProcessFailedPTU() FINAL;
 
   void ProcessFailedStatusUpdate(
       hmi_apis::Common_ServiceType::eType service_type,

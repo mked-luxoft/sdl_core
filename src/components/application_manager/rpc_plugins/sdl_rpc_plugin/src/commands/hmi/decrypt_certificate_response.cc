@@ -60,8 +60,6 @@ void DecryptCertificateResponse::Run() {
 
   const bool is_succeeded = hmi_apis::Common_Result::SUCCESS == code;
 
-  smart_objects::SmartObjectSPtr notification;
-
   policy_handler_.OnCertificateDecrypted(is_succeeded);
 }
 

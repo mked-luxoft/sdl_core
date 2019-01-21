@@ -91,11 +91,7 @@ class MessageHelper {
   /**
    * @brief CreateOnStatusUpdateNotification creates on status update hmi
    * notification smart object
-   * @param app_id  - application id
-   * @param app_mngr - application manager
    * @param service_type - enum value representing service_type
-   * @param service_event - enum value representing service_event
-   * @param update_reason - enum value representing update_reason
    * @return smart object containing on status update notification
    */
   static smart_objects::SmartObjectSPtr CreateOnServiceStatusUpdateNotification(

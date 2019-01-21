@@ -138,24 +138,6 @@ namespace jhs = ns_smart_device_link::ns_json_handler::strings;
 
 using namespace ns_smart_device_link::ns_smart_objects;
 
-hmi_apis::Common_ServiceType::eType GetHMIServiceType(
-    protocol_handler::ServiceType service_type) {
-  using namespace hmi_apis;
-  using namespace protocol_handler;
-  switch (service_type) {
-    case SERVICE_TYPE_RPC: {
-      return Common_ServiceType::RPC;
-    }
-    case SERVICE_TYPE_AUDIO: {
-      return Common_ServiceType::AUDIO;
-    }
-    case SERVICE_TYPE_NAVI: {
-      return Common_ServiceType::VIDEO;
-    }
-    default: { return Common_ServiceType::INVALID_ENUM; }
-  }
-}
-
 ApplicationManagerImpl::ApplicationManagerImpl(
     const ApplicationManagerSettings& am_settings,
     const policy::PolicySettings& policy_settings)
@@ -1464,7 +1446,8 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   }
 
   ProcessSuccessfulStatusUpdate(
-      GetHMIServiceType(type), hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED);
+      protocol_handler::GetHMIServiceType(type),
+      hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED);
   connection_handler().NotifyServiceStartedResult(session_key, false, empty);
 }
 
@@ -3413,9 +3396,6 @@ void ApplicationManagerImpl::ProcessReconnection(
 void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!ptu_result) {
-    // auto notification =
-    // MessageHelper::CreateOnServiceStatusUpdateNotification(0, this,
-    // hmi_apis::Common_ServiceType::VIDEO);
     return;
   }
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
