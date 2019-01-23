@@ -511,16 +511,18 @@ class ApplicationManagerImpl
    */
   void OnPTUFinished(const bool ptu_result) FINAL;
 
-  void ProcessFailedPTU() FINAL;
+  /**
+   * @brief OnPTUTimeoutExceeded is called on policy table update timed out
+   */
+  void OnPTUTimeoutExceeded() FINAL;
 
-  void ProcessFailedStatusUpdate(
+  /**
+   * @brief ProcessStatusUpdate is called on service status update received
+   */
+  void ProcessStatusUpdate(
       hmi_apis::Common_ServiceType::eType service_type,
       hmi_apis::Common_ServiceEvent::eType service_event,
       hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) FINAL;
-
-  void ProcessSuccessfulStatusUpdate(
-      hmi_apis::Common_ServiceType::eType service_type,
-      hmi_apis::Common_ServiceEvent::eType service_event) FINAL;
 
   void OnPTUFailed() FINAL {}
 

@@ -393,11 +393,9 @@ void SecurityManagerImpl::ProcessFailedPTU() {
   if (listeners_.empty()) {
     LOG4CXX_ERROR(logger_, "listeners arrays IS EMPTY!");
   }
-  std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
-  while (it != listeners_.end()) {
-    (*it)->OnPTUFailed();
-    ++it;
-  }
+  std::for_each(listeners_.begin(),
+                listeners_.end(),
+                std::mem_fun(&SecurityManagerListener::OnPTUFailed));
 }
 
 void SecurityManagerImpl::NotifyListenersOnHandshakeDone(

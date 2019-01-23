@@ -1445,9 +1445,9 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
     LOG4CXX_WARN(logger_, "Refuse unknown service");
   }
 
-  ProcessSuccessfulStatusUpdate(
-      protocol_handler::GetHMIServiceType(type),
-      hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED);
+  ProcessStatusUpdate(protocol_handler::GetHMIServiceType(type),
+                      hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED,
+                      hmi_apis::Common_ServiceUpdateReason::INVALID_ENUM);
   connection_handler().NotifyServiceStartedResult(session_key, false, empty);
 }
 
@@ -1530,7 +1530,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
   }
 }
 
-void ApplicationManagerImpl::ProcessFailedStatusUpdate(
+void ApplicationManagerImpl::ProcessStatusUpdate(
     hmi_apis::Common_ServiceType::eType service_type,
     hmi_apis::Common_ServiceEvent::eType service_event,
     hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) {
@@ -1539,26 +1539,13 @@ void ApplicationManagerImpl::ProcessFailedStatusUpdate(
       MessageHelper::CreateOnServiceStatusUpdateNotification(service_type);
   (*notification)[strings::msg_params][hmi_notification::service_event] =
       service_event;
-  (*notification)[strings::msg_params][hmi_notification::reason] =
-      service_update_reason;
+  if (service_update_reason !=
+      hmi_apis::Common_ServiceUpdateReason::eType::INVALID_ENUM) {
+    (*notification)[strings::msg_params][hmi_notification::reason] =
+        service_update_reason;
+  }
 
   rpc_service_->ManageHMICommand(notification);
-}
-
-void ApplicationManagerImpl::ProcessSuccessfulStatusUpdate(
-    hmi_apis::Common_ServiceType::eType service_type,
-    hmi_apis::Common_ServiceEvent::eType service_event) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  auto notification =
-      MessageHelper::CreateOnServiceStatusUpdateNotification(service_type);
-  (*notification)[strings::msg_params][hmi_notification::service_event] =
-      service_event;
-
-  rpc_service_->ManageHMICommand(notification);
-}
-
-void ApplicationManagerImpl::ProcessFailedPTU() {
-  protocol_handler_->ProcessFailedPTU();
 }
 
 void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
@@ -3396,6 +3383,7 @@ void ApplicationManagerImpl::ProcessReconnection(
 void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!ptu_result) {
+    protocol_handler_->ProcessFailedPTU();
     return;
   }
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
@@ -3403,6 +3391,11 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   };
 
   plugin_manager_->ForEachPlugin(on_app_policy_updated);
+}
+
+void ApplicationManagerImpl::OnPTUTimeoutExceeded() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  protocol_handler_->ProcessFailedPTU();
 }
 
 void ApplicationManagerImpl::SendDriverDistractionState(

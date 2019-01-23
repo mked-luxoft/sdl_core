@@ -37,19 +37,53 @@
 
 namespace protocol_handler {
 
+/**
+ *@brief  ServiceUpdateFailureReason helper enum containing reasons for service
+ *status to be updated
+  **/
+enum class ServiceStatus {
+  INVALID_ENUM = -1,
+  SERVICE_RECEIVED,
+  SERVICE_ACCEPTED,
+  SERVICE_START_FAILED,
+  PTU_FAILED,
+  CERT_INVALID,
+  INVALID_TIME
+};
+
+/**
+ *@brief ServiceStatusUpdateHandler class is used to notify listeners about
+ *occured events during service start
+ **/
 class ServiceStatusUpdateHandler {
  public:
   typedef std::shared_ptr<ServiceStatusUpdateHandlerListener>
       ServiceStatusUpdateListenerSPtr;
-  typedef std::vector<ServiceStatusUpdateHandlerListener*> ListenersList;
+  typedef std::list<ServiceStatusUpdateHandlerListener*> ListenersList;
 
-  void OnPTUFailed(protocol_handler::ServiceType service_type);
-  void OnGetSystemTimeExpired(protocol_handler::ServiceType service_type);
-  void OnCertInvalid(protocol_handler::ServiceType service_type);
-  void OnSuccessfulServiceUpdate(protocol_handler::ServiceType service_type,
-                                 const bool accepted);
+  /**
+  *@brief OnServiceUpdate callback that is invoked in case of
+  *successful service start
+  *@param service_type enum value containing type of service.
+  *@param service_status enum value containing status of service.
+  *received
+  **/
+  void OnServiceUpdate(const protocol_handler::ServiceType service_type,
+                       const ServiceStatus service_status);
 
+  /**
+  *@brief AddListener adds instances listening to events
+  *@param listener pointer to instance implementing
+  *ServiceStatusUpdateHandlerListener interface.
+  **/
   void AddListener(ServiceStatusUpdateHandlerListener* listener);
+
+  /**
+  *@brief RemoveListener removes instances listening to events
+  *@param listener pointer to instance implementing
+  *ServiceStatusUpdateHandlerListener interface.
+  **/
+  void RemoveListener(ServiceStatusUpdateHandlerListener* listener);
 
  private:
   ListenersList listeners_;

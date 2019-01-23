@@ -50,6 +50,10 @@ class OnServiceStatusUpdateNotification
  public:
   /**
    * @brief OnServiceStatusUpdateNotification class constructor
+   * @param application_manager ref to application manager
+   * @param rpc_service ref to rpc service
+   * @param hmi_capabilities ref to HMI capabilities
+   * @param policy_handle ref to policy handler
    **/
   OnServiceStatusUpdateNotification(
       const app_mngr::commands::MessageSharedPtr& message,

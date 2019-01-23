@@ -1085,7 +1085,6 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
         correlation_id, vehicle_data_args, application_manager_);
   } else {
     LOG4CXX_WARN(logger_, "Exchange wasn't successful");
-    application_manager_.ProcessFailedPTU();
   }
   OnPTUFinished(ret);
   return ret;
@@ -1593,7 +1592,11 @@ uint32_t PolicyHandler::TimeoutExchangeMSec() const {
 
 void PolicyHandler::OnExceededTimeout() {
   POLICY_LIB_CHECK_VOID();
-  application_manager_.ProcessFailedPTU();
+
+  std::for_each(listeners_.begin(),
+                listeners_.end(),
+                std::mem_fun(&PolicyHandlerObserver::OnPTUTimeoutExceeded));
+
   policy_manager_->OnExceededTimeout();
 }
 

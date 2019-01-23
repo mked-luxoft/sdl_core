@@ -75,8 +75,8 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
 void HandshakeHandler::OnCertificateUpdateRequired() {}
 
 bool HandshakeHandler::OnHandshakeFailed() {
-  service_status_update_handler_->OnGetSystemTimeExpired(
-      context_.service_type_);
+  service_status_update_handler_->OnServiceUpdate(context_.service_type_,
+                                                  ServiceStatus::INVALID_TIME);
 
   if (payload_) {
     ProcessFailedHandshake(*payload_);
@@ -91,7 +91,8 @@ bool HandshakeHandler::OnHandshakeFailed() {
 }
 
 void HandshakeHandler::OnPTUFailed() {
-  service_status_update_handler_->OnPTUFailed(context_.service_type_);
+  service_status_update_handler_->OnServiceUpdate(context_.service_type_,
+                                                  ServiceStatus::PTU_FAILED);
 }
 
 bool HandshakeHandler::OnHandshakeDone(
@@ -112,11 +113,12 @@ bool HandshakeHandler::OnHandshakeDone(
   const bool success =
       result == security_manager::SSLContext::Handshake_Result_Success;
 
-  if (!success) {
-    service_status_update_handler_->OnCertInvalid(context_.service_type_);
+  if (success) {
+    service_status_update_handler_->OnServiceUpdate(
+        context_.service_type_, ServiceStatus::SERVICE_ACCEPTED);
   } else {
-    service_status_update_handler_->OnSuccessfulServiceUpdate(
-        context_.service_type_, true);
+    service_status_update_handler_->OnServiceUpdate(
+        context_.service_type_, ServiceStatus::CERT_INVALID);
   }
 
   if (payload_) {
