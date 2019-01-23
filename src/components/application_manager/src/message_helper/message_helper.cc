@@ -1992,12 +1992,21 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
 
 smart_objects::SmartObjectSPtr
 MessageHelper::CreateOnServiceStatusUpdateNotification(
+    const uint32_t app_id,
     const hmi_apis::Common_ServiceType::eType service_type) {
   auto on_status_update_notification = CreateHMINotification(
       hmi_apis::FunctionID::BasicCommunication_OnServiceUpdate);
 
+  LOG4CXX_WARN(logger_, "Creating OnServiceUpdate with app id" << app_id);
+
+  if (app_id > 0) {
+    (*on_status_update_notification)[strings::msg_params][strings::app_id] =
+        app_id;
+  }
   (*on_status_update_notification)
       [strings::msg_params][hmi_notification::service_type] = service_type;
+
+  PrintSmartObject(*on_status_update_notification);
 
   return on_status_update_notification;
 }

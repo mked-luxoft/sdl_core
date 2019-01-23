@@ -35,20 +35,34 @@
 
 #include "interfaces/HMI_API.h"
 #include "protocol_handler/protocol_handler.h"
+#include "transport_manager/transport_manager.h"
 
 namespace protocol_handler {
+
+enum class ServiceUpdateFailureReason {
+  INVALID_ENUM = -1,
+  SERVICE_START_FAILED,
+  PTU_FAILED,
+  CERT_INVALID,
+  INVALID_TIME
+};
 
 hmi_apis::Common_ServiceType::eType GetHMIServiceType(
     protocol_handler::ServiceType service_type);
 
+hmi_apis::Common_ServiceUpdateReason::eType GetHMIServiceUpdateReason(
+    protocol_handler::ServiceUpdateFailureReason update_reason);
+
 class ServiceStatusUpdateHandlerListener {
  public:
   virtual void ProcessFailedStatusUpdate(
+      const uint8_t session_id,
       hmi_apis::Common_ServiceType::eType service_type,
       hmi_apis::Common_ServiceEvent::eType service_event,
       hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) = 0;
 
   virtual void ProcessSuccessfulStatusUpdate(
+      const uint32_t session_id,
       hmi_apis::Common_ServiceType::eType service_type,
       hmi_apis::Common_ServiceEvent::eType service_event) = 0;
 };

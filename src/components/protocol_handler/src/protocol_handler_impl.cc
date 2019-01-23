@@ -1836,6 +1836,8 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   }
 #endif  // ENABLE_SECURITY
   if (rejected_params.empty()) {
+    service_status_update_handler_->OnSuccessfulServiceUpdate(
+        context.connection_id_, context.service_type_, true);
     SendStartSessionAck(context.connection_id_,
                         context.new_session_id_,
                         packet->protocol_version(),
@@ -1845,6 +1847,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                         *fullVersion,
                         *start_session_ack_params);
   } else {
+    service_status_update_handler_->OnFailedServiceUpdate(
+        context.connection_id_,
+        context.service_type_,
+        ServiceUpdateFailureReason::SERVICE_START_FAILED);
     SendStartSessionNAck(context.connection_id_,
                          packet->session_id(),
                          protocol_version,

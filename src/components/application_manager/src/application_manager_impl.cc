@@ -1420,6 +1420,10 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   if (type == kRpc) {
     LOG4CXX_DEBUG(logger_, "RPC service is about to be started.");
     connection_handler().NotifyServiceStartedResult(session_key, true, empty);
+    ProcessSuccessfulStatusUpdate(
+        session_key,
+        protocol_handler::GetHMIServiceType(type),
+        hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED);
     return;
   }
   ApplicationSharedPtr app = application(session_key);
@@ -1446,6 +1450,7 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   }
 
   ProcessSuccessfulStatusUpdate(
+      session_key,
       protocol_handler::GetHMIServiceType(type),
       hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED);
   connection_handler().NotifyServiceStartedResult(session_key, false, empty);
@@ -1531,26 +1536,48 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
 }
 
 void ApplicationManagerImpl::ProcessFailedStatusUpdate(
+    const uint8_t session_id,
     hmi_apis::Common_ServiceType::eType service_type,
     hmi_apis::Common_ServiceEvent::eType service_event,
     hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto notification =
-      MessageHelper::CreateOnServiceStatusUpdateNotification(service_type);
+  auto notification = MessageHelper::CreateOnServiceStatusUpdateNotification(
+      application(session_id)->hmi_app_id(), service_type);
   (*notification)[strings::msg_params][hmi_notification::service_event] =
       service_event;
-  (*notification)[strings::msg_params][hmi_notification::reason] =
-      service_update_reason;
+
+  if (service_update_reason !=
+      hmi_apis::Common_ServiceUpdateReason::INVALID_ENUM) {
+    (*notification)[strings::msg_params][hmi_notification::reason] =
+        service_update_reason;
+  }
 
   rpc_service_->ManageHMICommand(notification);
 }
 
 void ApplicationManagerImpl::ProcessSuccessfulStatusUpdate(
+    const uint32_t session_id,
     hmi_apis::Common_ServiceType::eType service_type,
     hmi_apis::Common_ServiceEvent::eType service_event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto notification =
-      MessageHelper::CreateOnServiceStatusUpdateNotification(service_type);
+  LOG4CXX_TRACE(logger_, "session id is: " << session_id);
+  ApplicationSharedPtr app = application(session_id);
+  for (auto application : applications().GetData()) {
+    LOG4CXX_TRACE(logger_, "application app id is " << application->app_id());
+    LOG4CXX_TRACE(logger_,
+                  "application hmi app id is " << application->hmi_app_id());
+  }
+  LOG4CXX_TRACE(logger_, "App is " << app.get());
+  auto notification = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Null);
+  if (!app && service_type == hmi_apis::Common_ServiceType::RPC) {
+    LOG4CXX_WARN(logger_, "Starting first RPC service");
+    notification =
+        MessageHelper::CreateOnServiceStatusUpdateNotification(0, service_type);
+  } else {
+    notification = MessageHelper::CreateOnServiceStatusUpdateNotification(
+        session_id, service_type);
+  }
   (*notification)[strings::msg_params][hmi_notification::service_event] =
       service_event;
 

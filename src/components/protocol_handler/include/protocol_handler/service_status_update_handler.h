@@ -43,11 +43,13 @@ class ServiceStatusUpdateHandler {
       ServiceStatusUpdateListenerSPtr;
   typedef std::vector<ServiceStatusUpdateHandlerListener*> ListenersList;
 
-  void OnPTUFailed(protocol_handler::ServiceType service_type);
-  void OnGetSystemTimeExpired(protocol_handler::ServiceType service_type);
-  void OnCertInvalid(protocol_handler::ServiceType service_type);
-  void OnSuccessfulServiceUpdate(protocol_handler::ServiceType service_type,
+  void OnSuccessfulServiceUpdate(const uint32_t session_id,
+                                 protocol_handler::ServiceType service_type,
                                  const bool accepted);
+
+  void OnFailedServiceUpdate(const uint8_t session_id,
+                             const protocol_handler::ServiceType service_type,
+                             ServiceUpdateFailureReason reason);
 
   void AddListener(ServiceStatusUpdateHandlerListener* listener);
 

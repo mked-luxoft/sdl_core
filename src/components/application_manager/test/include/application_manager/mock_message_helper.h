@@ -308,8 +308,9 @@ class MockMessageHelper {
                void(mobile_apis::ButtonName::eType button,
                     ApplicationSharedPtr application,
                     ApplicationManager& app_mngr));
-  MOCK_METHOD1(CreateOnServiceStatusUpdateNotification,
+  MOCK_METHOD2(CreateOnServiceStatusUpdateNotification,
                smart_objects::SmartObject(
+                   const uint32_t app_id,
                    const hmi_apis::Common_ServiceType::eType service_type));
 
   static MockMessageHelper* message_helper_mock();

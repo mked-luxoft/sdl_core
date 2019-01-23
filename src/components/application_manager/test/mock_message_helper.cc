@@ -574,6 +574,7 @@ void MessageHelper::SendUnsubscribeButtonNotification(
 
 smart_objects::SmartObject
 MessageHelper::CreateOnServiceStatusUpdateNotification(
+    const uint32_t app_id,
     const hmi_apis::Common_ServiceType::eType service_type) {
   return MockMessageHelper::message_helper_mock()
       ->CreateOnStatusUpdateNotification(service_type);

@@ -21,53 +21,50 @@ hmi_apis::Common_ServiceType::eType GetHMIServiceType(
   }
 }
 
-void ServiceStatusUpdateHandler::OnPTUFailed(
-    protocol_handler::ServiceType service_type) {
-  const auto hmi_service_type = GetHMIServiceType(service_type);
-  const auto service_event = hmi_apis::Common_ServiceEvent::REQUEST_REJECTED;
-  const auto service_update = hmi_apis::Common_ServiceUpdateReason::PTU_FAILED;
-
-  for (const auto listener : listeners_) {
-    listener->ProcessFailedStatusUpdate(
-        hmi_service_type, service_event, service_update);
-  }
-}
-
-void ServiceStatusUpdateHandler::OnGetSystemTimeExpired(
-    protocol_handler::ServiceType service_type) {
-  const auto hmi_service_type = GetHMIServiceType(service_type);
-  const auto service_event = hmi_apis::Common_ServiceEvent::REQUEST_REJECTED;
-  const auto service_update =
-      hmi_apis::Common_ServiceUpdateReason::INVALID_TIME;
-
-  for (const auto listener : listeners_) {
-    listener->ProcessFailedStatusUpdate(
-        hmi_service_type, service_event, service_update);
-  }
-}
-
-void ServiceStatusUpdateHandler::OnCertInvalid(
-    protocol_handler::ServiceType service_type) {
-  const auto hmi_service_type = GetHMIServiceType(service_type);
-  const auto service_event = hmi_apis::Common_ServiceEvent::REQUEST_REJECTED;
-  const auto service_update =
-      hmi_apis::Common_ServiceUpdateReason::INVALID_CERT;
-
-  for (const auto listener : listeners_) {
-    listener->ProcessFailedStatusUpdate(
-        hmi_service_type, service_event, service_update);
+hmi_apis::Common_ServiceUpdateReason::eType GetHMIServiceUpdateReason(
+    protocol_handler::ServiceUpdateFailureReason update_reason) {
+  using namespace hmi_apis;
+  using namespace protocol_handler;
+  switch (update_reason) {
+    case ServiceUpdateFailureReason::PTU_FAILED: {
+      return Common_ServiceUpdateReason::PTU_FAILED;
+    }
+    case ServiceUpdateFailureReason::CERT_INVALID: {
+      return Common_ServiceUpdateReason::INVALID_CERT;
+    }
+    case ServiceUpdateFailureReason::INVALID_TIME: {
+      return Common_ServiceUpdateReason::INVALID_TIME;
+    }
+    default: { return Common_ServiceUpdateReason::INVALID_ENUM; }
   }
 }
 
 void ServiceStatusUpdateHandler::OnSuccessfulServiceUpdate(
-    protocol_handler::ServiceType service_type, const bool accepted) {
+    const uint32_t session_id,
+    protocol_handler::ServiceType service_type,
+    const bool accepted) {
   const auto hmi_service_type = GetHMIServiceType(service_type);
   const auto service_event =
       accepted ? hmi_apis::Common_ServiceEvent::REQUEST_ACCEPTED
                : hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED;
 
   for (const auto listener : listeners_) {
-    listener->ProcessSuccessfulStatusUpdate(hmi_service_type, service_event);
+    listener->ProcessSuccessfulStatusUpdate(
+        session_id, hmi_service_type, service_event);
+  }
+}
+
+void ServiceStatusUpdateHandler::OnFailedServiceUpdate(
+    const uint8_t session_id,
+    const protocol_handler::ServiceType service_type,
+    ServiceUpdateFailureReason update_reason) {
+  const auto hmi_service_type = GetHMIServiceType(service_type);
+  const auto service_event = hmi_apis::Common_ServiceEvent::REQUEST_REJECTED;
+  const auto service_update_reason = GetHMIServiceUpdateReason(update_reason);
+
+  for (const auto& listener : listeners_) {
+    listener->ProcessFailedStatusUpdate(
+        session_id, hmi_service_type, service_event, service_update_reason);
   }
 }
 

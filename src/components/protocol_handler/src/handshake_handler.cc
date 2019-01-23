@@ -75,8 +75,10 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
 void HandshakeHandler::OnCertificateUpdateRequired() {}
 
 bool HandshakeHandler::OnHandshakeFailed() {
-  service_status_update_handler_->OnGetSystemTimeExpired(
-      context_.service_type_);
+  service_status_update_handler_->OnFailedServiceUpdate(
+      context_.new_session_id_,
+      context_.service_type_,
+      ServiceUpdateFailureReason::INVALID_TIME);
 
   if (payload_) {
     ProcessFailedHandshake(*payload_);
@@ -91,7 +93,10 @@ bool HandshakeHandler::OnHandshakeFailed() {
 }
 
 void HandshakeHandler::OnPTUFailed() {
-  service_status_update_handler_->OnPTUFailed(context_.service_type_);
+  service_status_update_handler_->OnFailedServiceUpdate(
+      context_.new_session_id_,
+      context_.service_type_,
+      ServiceUpdateFailureReason::PTU_FAILED);
 }
 
 bool HandshakeHandler::OnHandshakeDone(
@@ -112,11 +117,18 @@ bool HandshakeHandler::OnHandshakeDone(
   const bool success =
       result == security_manager::SSLContext::Handshake_Result_Success;
 
-  if (!success) {
-    service_status_update_handler_->OnCertInvalid(context_.service_type_);
-  } else {
+  LOG4CXX_TRACE(logger_,
+                "context_.new_session_id_  is "
+                    << (uint32_t)context_.new_session_id_);
+
+  if (success) {
     service_status_update_handler_->OnSuccessfulServiceUpdate(
-        context_.service_type_, true);
+        context_.new_session_id_, context_.service_type_, true);
+  } else {
+    service_status_update_handler_->OnFailedServiceUpdate(
+        context_.new_session_id_,
+        context_.service_type_,
+        ServiceUpdateFailureReason::CERT_INVALID);
   }
 
   if (payload_) {
