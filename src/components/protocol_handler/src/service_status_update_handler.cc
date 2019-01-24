@@ -1,8 +1,6 @@
 #include "protocol_handler/service_status_update_handler.h"
 #include "interfaces/HMI_API.h"
 
-#include <algorithm>
-
 namespace protocol_handler {
 
 hmi_apis::Common_ServiceType::eType GetHMIServiceType(
@@ -24,6 +22,7 @@ hmi_apis::Common_ServiceType::eType GetHMIServiceType(
 }
 
 void ServiceStatusUpdateHandler::OnServiceUpdate(
+    const uint32_t connection_key,
     const protocol_handler::ServiceType service_type,
     ServiceStatus service_status) {
   using namespace hmi_apis;
@@ -67,7 +66,7 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
 
   for (const auto listener : listeners_) {
     listener->ProcessStatusUpdate(
-        hmi_service_type, service_event, service_update_reason);
+        connection_key, hmi_service_type, service_event, service_update_reason);
   }
 }
 

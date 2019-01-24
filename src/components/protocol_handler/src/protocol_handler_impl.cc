@@ -1835,9 +1835,11 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     return;
   }
 #endif  // ENABLE_SECURITY
+  const uint32_t connection_key = session_observer_.KeyFromPair(
+      context.connection_id_, context.new_session_id_);
   if (rejected_params.empty()) {
     service_status_update_handler_->OnServiceUpdate(
-        context.service_type_, ServiceStatus::SERVICE_ACCEPTED);
+        connection_key, context.service_type_, ServiceStatus::SERVICE_ACCEPTED);
     SendStartSessionAck(context.connection_id_,
                         context.new_session_id_,
                         packet->protocol_version(),
@@ -1848,7 +1850,9 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                         *start_session_ack_params);
   } else {
     service_status_update_handler_->OnServiceUpdate(
-        context.service_type_, ServiceStatus::SERVICE_START_FAILED);
+        connection_key,
+        context.service_type_,
+        ServiceStatus::SERVICE_START_FAILED);
     SendStartSessionNAck(context.connection_id_,
                          packet->session_id(),
                          protocol_version,

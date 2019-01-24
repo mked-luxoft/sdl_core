@@ -513,6 +513,8 @@ void ApplicationImpl::StartStreaming(
       (*on_service_status_update_notification)
           [strings::msg_params][hmi_notification::service_event] =
               hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED;
+      (*on_service_status_update_notification)[strings::msg_params]
+                                              [strings::app_id] = app_id();
       application_manager_.GetRPCService().ManageHMICommand(
           on_service_status_update_notification);
       set_video_stream_retry_number(0);
@@ -528,6 +530,8 @@ void ApplicationImpl::StartStreaming(
       (*on_service_status_update_notification)
           [strings::msg_params][hmi_notification::service_event] =
               hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED;
+      (*on_service_status_update_notification)[strings::msg_params]
+                                              [strings::app_id] = app_id();
       application_manager_.GetRPCService().ManageHMICommand(
           on_service_status_update_notification);
       set_audio_stream_retry_number(0);

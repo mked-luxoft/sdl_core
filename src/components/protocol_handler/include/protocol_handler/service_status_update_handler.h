@@ -63,12 +63,14 @@ class ServiceStatusUpdateHandler {
 
   /**
   *@brief OnServiceUpdate callback that is invoked in case of
-  *successful service start
+  *service status update needed
+  *@param connection_key - connection key
   *@param service_type enum value containing type of service.
   *@param service_status enum value containing status of service.
   *received
   **/
-  void OnServiceUpdate(const protocol_handler::ServiceType service_type,
+  void OnServiceUpdate(const uint32_t connection_key,
+                       const protocol_handler::ServiceType service_type,
                        const ServiceStatus service_status);
 
   /**

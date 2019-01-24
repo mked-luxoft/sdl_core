@@ -75,7 +75,8 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
 void HandshakeHandler::OnCertificateUpdateRequired() {}
 
 bool HandshakeHandler::OnHandshakeFailed() {
-  service_status_update_handler_->OnServiceUpdate(context_.service_type_,
+  service_status_update_handler_->OnServiceUpdate(this->connection_key(),
+                                                  context_.service_type_,
                                                   ServiceStatus::INVALID_TIME);
 
   if (payload_) {
@@ -91,7 +92,8 @@ bool HandshakeHandler::OnHandshakeFailed() {
 }
 
 void HandshakeHandler::OnPTUFailed() {
-  service_status_update_handler_->OnServiceUpdate(context_.service_type_,
+  service_status_update_handler_->OnServiceUpdate(this->connection_key(),
+                                                  context_.service_type_,
                                                   ServiceStatus::PTU_FAILED);
 }
 
@@ -115,10 +117,14 @@ bool HandshakeHandler::OnHandshakeDone(
 
   if (success) {
     service_status_update_handler_->OnServiceUpdate(
-        context_.service_type_, ServiceStatus::SERVICE_ACCEPTED);
+        this->connection_key(),
+        context_.service_type_,
+        ServiceStatus::SERVICE_ACCEPTED);
   } else {
     service_status_update_handler_->OnServiceUpdate(
-        context_.service_type_, ServiceStatus::CERT_INVALID);
+        this->connection_key(),
+        context_.service_type_,
+        ServiceStatus::CERT_INVALID);
   }
 
   if (payload_) {

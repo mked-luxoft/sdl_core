@@ -1418,6 +1418,10 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   std::vector<std::string> empty;
 
   if (type == kRpc) {
+    ProcessStatusUpdate(session_key,
+                        protocol_handler::GetHMIServiceType(type),
+                        hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED,
+                        hmi_apis::Common_ServiceUpdateReason::INVALID_ENUM);
     LOG4CXX_DEBUG(logger_, "RPC service is about to be started.");
     connection_handler().NotifyServiceStartedResult(session_key, true, empty);
     return;
@@ -1445,7 +1449,8 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
     LOG4CXX_WARN(logger_, "Refuse unknown service");
   }
 
-  ProcessStatusUpdate(protocol_handler::GetHMIServiceType(type),
+  ProcessStatusUpdate(session_key,
+                      protocol_handler::GetHMIServiceType(type),
                       hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED,
                       hmi_apis::Common_ServiceUpdateReason::INVALID_ENUM);
   connection_handler().NotifyServiceStartedResult(session_key, false, empty);
@@ -1530,15 +1535,47 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
   }
 }
 
+void AddAppIDForRPCService(bool& is_first_rpc_service_accepted,
+                           hmi_apis::Common_ServiceEvent::eType service_event,
+                           smart_objects::SmartObjectSPtr notification,
+                           const uint32_t connection_key) {
+  if (!is_first_rpc_service_accepted &&
+      service_event == hmi_apis::Common_ServiceEvent::REQUEST_ACCEPTED) {
+    is_first_rpc_service_accepted = true;
+  } else if (is_first_rpc_service_accepted) {
+    (*notification)[strings::msg_params][strings::app_id] = connection_key;
+  }
+}
+
 void ApplicationManagerImpl::ProcessStatusUpdate(
+    const uint32_t connection_key,
     hmi_apis::Common_ServiceType::eType service_type,
     hmi_apis::Common_ServiceEvent::eType service_event,
     hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  static bool is_first_rpc_service_accepted = false;
+
+  LOG4CXX_DEBUG(logger_,
+                "Processing status update with connection key: "
+                    << connection_key << " service type: " << service_type
+                    << " service_event " << service_event
+                    << "service_update_reason " << service_update_reason);
+
   auto notification =
       MessageHelper::CreateOnServiceStatusUpdateNotification(service_type);
   (*notification)[strings::msg_params][hmi_notification::service_event] =
       service_event;
+
+  if (service_type == hmi_apis::Common_ServiceType::RPC) {
+    AddAppIDForRPCService(is_first_rpc_service_accepted,
+                          service_event,
+                          notification,
+                          connection_key);
+  } else {
+    (*notification)[strings::msg_params][strings::app_id] = connection_key;
+  }
+
   if (service_update_reason !=
       hmi_apis::Common_ServiceUpdateReason::eType::INVALID_ENUM) {
     (*notification)[strings::msg_params][hmi_notification::reason] =

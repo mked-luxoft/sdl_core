@@ -520,6 +520,7 @@ class ApplicationManagerImpl
    * @brief ProcessStatusUpdate is called on service status update received
    */
   void ProcessStatusUpdate(
+      const uint32_t connection_key,
       hmi_apis::Common_ServiceType::eType service_type,
       hmi_apis::Common_ServiceEvent::eType service_event,
       hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) FINAL;
