@@ -392,6 +392,7 @@ void SecurityManagerImpl::ProcessFailedPTU() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (listeners_.empty()) {
     LOG4CXX_ERROR(logger_, "listeners arrays IS EMPTY!");
+    return;
   }
   std::for_each(listeners_.begin(),
                 listeners_.end(),

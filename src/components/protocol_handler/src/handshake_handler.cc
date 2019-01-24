@@ -115,17 +115,10 @@ bool HandshakeHandler::OnHandshakeDone(
   const bool success =
       result == security_manager::SSLContext::Handshake_Result_Success;
 
-  if (success) {
-    service_status_update_handler_->OnServiceUpdate(
-        this->connection_key(),
-        context_.service_type_,
-        ServiceStatus::SERVICE_ACCEPTED);
-  } else {
-    service_status_update_handler_->OnServiceUpdate(
-        this->connection_key(),
-        context_.service_type_,
-        ServiceStatus::CERT_INVALID);
-  }
+  const auto service_status =
+      success ? ServiceStatus::SERVICE_ACCEPTED : ServiceStatus::CERT_INVALID;
+  service_status_update_handler_->OnServiceUpdate(
+      this->connection_key(), context_.service_type_, service_status);
 
   if (payload_) {
     if (success) {

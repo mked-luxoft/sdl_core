@@ -517,9 +517,16 @@ class ApplicationManagerImpl
   void OnPTUTimeoutExceeded() FINAL;
 
   /**
-   * @brief ProcessStatusUpdate is called on service status update received
-   */
-  void ProcessStatusUpdate(
+   *@brief ProcessServiceStatusUpdate callback that is invoked in case of
+   *service status update
+   *@param connection_key - connection key
+   *@param service_type enum value containing type of service.
+   *@param service_event enum value containing event that occured during service
+   *start.
+   *@param service_update_reason enum value containing reason why service_event
+   *occured.
+   **/
+  void ProcessServiceStatusUpdate(
       const uint32_t connection_key,
       hmi_apis::Common_ServiceType::eType service_type,
       hmi_apis::Common_ServiceEvent::eType service_event,
@@ -1260,6 +1267,17 @@ class ApplicationManagerImpl
   void DisallowStreaming(uint32_t app_id);
 
   /**
+   * @brief Determines whether app_id should be added to OnServiceUpdate
+   * notification
+   * @param service_type type of service pending update
+   * @param service_event service status update event
+   * @return bool value indicating whether app_id should be added
+   */
+  bool ShouldAddAppIDForService(
+      hmi_apis::Common_ServiceType::eType service_type,
+      hmi_apis::Common_ServiceEvent::eType service_event);
+
+  /**
    * @brief Types of directories used by Application Manager
    */
   enum DirectoryType { TYPE_STORAGE, TYPE_SYSTEM, TYPE_ICONS };
@@ -1389,6 +1407,7 @@ class ApplicationManagerImpl
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
   bool is_all_apps_allowed_;
+  bool is_first_rpc_service_accepted_;
   uint32_t current_audio_source_;
 
   event_engine::EventDispatcherImpl event_dispatcher_;

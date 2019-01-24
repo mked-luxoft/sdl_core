@@ -104,9 +104,8 @@ bool LifeCycleImpl::StartComponents() {
       new application_manager::ApplicationManagerImpl(profile_, profile_);
 
   auto service_status_update_handler =
-      std::make_shared<protocol_handler::ServiceStatusUpdateHandler>();
-
-  service_status_update_handler->AddListener(app_manager_);
+      std::make_shared<protocol_handler::ServiceStatusUpdateHandler>(
+          app_manager_);
 
   protocol_handler_->set_service_status_update_handler(
       service_status_update_handler);

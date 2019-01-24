@@ -58,9 +58,6 @@ void OnServiceStatusUpdateNotification::Run() {
 
   SendNotification();
 }
-
 }  // namespace hmi
-
 }  // namespace commands
-
 }  // namespace application_manager

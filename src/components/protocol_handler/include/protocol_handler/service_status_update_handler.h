@@ -33,13 +33,14 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_SERVICE_STATUS_UPDATE_HANDLER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_SERVICE_STATUS_UPDATE_HANDLER_H_
 
-#include "service_status_update_handler_listener.h"
+#include "protocol_handler/service_status_update_handler_listener.h"
 
 namespace protocol_handler {
 
 /**
- *@brief  ServiceUpdateFailureReason helper enum containing reasons for service
- *status to be updated
+  * @brief  ServiceUpdateFailureReason helper enum containing reasons for
+  *service
+  * status to be updated
   **/
 enum class ServiceStatus {
   INVALID_ENUM = -1,
@@ -52,43 +53,38 @@ enum class ServiceStatus {
 };
 
 /**
- *@brief ServiceStatusUpdateHandler class is used to notify listeners about
- *occured events during service start
+ * @brief ServiceStatusUpdateHandler class is used to notify listeners about
+ * occured events during service start
  **/
 class ServiceStatusUpdateHandler {
  public:
-  typedef std::shared_ptr<ServiceStatusUpdateHandlerListener>
-      ServiceStatusUpdateListenerSPtr;
-  typedef std::list<ServiceStatusUpdateHandlerListener*> ListenersList;
+  /**
+  * @brief ServiceStatusUpdateHandler class constructor
+  * @param listener pointer to ServiceStatusUpdateHandlerListener instance
+  **/
+  ServiceStatusUpdateHandler(ServiceStatusUpdateHandlerListener* listener)
+      : listener_(listener) {}
 
   /**
-  *@brief OnServiceUpdate callback that is invoked in case of
-  *service status update needed
-  *@param connection_key - connection key
-  *@param service_type enum value containing type of service.
-  *@param service_status enum value containing status of service.
-  *received
-  **/
+   * @brief OnServiceUpdate callback that is invoked in case of
+   * service status update needed
+   * @param connection_key - connection key
+   * @param service_type enum value containing type of service.
+   * @param service_status enum value containing status of service.
+   * received
+   **/
   void OnServiceUpdate(const uint32_t connection_key,
                        const protocol_handler::ServiceType service_type,
                        const ServiceStatus service_status);
 
   /**
-  *@brief AddListener adds instances listening to events
-  *@param listener pointer to instance implementing
-  *ServiceStatusUpdateHandlerListener interface.
-  **/
-  void AddListener(ServiceStatusUpdateHandlerListener* listener);
-
-  /**
-  *@brief RemoveListener removes instances listening to events
-  *@param listener pointer to instance implementing
-  *ServiceStatusUpdateHandlerListener interface.
-  **/
-  void RemoveListener(ServiceStatusUpdateHandlerListener* listener);
+   * @brief set_listener sets listener to ServiceStatusUpdateHandler
+   * @param listener pointer to ServiceStatusUpdateHandlerListener instance
+   **/
+  void set_listener(const ServiceStatusUpdateHandlerListener* listener);
 
  private:
-  ListenersList listeners_;
+  ServiceStatusUpdateHandlerListener* listener_;
 };
 
 }  // namespace protocol_handler

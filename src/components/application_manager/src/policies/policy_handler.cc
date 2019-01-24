@@ -1595,7 +1595,7 @@ void PolicyHandler::OnExceededTimeout() {
 
   std::for_each(listeners_.begin(),
                 listeners_.end(),
-                std::mem_fun(&PolicyHandlerObserver::OnPTUTimeoutExceeded));
+                std::mem_fn(&PolicyHandlerObserver::OnPTUTimeoutExceeded));
 
   policy_manager_->OnExceededTimeout();
 }

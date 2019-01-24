@@ -17,7 +17,9 @@ hmi_apis::Common_ServiceType::eType GetHMIServiceType(
     case SERVICE_TYPE_NAVI: {
       return Common_ServiceType::VIDEO;
     }
-    default: { return Common_ServiceType::INVALID_ENUM; }
+    default: { 
+      return Common_ServiceType::INVALID_ENUM; 
+    }
   }
 }
 
@@ -61,26 +63,12 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
       service_update_reason = Common_ServiceUpdateReason::INVALID_TIME;
       break;
     }
-    default: { return; }
+    default: { 
+      return; 
+    }
   }
 
-  for (const auto listener : listeners_) {
-    listener->ProcessStatusUpdate(
-        connection_key, hmi_service_type, service_event, service_update_reason);
-  }
+  listener_->ProcessServiceStatusUpdate(
+      connection_key, hmi_service_type, service_event, service_update_reason);
 }
-
-void ServiceStatusUpdateHandler::AddListener(
-    ServiceStatusUpdateHandlerListener* listener) {
-  listeners_.push_back(listener);
-}
-
-void ServiceStatusUpdateHandler::RemoveListener(
-    ServiceStatusUpdateHandlerListener* listener) {
-  if (!listener) {
-    return;
-  }
-  listeners_.remove(listener);
-}
-
 }  // namespace protocol_handler
