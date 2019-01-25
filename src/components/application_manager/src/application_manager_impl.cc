@@ -1565,20 +1565,12 @@ void ApplicationManagerImpl::ProcessServiceStatusUpdate(
                     << " service_event " << service_event
                     << "service_update_reason " << service_update_reason);
 
-  auto notification =
-      MessageHelper::CreateOnServiceStatusUpdateNotification(service_type);
-  (*notification)[strings::msg_params][hmi_notification::service_event] =
-      service_event;
+  const uint32_t app_id = ShouldAddAppIDForService(service_type, service_event)
+                              ? connection_key
+                              : 0;
 
-  if (ShouldAddAppIDForService(service_type, service_event)) {
-    (*notification)[strings::msg_params][strings::app_id] = connection_key;
-  }
-
-  if (service_update_reason !=
-      hmi_apis::Common_ServiceUpdateReason::eType::INVALID_ENUM) {
-    (*notification)[strings::msg_params][hmi_notification::reason] =
-        service_update_reason;
-  }
+  auto notification = MessageHelper::CreateOnServiceStatusUpdateNotification(
+      app_id, service_type, service_event, service_update_reason);
 
   rpc_service_->ManageHMICommand(notification);
 }
