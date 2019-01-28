@@ -111,6 +111,16 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_get_language_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_get_supported_languages_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_get_supported_languages_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_get_language_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_get_language_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_get_capabilities_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_get_capabilities_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_change_registration_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_change_registration_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_show_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_show_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_alert_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_alert_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_is_ready_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_is_ready_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_perform_audio_pass_thru_request.h"
@@ -151,6 +161,10 @@
 #include "sdl_rpc_plugin/commands/hmi/vr_is_ready_response.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_perform_interaction_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_perform_interaction_response.h"
+#include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_request.h"
+#include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_response.h"
+#include "sdl_rpc_plugin/commands/hmi/on_app_permission_changed_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_event_changed_notification.h"
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 #include "sdl_rpc_plugin/commands/hmi/decrypt_certificate_request.h"
@@ -230,6 +244,16 @@
 #include "sdl_rpc_plugin/commands/hmi/on_vr_stopped_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_policy_update.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_policy_update_response.h"
+#include "sdl_rpc_plugin/commands/hmi/on_received_policy_update.h"
+#include "sdl_rpc_plugin/commands/hmi/on_policy_update.h"
+#include "sdl_rpc_plugin/commands/hmi/get_urls.h"
+#include "sdl_rpc_plugin/commands/hmi/get_urls_response.h"
+#include "sdl_rpc_plugin/commands/hmi/on_device_state_changed_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/navi_send_location_request.h"
+#include "sdl_rpc_plugin/commands/hmi/navi_send_location_response.h"
+#include "sdl_rpc_plugin/commands/hmi/on_tts_reset_timeout_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
+#include "sdl_rpc_plugin/commands/hmi/dial_number_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_request.h"
@@ -827,6 +851,10 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::hmi::DialNumberRequest>()
                  : factory.GetCreator<commands::hmi::DialNumberResponse>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnServiceUpdate: {
+      return factory
+          .GetCreator<commands::hmi::OnServiceStatusUpdateNotification>();
     }
     case hmi_apis::FunctionID::Navigation_OnWayPointChange: {
       return factory.GetCreator<commands::OnNaviWayPointChangeNotification>();
