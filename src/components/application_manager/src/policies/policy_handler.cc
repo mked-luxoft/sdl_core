@@ -1592,6 +1592,11 @@ uint32_t PolicyHandler::TimeoutExchangeMSec() const {
 
 void PolicyHandler::OnExceededTimeout() {
   POLICY_LIB_CHECK_VOID();
+
+  std::for_each(listeners_.begin(),
+                listeners_.end(),
+                std::mem_fn(&PolicyHandlerObserver::OnPTUTimeoutExceeded));
+
   policy_manager_->OnExceededTimeout();
 }
 
