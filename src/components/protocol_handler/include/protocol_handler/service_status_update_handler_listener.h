@@ -41,7 +41,7 @@ namespace protocol_handler {
 /**
  * @brief Converts service type enum value from protocol_handler to hmi_apis.
  * @param service_type protocol_handler enum value.
- **/
+ */
 hmi_apis::Common_ServiceType::eType GetHMIServiceType(
     protocol_handler::ServiceType service_type);
 
@@ -49,7 +49,7 @@ hmi_apis::Common_ServiceType::eType GetHMIServiceType(
   * @brief ServiceStatusUpdateHandlerListener provides callbacks interface with
   * a purpose to notify HMI on successful or failed state updates of different
   * services
-  **/
+  */
 class ServiceStatusUpdateHandlerListener {
  public:
   /**
@@ -62,7 +62,7 @@ class ServiceStatusUpdateHandlerListener {
    * service start.
    * @param service_update_reason enum value containing reason why service_event
    * occured.
-   **/
+   */
   virtual void ProcessServiceStatusUpdate(
       const uint32_t connection_key,
       hmi_apis::Common_ServiceType::eType service_type,
