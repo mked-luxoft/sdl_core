@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,46 +29,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
-#define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
 
-#include <string>
+#include "sdl_rpc_plugin/commands/hmi/on_service_status_update_notification.h"
 
-namespace security_manager {
+namespace sdl_rpc_plugin {
+using namespace application_manager;
 
-class SecurityManagerListener {
- public:
-  /**
-   * \brief Notification about protection result
-   * \param connection_key Unique key used by other components as session
-   * identifier
-   * \param success result of connection protection
-   * \return \c true on success notification or \c false otherwise
-   */
-  virtual bool OnHandshakeDone(uint32_t connection_key,
-                               SSLContext::HandshakeResult result) = 0;
+namespace commands {
 
-  /**
-   * @brief Notification about handshake failure
-   * @return true on success notification handling or false otherwise
-   */
-  virtual bool OnHandshakeFailed() = 0;
+namespace hmi {
 
-  /**
-   * @brief Notify listeners that certificate update is required.
-   */
-  virtual void OnCertificateUpdateRequired() = 0;
+OnServiceStatusUpdateNotification::OnServiceStatusUpdateNotification(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : NotificationToHMI(message,
+                        application_manager,
+                        rpc_service,
+                        hmi_capabilities,
+                        policy_handle) {}
 
-  virtual void OnPTUFailed() = 0;
+OnServiceStatusUpdateNotification::~OnServiceStatusUpdateNotification() {}
 
-  /**
-   * @brief Get certificate data from policy
-   * @param reference to string where to save certificate data
-   * @return true if listener saved some data to string otherwise false
-   */
-  virtual bool GetPolicyCertificateData(std::string& data) const = 0;
+void OnServiceStatusUpdateNotification::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  virtual ~SecurityManagerListener() {}
-};
-}  // namespace security_manager
-#endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
+  SendNotification();
+}
+}  // namespace hmi
+}  // namespace commands
+}  // namespace application_manager

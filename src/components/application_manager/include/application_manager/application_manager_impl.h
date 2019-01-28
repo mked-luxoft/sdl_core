@@ -59,6 +59,7 @@
 
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/service_status_update_handler_listener.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
 #include "application_manager/policies/policy_handler_interface.h"
@@ -123,7 +124,8 @@ typedef std::shared_ptr<timer::Timer> TimerSPtr;
 class ApplicationManagerImpl
     : public ApplicationManager,
       public connection_handler::ConnectionHandlerObserver,
-      public policy::PolicyHandlerObserver
+      public policy::PolicyHandlerObserver,
+      public protocol_handler::ServiceStatusUpdateHandlerListener
 #ifdef ENABLE_SECURITY
       ,
       public security_manager::SecurityManagerListener
@@ -508,6 +510,29 @@ class ApplicationManagerImpl
    * @param ptu_result True if PTU is succeeded, otherwise - false
    */
   void OnPTUFinished(const bool ptu_result) FINAL;
+
+  /**
+   * @brief OnPTUTimeoutExceeded is called on policy table update timed out
+   */
+  void OnPTUTimeoutExceeded() FINAL;
+
+  /**
+   *@brief ProcessServiceStatusUpdate callback that is invoked in case of
+   *service status update
+   *@param connection_key - connection key
+   *@param service_type enum value containing type of service.
+   *@param service_event enum value containing event that occured during service
+   *start.
+   *@param service_update_reason enum value containing reason why service_event
+   *occured.
+   **/
+  void ProcessServiceStatusUpdate(
+      const uint32_t connection_key,
+      hmi_apis::Common_ServiceType::eType service_type,
+      hmi_apis::Common_ServiceEvent::eType service_event,
+      hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) FINAL;
+
+  void OnPTUFailed() FINAL {}
 
   /*
    * @brief Starts audio pass thru thread
@@ -1242,6 +1267,17 @@ class ApplicationManagerImpl
   void DisallowStreaming(uint32_t app_id);
 
   /**
+   * @brief Determines whether app_id should be added to OnServiceUpdate
+   * notification
+   * @param service_type type of service pending update
+   * @param service_event service status update event
+   * @return bool value indicating whether app_id should be added
+   */
+  bool ShouldAddAppIDForService(
+      hmi_apis::Common_ServiceType::eType service_type,
+      hmi_apis::Common_ServiceEvent::eType service_event);
+
+  /**
    * @brief Types of directories used by Application Manager
    */
   enum DirectoryType { TYPE_STORAGE, TYPE_SYSTEM, TYPE_ICONS };
@@ -1371,6 +1407,7 @@ class ApplicationManagerImpl
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
   bool is_all_apps_allowed_;
+  bool is_first_rpc_service_accepted_;
   uint32_t current_audio_source_;
 
   event_engine::EventDispatcherImpl event_dispatcher_;

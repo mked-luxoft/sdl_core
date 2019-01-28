@@ -214,6 +214,8 @@ class SecurityManagerImpl : public SecurityManager,
    */
   static const char* ConfigSection();
 
+  void ProcessFailedPTU() OVERRIDE;
+
  private:
   /**
    * \brief Sends Handshake binary data to mobile application
