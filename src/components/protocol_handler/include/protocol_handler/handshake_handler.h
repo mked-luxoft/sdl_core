@@ -58,8 +58,7 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
                    const SessionContext& context,
                    const uint8_t protocol_version,
                    std::shared_ptr<BsonObject> payload,
-                   std::shared_ptr<ServiceStatusUpdateHandler>
-                       service_status_update_handler);
+                   ServiceStatusUpdateHandler& service_status_update_handler);
 
   ~HandshakeHandler();
 
@@ -120,7 +119,7 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
   utils::SemanticVersion full_version_;
   const uint8_t protocol_version_;
   std::shared_ptr<BsonObject> payload_;
-  std::shared_ptr<ServiceStatusUpdateHandler> service_status_update_handler_;
+  ServiceStatusUpdateHandler& service_status_update_handler_;
 };
 
 }  // namespace protocol_handler

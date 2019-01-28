@@ -50,7 +50,7 @@ HandshakeHandler::HandshakeHandler(
     const SessionContext& context,
     const uint8_t protocol_version,
     std::shared_ptr<BsonObject> payload,
-    std::shared_ptr<ServiceStatusUpdateHandler> service_status_update_handler)
+    ServiceStatusUpdateHandler& service_status_update_handler)
     : protocol_handler_(protocol_handler)
     , session_observer_(session_observer)
     , context_(context)
@@ -75,9 +75,9 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
 void HandshakeHandler::OnCertificateUpdateRequired() {}
 
 bool HandshakeHandler::OnHandshakeFailed() {
-  service_status_update_handler_->OnServiceUpdate(this->connection_key(),
-                                                  context_.service_type_,
-                                                  ServiceStatus::INVALID_TIME);
+  service_status_update_handler_.OnServiceUpdate(this->connection_key(),
+                                                 context_.service_type_,
+                                                 ServiceStatus::INVALID_TIME);
 
   if (payload_) {
     ProcessFailedHandshake(*payload_);
@@ -92,9 +92,9 @@ bool HandshakeHandler::OnHandshakeFailed() {
 }
 
 void HandshakeHandler::OnPTUFailed() {
-  service_status_update_handler_->OnServiceUpdate(this->connection_key(),
-                                                  context_.service_type_,
-                                                  ServiceStatus::PTU_FAILED);
+  service_status_update_handler_.OnServiceUpdate(this->connection_key(),
+                                                 context_.service_type_,
+                                                 ServiceStatus::PTU_FAILED);
 }
 
 bool HandshakeHandler::OnHandshakeDone(
@@ -117,7 +117,7 @@ bool HandshakeHandler::OnHandshakeDone(
 
   const auto service_status =
       success ? ServiceStatus::SERVICE_ACCEPTED : ServiceStatus::CERT_INVALID;
-  service_status_update_handler_->OnServiceUpdate(
+  service_status_update_handler_.OnServiceUpdate(
       this->connection_key(), context_.service_type_, service_status);
 
   if (payload_) {

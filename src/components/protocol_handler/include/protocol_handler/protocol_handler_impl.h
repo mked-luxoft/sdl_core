@@ -219,7 +219,7 @@ class ProtocolHandlerImpl
 #endif  // ENABLE_SECURITY
 
   void set_service_status_update_handler(
-      std::shared_ptr<ServiceStatusUpdateHandler> handler);
+      std::unique_ptr<ServiceStatusUpdateHandler> handler);
 
   /**
    * \brief Stop all handling activity
@@ -779,7 +779,7 @@ class ProtocolHandlerImpl
   sync_primitives::Lock start_session_frame_map_lock_;
   StartSessionFrameMap start_session_frame_map_;
 
-  std::shared_ptr<ServiceStatusUpdateHandler> service_status_update_handler_;
+  std::unique_ptr<ServiceStatusUpdateHandler> service_status_update_handler_;
 
   bool tcp_enabled_;
   std::string tcp_port_;

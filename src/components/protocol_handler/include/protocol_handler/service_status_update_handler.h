@@ -39,9 +39,9 @@ namespace protocol_handler {
 
 /**
   * @brief  ServiceUpdateFailureReason helper enum containing reasons for
-  *service
+  * service
   * status to be updated
-  **/
+  */
 enum class ServiceStatus {
   INVALID_ENUM = -1,
   SERVICE_RECEIVED,
@@ -55,13 +55,13 @@ enum class ServiceStatus {
 /**
  * @brief ServiceStatusUpdateHandler class is used to notify listeners about
  * occured events during service start
- **/
+ */
 class ServiceStatusUpdateHandler {
  public:
   /**
   * @brief ServiceStatusUpdateHandler class constructor
   * @param listener pointer to ServiceStatusUpdateHandlerListener instance
-  **/
+  */
   ServiceStatusUpdateHandler(ServiceStatusUpdateHandlerListener* listener)
       : listener_(listener) {}
 
@@ -72,7 +72,7 @@ class ServiceStatusUpdateHandler {
    * @param service_type enum value containing type of service.
    * @param service_status enum value containing status of service.
    * received
-   **/
+   */
   void OnServiceUpdate(const uint32_t connection_key,
                        const protocol_handler::ServiceType service_type,
                        const ServiceStatus service_status);
@@ -80,7 +80,7 @@ class ServiceStatusUpdateHandler {
   /**
    * @brief set_listener sets listener to ServiceStatusUpdateHandler
    * @param listener pointer to ServiceStatusUpdateHandlerListener instance
-   **/
+   */
   void set_listener(const ServiceStatusUpdateHandlerListener* listener);
 
  private:

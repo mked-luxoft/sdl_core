@@ -116,6 +116,34 @@ class MessageHelper {
       const hmi_apis::Common_ServiceEvent::eType service_event,
       const hmi_apis::Common_ServiceUpdateReason::eType service_update_reason);
 
+  class ServiceStatusUpdateNotificationBuilder {
+   public:
+    typedef std::shared_ptr<ServiceStatusUpdateNotificationBuilder>
+        ServiceStatusUpdateNotificationBuilderSPtr;
+
+    static ServiceStatusUpdateNotificationBuilder
+    CreateServiceStatusUpdateNotificationBuilder(
+        hmi_apis::Common_ServiceType::eType service_type,
+        hmi_apis::Common_ServiceEvent::eType service_event);
+
+    ServiceStatusUpdateNotificationBuilder& add_app_id(const uint32_t app_id);
+
+    ServiceStatusUpdateNotificationBuilder& add_service_update_reason(
+        const hmi_apis::Common_ServiceUpdateReason::eType
+            service_update_reason);
+
+    operator smart_objects::SmartObjectSPtr();
+
+   private:
+    smart_objects::SmartObjectSPtr notification_;
+
+    ServiceStatusUpdateNotificationBuilder(
+        hmi_apis::Common_ServiceType::eType service_type,
+        hmi_apis::Common_ServiceEvent::eType service_event);
+
+    ServiceStatusUpdateNotificationBuilder() = delete;
+  };
+
   /**
    * @brief Creates request for different interfaces(JSON)
    * @param correlation_id unique ID

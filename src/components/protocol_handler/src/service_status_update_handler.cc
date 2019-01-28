@@ -3,6 +3,8 @@
 
 namespace protocol_handler {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "ServiceStatusUpdateHandler")
+
 hmi_apis::Common_ServiceType::eType GetHMIServiceType(
     protocol_handler::ServiceType service_type) {
   using namespace hmi_apis;
@@ -17,9 +19,7 @@ hmi_apis::Common_ServiceType::eType GetHMIServiceType(
     case SERVICE_TYPE_NAVI: {
       return Common_ServiceType::VIDEO;
     }
-    default: { 
-      return Common_ServiceType::INVALID_ENUM; 
-    }
+    default: { return Common_ServiceType::INVALID_ENUM; }
   }
 }
 
@@ -28,43 +28,49 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
     const protocol_handler::ServiceType service_type,
     ServiceStatus service_status) {
   using namespace hmi_apis;
+  typedef utils::Optional<Common_ServiceUpdateReason::eType>
+      UpdateReasonOptional;
   auto hmi_service_type = GetHMIServiceType(service_type);
   Common_ServiceEvent::eType service_event;
-  Common_ServiceUpdateReason::eType service_update_reason;
+  UpdateReasonOptional service_update_reason =
+      UpdateReasonOptional(UpdateReasonOptional::EMPTY);
 
   switch (service_status) {
     case ServiceStatus::SERVICE_RECEIVED: {
       service_event = Common_ServiceEvent::REQUEST_RECEIVED;
-      service_update_reason = Common_ServiceUpdateReason::INVALID_ENUM;
       break;
     }
     case ServiceStatus::SERVICE_ACCEPTED: {
       service_event = Common_ServiceEvent::REQUEST_ACCEPTED;
-      service_update_reason = Common_ServiceUpdateReason::INVALID_ENUM;
       break;
     }
     case ServiceStatus::SERVICE_START_FAILED: {
       service_event = Common_ServiceEvent::REQUEST_REJECTED;
-      service_update_reason = Common_ServiceUpdateReason::INVALID_ENUM;
       break;
     }
     case ServiceStatus::PTU_FAILED: {
       service_event = Common_ServiceEvent::REQUEST_REJECTED;
-      service_update_reason = Common_ServiceUpdateReason::PTU_FAILED;
+      auto service_update_reason_val = Common_ServiceUpdateReason::PTU_FAILED;
+      service_update_reason = UpdateReasonOptional(service_update_reason_val);
       break;
     }
     case ServiceStatus::CERT_INVALID: {
       service_event = Common_ServiceEvent::REQUEST_REJECTED;
-      service_update_reason = Common_ServiceUpdateReason::INVALID_CERT;
+      auto service_update_reason_val = Common_ServiceUpdateReason::INVALID_CERT;
+      service_update_reason = UpdateReasonOptional(service_update_reason_val);
       break;
     }
     case ServiceStatus::INVALID_TIME: {
       service_event = Common_ServiceEvent::REQUEST_REJECTED;
-      service_update_reason = Common_ServiceUpdateReason::INVALID_TIME;
+      auto service_update_reason_val = Common_ServiceUpdateReason::INVALID_TIME;
+      service_update_reason = UpdateReasonOptional(service_update_reason_val);
       break;
     }
-    default: { 
-      return; 
+    default: {
+      LOG4CXX_WARN(logger_,
+                   "Received unknown ServiceStatus: "
+                       << static_cast<int32_t>(service_status));
+      return;
     }
   }
 

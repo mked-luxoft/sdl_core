@@ -1990,43 +1990,48 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
   return std::make_shared<smart_objects::SmartObject>(response_data);
 }
 
-smart_objects::SmartObjectSPtr
-MessageHelper::CreateOnServiceStatusUpdateNotification(
-    const uint32_t app_id,
-    const hmi_apis::Common_ServiceType::eType service_type,
-    const hmi_apis::Common_ServiceEvent::eType service_event) {
-  auto on_status_update_notification = CreateHMINotification(
+MessageHelper::ServiceStatusUpdateNotificationBuilder::
+    ServiceStatusUpdateNotificationBuilder(
+        hmi_apis::Common_ServiceType::eType service_type,
+        hmi_apis::Common_ServiceEvent::eType service_event) {
+  notification_ = MessageHelper::CreateHMINotification(
       hmi_apis::FunctionID::BasicCommunication_OnServiceUpdate);
 
-  if (0 < app_id) {
-    (*on_status_update_notification)[strings::msg_params][strings::app_id] =
-        app_id;
-  }
-
-  (*on_status_update_notification)
-      [strings::msg_params][hmi_notification::service_type] = service_type;
-  (*on_status_update_notification)
-      [strings::msg_params][hmi_notification::service_event] = service_event;
-
-  return on_status_update_notification;
+  (*notification_)[strings::msg_params][hmi_notification::service_type] =
+      service_type;
+  (*notification_)[strings::msg_params][hmi_notification::service_event] =
+      service_event;
 }
 
-smart_objects::SmartObjectSPtr
-MessageHelper::CreateOnServiceStatusUpdateNotification(
-    const uint32_t app_id,
-    const hmi_apis::Common_ServiceType::eType service_type,
-    const hmi_apis::Common_ServiceEvent::eType service_event,
-    const hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) {
-  auto notification = CreateOnServiceStatusUpdateNotification(
-      app_id, service_type, service_event);
+MessageHelper::ServiceStatusUpdateNotificationBuilder
+MessageHelper::ServiceStatusUpdateNotificationBuilder::
+    CreateServiceStatusUpdateNotificationBuilder(
+        hmi_apis::Common_ServiceType::eType service_type,
+        hmi_apis::Common_ServiceEvent::eType service_event) {
+  return {service_type, service_event};
+}
 
-  if (hmi_apis::Common_ServiceUpdateReason::eType::INVALID_ENUM !=
-      service_update_reason) {
-    (*notification)[strings::msg_params][hmi_notification::reason] =
-        service_update_reason;
-  }
+MessageHelper::ServiceStatusUpdateNotificationBuilder&
+MessageHelper::ServiceStatusUpdateNotificationBuilder::add_app_id(
+    const uint32_t app_id) {
+  (*notification_)[strings::msg_params][strings::app_id] = app_id;
 
-  return notification;
+  return *this;
+}
+
+MessageHelper::ServiceStatusUpdateNotificationBuilder& MessageHelper::
+    ServiceStatusUpdateNotificationBuilder::add_service_update_reason(
+        const hmi_apis::Common_ServiceUpdateReason::eType
+            service_update_reason) {
+  (*notification_)[strings::msg_params][hmi_notification::reason] =
+      service_update_reason;
+
+  return *this;
+}
+
+MessageHelper::ServiceStatusUpdateNotificationBuilder::
+operator smart_objects::SmartObjectSPtr() {
+  return notification_;
 }
 
 void MessageHelper::SendNaviSetVideoConfig(

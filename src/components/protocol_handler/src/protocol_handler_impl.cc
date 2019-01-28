@@ -1588,6 +1588,10 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       std::find(audio_transports.begin(), audio_transports.end(), transport) !=
           audio_transports.end();
 
+  service_status_update_handler_->OnServiceUpdate(
+      session_observer_.KeyFromPair(
+      packet->connection_id(), packet->session_id()), service_type, ServiceStatus::SERVICE_RECEIVED);
+
   if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
       (ServiceType::kAudio == service_type && !is_audio_allowed)) {
     LOG4CXX_DEBUG(logger_,
@@ -1762,13 +1766,14 @@ void ProtocolHandlerImpl::NotifySessionStarted(
         context.connection_id_, context.new_session_id_);
 
     std::shared_ptr<HandshakeHandler> handler =
-        std::make_shared<HandshakeHandler>(*this,
-                                           session_observer_,
-                                           *fullVersion,
-                                           context,
-                                           packet->protocol_version(),
-                                           start_session_ack_params,
-                                           service_status_update_handler_);
+        std::make_shared<HandshakeHandler>(
+            *this,
+            session_observer_,
+            *fullVersion,
+            context,
+            packet->protocol_version(),
+            start_session_ack_params,
+            *(service_status_update_handler_.get()));
 
     security_manager::SSLContext* ssl_context =
         security_manager_->CreateSSLContext(
@@ -2033,8 +2038,8 @@ void ProtocolHandlerImpl::Stop() {
 }
 
 void ProtocolHandlerImpl::set_service_status_update_handler(
-    std::shared_ptr<ServiceStatusUpdateHandler> handler) {
-  service_status_update_handler_ = handler;
+    std::unique_ptr<ServiceStatusUpdateHandler> handler) {
+  service_status_update_handler_ = std::move(handler);
 }
 
 #ifdef ENABLE_SECURITY
