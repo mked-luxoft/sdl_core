@@ -3342,6 +3342,42 @@
     </param>
   </struct>
 
+  <enum name="ServiceType">
+    <element name="VIDEO" >
+      <description>Refers to the Video service.</description>
+    </element>
+    <element name="AUDIO" >
+      <description>Refers to the Audio service.</description>
+    </element>
+    <element name="RPC" >
+      <description>Refers to the RPC service.</description>
+    </element>	  
+  </enum>
+
+  <enum name="ServiceEvent">
+    <element name="REQUEST_RECEIVED" >
+      <description>When a request for a Service is received.</description>
+    </element>
+    <element name="REQUEST_ACCEPTED" >
+      <description>When a request for a Service is Accepted.</description>
+    </element>			
+    <element name="REQUEST_REJECTED" >
+      <description>When a request for a Service is Rejected.</description>
+    </element>			
+  </enum>	
+
+  <enum name="ServiceUpdateReason">
+    <element name="PTU_FAILED" >
+      <description>When a Service is rejected because the system was unable to get a required Policy Table Update.</description>
+    </element>
+    <element name="INVALID_CERT" >
+      <description>When a Service is rejected because the security certificate is invalid/expired.</description>
+    </element>			
+    <element name="INVALID_TIME" >
+      <description>When a Service is rejected because the system was unable to get a valid SystemTime from HMI, which is required for certificate authentication.</description>
+    </element>			
+  </enum>	
+
 </interface>
 
 <interface name="Buttons" version="1.3.0" date="2017-07-18">
@@ -3429,6 +3465,26 @@
 </interface>
 
 <interface name="BasicCommunication" version="2.0.0" date="2018-09-05">
+<function name="OnServiceUpdate" messagetype="notification">
+  <description>
+    Must be sent by SDL to HMI when there is an update on status of certain services.
+    Services supported with current version: Video
+  </description>
+  <param name="serviceType" type="Common.ServiceType" mandatory="true">
+    <description>Specifies the service which has been updated.</description>
+  </param>
+  <param name="serviceEvent" type="Common.ServiceEvent" mandatory="false">
+    <description>Specifies service update event.</description>
+  </param>
+  <param name="reason" type="Common.ServiceUpdateReason" mandatory="false">
+    <description>
+      The reason for a service event. Certain events may not have a reason, such as when a service is ACCEPTED (which is the normal expected behavior).
+    </description>
+  </param>
+   <param name="appID" type="Integer" mandatory="false">
+       <description>ID of the application which triggered the update.</description>
+   </param>	
+</function>
     <function name="GetSystemTime" messagetype="request">
       <description>Request from SDL to HMI to obtain current UTC time.</description>
     </function>
