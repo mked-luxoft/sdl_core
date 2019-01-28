@@ -66,6 +66,14 @@ using namespace application_manager;
 typedef std::shared_ptr<MockApplication> MockApplicationSharedPtr;
 typedef std::vector<std::string> StringArray;
 typedef std::shared_ptr<application_manager::Application> ApplicationSharedPtr;
+typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::ServiceType
+    ServiceType;
+typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::ServiceEvent
+    ServiceEvent;
+typedef MessageHelper::ServiceStatusUpdateNotificationBuilder::
+    ServiceUpdateReason UpdateReason;
+typedef MessageHelper::ServiceStatusUpdateNotificationBuilder
+    ServiceStatusUpdateBuilder;
 
 using testing::AtLeast;
 using testing::ReturnRefOfCopy;
@@ -948,7 +956,8 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
   size_t function_id = 1;
   //
   EXPECT_CALL(*appSharedPtr,
-              SubscribeToSoftButtons(function_id, SoftButtonID())).Times(1);
+              SubscribeToSoftButtons(function_id, SoftButtonID()))
+      .Times(1);
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
 }

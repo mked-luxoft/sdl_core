@@ -60,6 +60,7 @@
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "connection_handler/connection_handler.h"
 #include "application_manager/policies/policy_handler_observer.h"
+#include "protocol_handler/service_status_update_handler.h"
 
 #ifdef TELEMETRY_MONITOR
 #include "protocol_handler/telemetry_observer.h"
@@ -205,6 +206,16 @@ class ProtocolHandlerImpl
 
   void RemoveProtocolObserver(ProtocolObserver* observer) OVERRIDE;
 
+  void ProcessFailedPTU() OVERRIDE;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief ProcessFailedCertDecrypt is called to notify security manager that
+   * certificate decryption failed in the external flow
+   */
+  void ProcessFailedCertDecrypt() OVERRIDE;
+#endif
+
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets pointer for SecurityManager layer for managing protection
@@ -214,6 +225,9 @@ class ProtocolHandlerImpl
   void set_security_manager(
       security_manager::SecurityManager* security_manager);
 #endif  // ENABLE_SECURITY
+
+  void set_service_status_update_handler(
+      std::unique_ptr<ServiceStatusUpdateHandler> handler);
 
   /**
    * \brief Stop all handling activity
@@ -772,6 +786,8 @@ class ProtocolHandlerImpl
 
   sync_primitives::Lock start_session_frame_map_lock_;
   StartSessionFrameMap start_session_frame_map_;
+
+  std::unique_ptr<ServiceStatusUpdateHandler> service_status_update_handler_;
 
   bool tcp_enabled_;
   std::string tcp_port_;
