@@ -1417,7 +1417,7 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
                                  << session_key);
   std::vector<std::string> empty;
 
-  if (type == kRpc) {
+  if (kRpc == type) {
     LOG4CXX_DEBUG(logger_, "RPC service is about to be started.");
     connection_handler().NotifyServiceStartedResult(session_key, true, empty);
     return;
@@ -1444,6 +1444,7 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   } else {
     LOG4CXX_WARN(logger_, "Refuse unknown service");
   }
+
   connection_handler().NotifyServiceStartedResult(session_key, false, empty);
 }
 
@@ -1524,6 +1525,36 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
           type, ServiceType::kMobileNav, ServiceType::kAudio)) {
     StopNaviService(session_key, type);
   }
+}
+
+void ApplicationManagerImpl::ProcessServiceStatusUpdate(
+    const uint32_t connection_key,
+    hmi_apis::Common_ServiceType::eType service_type,
+    hmi_apis::Common_ServiceEvent::eType service_event,
+    utils::Optional<hmi_apis::Common_ServiceUpdateReason::eType>
+        service_update_reason) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  LOG4CXX_DEBUG(logger_,
+                "Processing status update with connection key: "
+                    << connection_key << " service type: " << service_type
+                    << " service_event " << service_event
+                    << " service_update_reason " << service_update_reason);
+
+  const auto app = application(connection_key);
+  auto notification_builder =
+      MessageHelper::ServiceStatusUpdateNotificationBuilder::CreateBuilder(
+          service_type, service_event);
+
+  if (app) {
+    notification_builder.AddAppID(app->app_id());
+  }
+
+  if (service_update_reason) {
+    notification_builder.AddServiceUpdateReason(*service_update_reason);
+  }
+
+  rpc_service_->ManageHMICommand(notification_builder.notification());
 }
 
 void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
@@ -1618,7 +1649,12 @@ bool ApplicationManagerImpl::OnHandshakeDone(
   using namespace helpers;
 
   ApplicationSharedPtr app = application(connection_key);
-  DCHECK_OR_RETURN(app, false);
+  if (!app) {
+    LOG4CXX_WARN(logger_,
+                 "Application for connection key: " << connection_key
+                                                    << " was not found");
+    return false;
+  }
   if (Compare<SSLContext::HandshakeResult, EQ, ONE>(
           result,
           SSLContext::Handshake_Result_CertExpired,
@@ -3361,6 +3397,7 @@ void ApplicationManagerImpl::ProcessReconnection(
 void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!ptu_result) {
+    protocol_handler_->ProcessFailedPTU();
     return;
   }
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
@@ -3368,6 +3405,25 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   };
 
   plugin_manager_->ForEachPlugin(on_app_policy_updated);
+}
+
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
+void ApplicationManagerImpl::OnCertDecryptFinished(const bool decrypt_result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!decrypt_result) {
+    protocol_handler_->ProcessFailedCertDecrypt();
+  }
+}
+
+bool ApplicationManagerImpl::OnCertDecryptFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return false;
+}
+#endif
+
+void ApplicationManagerImpl::OnPTUTimeoutExceeded() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  protocol_handler_->ProcessFailedPTU();
 }
 
 void ApplicationManagerImpl::SendDriverDistractionState(

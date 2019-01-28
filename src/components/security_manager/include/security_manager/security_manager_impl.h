@@ -214,6 +214,16 @@ class SecurityManagerImpl : public SecurityManager,
    */
   static const char* ConfigSection();
 
+  void ProcessFailedPTU() OVERRIDE;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief ProcessFailedCertDecrypt is called to notify listeners that
+   * certificate decryption failed in the external flow
+   */
+  void ProcessFailedCertDecrypt() OVERRIDE;
+#endif
+
  private:
   /**
    * \brief Sends Handshake binary data to mobile application
@@ -279,6 +289,17 @@ class SecurityManagerImpl : public SecurityManager,
    * @param utc_time the current system time.
    */
   void OnSystemTimeArrived(const time_t utc_time) OVERRIDE;
+
+  /**
+   * @brief OnSystemTimeFailed Notify about system request failure
+   */
+  void OnSystemTimeFailed() OVERRIDE;
+
+  /**
+   * @brief ResetPendingSystemTimeRequests resets waiting for system time
+   * requests flag
+   */
+  void ResetPendingSystemTimeRequests();
 
   // Thread that pumps handshake data
   SecurityMessageLoop security_messages_;
