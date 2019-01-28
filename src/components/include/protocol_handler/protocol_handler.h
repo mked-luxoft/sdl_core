@@ -136,6 +136,8 @@ class ProtocolHandler {
       const SessionContext& context,
       std::vector<std::string>& rejected_params) = 0;
 
+  virtual void ProcessFailedPTU() = 0;
+
  protected:
   /**
    * \brief Destructor

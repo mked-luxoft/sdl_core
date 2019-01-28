@@ -1115,6 +1115,10 @@ void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
 #endif  // ENABLE_SECURITY
 }
 
+void ProtocolHandlerImpl::ProcessFailedPTU() {
+  security_manager_->ProcessFailedPTU();
+}
+
 void ProtocolHandlerImpl::OnTransportConfigUpdated(
     const transport_manager::transport_adapter::TransportConfig& configs) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1763,7 +1767,8 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                                            *fullVersion,
                                            context,
                                            packet->protocol_version(),
-                                           start_session_ack_params);
+                                           start_session_ack_params,
+                                           service_status_update_handler_);
 
     security_manager::SSLContext* ssl_context =
         security_manager_->CreateSSLContext(
@@ -1830,7 +1835,11 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     return;
   }
 #endif  // ENABLE_SECURITY
+  const uint32_t connection_key = session_observer_.KeyFromPair(
+      context.connection_id_, context.new_session_id_);
   if (rejected_params.empty()) {
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key, context.service_type_, ServiceStatus::SERVICE_ACCEPTED);
     SendStartSessionAck(context.connection_id_,
                         context.new_session_id_,
                         packet->protocol_version(),
@@ -1840,6 +1849,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                         *fullVersion,
                         *start_session_ack_params);
   } else {
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key,
+        context.service_type_,
+        ServiceStatus::SERVICE_START_FAILED);
     SendStartSessionNAck(context.connection_id_,
                          packet->session_id(),
                          protocol_version,
@@ -2017,6 +2030,11 @@ void ProtocolHandlerImpl::Stop() {
 
   sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
   start_session_frame_map_.clear();
+}
+
+void ProtocolHandlerImpl::set_service_status_update_handler(
+    std::shared_ptr<ServiceStatusUpdateHandler> handler) {
+  service_status_update_handler_ = handler;
 }
 
 #ifdef ENABLE_SECURITY

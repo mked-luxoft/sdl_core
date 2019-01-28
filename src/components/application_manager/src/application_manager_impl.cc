@@ -151,6 +151,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , is_vr_session_strated_(false)
     , hmi_cooperating_(false)
     , is_all_apps_allowed_(true)
+    , is_first_rpc_service_accepted_(false)
     , media_manager_(NULL)
     , hmi_handler_(NULL)
     , connection_handler_(NULL)
@@ -1417,7 +1418,12 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
                                  << session_key);
   std::vector<std::string> empty;
 
-  if (type == kRpc) {
+  if (kRpc == type) {
+    ProcessServiceStatusUpdate(
+        session_key,
+        protocol_handler::GetHMIServiceType(type),
+        hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED,
+        hmi_apis::Common_ServiceUpdateReason::INVALID_ENUM);
     LOG4CXX_DEBUG(logger_, "RPC service is about to be started.");
     connection_handler().NotifyServiceStartedResult(session_key, true, empty);
     return;
@@ -1444,6 +1450,12 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   } else {
     LOG4CXX_WARN(logger_, "Refuse unknown service");
   }
+
+  ProcessServiceStatusUpdate(
+      session_key,
+      protocol_handler::GetHMIServiceType(type),
+      hmi_apis::Common_ServiceEvent::REQUEST_RECEIVED,
+      hmi_apis::Common_ServiceUpdateReason::INVALID_ENUM);
   connection_handler().NotifyServiceStartedResult(session_key, false, empty);
 }
 
@@ -1524,6 +1536,43 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
           type, ServiceType::kMobileNav, ServiceType::kAudio)) {
     StopNaviService(session_key, type);
   }
+}
+
+bool ApplicationManagerImpl::ShouldAddAppIDForService(
+    hmi_apis::Common_ServiceType::eType service_type,
+    hmi_apis::Common_ServiceEvent::eType service_event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (hmi_apis::Common_ServiceType::RPC == service_type &&
+      !is_first_rpc_service_accepted_) {
+    if (hmi_apis::Common_ServiceEvent::REQUEST_ACCEPTED == service_event) {
+      is_first_rpc_service_accepted_ = true;
+    }
+    return false;
+  }
+  return true;
+}
+
+void ApplicationManagerImpl::ProcessServiceStatusUpdate(
+    const uint32_t connection_key,
+    hmi_apis::Common_ServiceType::eType service_type,
+    hmi_apis::Common_ServiceEvent::eType service_event,
+    hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  LOG4CXX_DEBUG(logger_,
+                "Processing status update with connection key: "
+                    << connection_key << " service type: " << service_type
+                    << " service_event " << service_event
+                    << "service_update_reason " << service_update_reason);
+
+  const uint32_t app_id = ShouldAddAppIDForService(service_type, service_event)
+                              ? connection_key
+                              : 0;
+
+  auto notification = MessageHelper::CreateOnServiceStatusUpdateNotification(
+      app_id, service_type, service_event, service_update_reason);
+
+  rpc_service_->ManageHMICommand(notification);
 }
 
 void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
@@ -3361,6 +3410,7 @@ void ApplicationManagerImpl::ProcessReconnection(
 void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!ptu_result) {
+    protocol_handler_->ProcessFailedPTU();
     return;
   }
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
@@ -3368,6 +3418,11 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   };
 
   plugin_manager_->ForEachPlugin(on_app_policy_updated);
+}
+
+void ApplicationManagerImpl::OnPTUTimeoutExceeded() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  protocol_handler_->ProcessFailedPTU();
 }
 
 void ApplicationManagerImpl::SendDriverDistractionState(
