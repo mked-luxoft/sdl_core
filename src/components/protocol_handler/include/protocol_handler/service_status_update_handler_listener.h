@@ -36,6 +36,7 @@
 #include "interfaces/HMI_API.h"
 #include "protocol_handler/protocol_handler.h"
 #include "transport_manager/transport_manager.h"
+#include "utils/optional.h"
 
 namespace protocol_handler {
 /**
@@ -67,7 +68,8 @@ class ServiceStatusUpdateHandlerListener {
       const uint32_t connection_key,
       hmi_apis::Common_ServiceType::eType service_type,
       hmi_apis::Common_ServiceEvent::eType service_event,
-      hmi_apis::Common_ServiceUpdateReason::eType service_update_reason) = 0;
+      utils::Optional<hmi_apis::Common_ServiceUpdateReason::eType>
+          service_update_reason) = 0;
 };
 
 }  // namespace protocol_handler
