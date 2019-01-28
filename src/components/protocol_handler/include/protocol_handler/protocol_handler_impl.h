@@ -52,12 +52,9 @@
 #include "protocol_handler/incoming_data_handler.h"
 #include "protocol_handler/multiframe_builder.h"
 #include "protocol_handler/protocol_handler.h"
-#include "protocol_handler/protocol_handler_settings.h"
-#include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/session_observer.h"
 #include "transport_manager/common.h"
-#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 
@@ -210,6 +207,16 @@ class ProtocolHandlerImpl
 
   void RemoveProtocolObserver(ProtocolObserver* observer) OVERRIDE;
 
+  void ProcessFailedPTU() OVERRIDE;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief ProcessFailedCertDecrypt is called to notify security manager that
+   * certificate decryption failed in the external flow
+   */
+  void ProcessFailedCertDecrypt() OVERRIDE;
+#endif
+
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets pointer for SecurityManager layer for managing protection
@@ -219,6 +226,9 @@ class ProtocolHandlerImpl
   void set_security_manager(
       security_manager::SecurityManager* security_manager);
 #endif  // ENABLE_SECURITY
+
+  void set_service_status_update_handler(
+      std::unique_ptr<ServiceStatusUpdateHandler> handler);
 
   /**
    * \brief Stop all handling activity
@@ -275,7 +285,7 @@ class ProtocolHandlerImpl
                       uint8_t session_id,
                       uint8_t service_type);
 
-  void NotifyOnFailedHandshake() OVERRIDE;
+  void NotifyOnGetSystemTimeFailed() OVERRIDE;
 
   // TODO(Ezamakhov): move Ack/Nack as interface for StartSessionHandler
   /**
@@ -784,6 +794,8 @@ class ProtocolHandlerImpl
 
   sync_primitives::Lock start_session_frame_map_lock_;
   StartSessionFrameMap start_session_frame_map_;
+
+  std::unique_ptr<ServiceStatusUpdateHandler> service_status_update_handler_;
 
   // Map policy app id -> auth token
   sync_primitives::Lock auth_token_map_lock_;
