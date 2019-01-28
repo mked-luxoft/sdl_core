@@ -28,47 +28,57 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
     const protocol_handler::ServiceType service_type,
     ServiceStatus service_status) {
   using namespace hmi_apis;
+  typedef utils::Optional<Common_ServiceUpdateReason::eType>
+      UpdateReasonOptional;
   auto hmi_service_type = GetHMIServiceType(service_type);
-  Common_ServiceEvent::eType service_event;
-  Common_ServiceUpdateReason::eType service_update_reason;
 
   switch (service_status) {
     case ServiceStatus::SERVICE_RECEIVED: {
-      service_event = Common_ServiceEvent::REQUEST_RECEIVED;
-      service_update_reason = Common_ServiceUpdateReason::INVALID_ENUM;
-      break;
+      return listener_->ProcessServiceStatusUpdate(
+          connection_key,
+          hmi_service_type,
+          Common_ServiceEvent::REQUEST_RECEIVED,
+          UpdateReasonOptional(UpdateReasonOptional::EMPTY));
     }
     case ServiceStatus::SERVICE_ACCEPTED: {
-      service_event = Common_ServiceEvent::REQUEST_ACCEPTED;
-      service_update_reason = Common_ServiceUpdateReason::INVALID_ENUM;
-      break;
+      return listener_->ProcessServiceStatusUpdate(
+          connection_key,
+          hmi_service_type,
+          Common_ServiceEvent::REQUEST_ACCEPTED,
+          UpdateReasonOptional(UpdateReasonOptional::EMPTY));
     }
     case ServiceStatus::SERVICE_START_FAILED: {
-      service_event = Common_ServiceEvent::REQUEST_REJECTED;
-      service_update_reason = Common_ServiceUpdateReason::INVALID_ENUM;
-      break;
+      return listener_->ProcessServiceStatusUpdate(
+          connection_key,
+          hmi_service_type,
+          Common_ServiceEvent::REQUEST_REJECTED,
+          UpdateReasonOptional(UpdateReasonOptional::EMPTY));
     }
     case ServiceStatus::PTU_FAILED: {
-      service_event = Common_ServiceEvent::REQUEST_REJECTED;
-      service_update_reason = Common_ServiceUpdateReason::PTU_FAILED;
-      break;
+      auto update_reason = Common_ServiceUpdateReason::PTU_FAILED;
+      return listener_->ProcessServiceStatusUpdate(
+          connection_key,
+          hmi_service_type,
+          Common_ServiceEvent::REQUEST_REJECTED,
+          update_reason);
     }
     case ServiceStatus::CERT_INVALID: {
-      service_event = Common_ServiceEvent::REQUEST_REJECTED;
-      service_update_reason = Common_ServiceUpdateReason::INVALID_CERT;
-      break;
+      auto update_reason = Common_ServiceUpdateReason::INVALID_CERT;
+      return listener_->ProcessServiceStatusUpdate(
+          connection_key,
+          hmi_service_type,
+          Common_ServiceEvent::REQUEST_REJECTED,
+          update_reason);
     }
     case ServiceStatus::INVALID_TIME: {
-      service_event = Common_ServiceEvent::REQUEST_REJECTED;
-      service_update_reason = Common_ServiceUpdateReason::INVALID_TIME;
-      break;
+      auto update_reason = Common_ServiceUpdateReason::INVALID_TIME;
+      return listener_->ProcessServiceStatusUpdate(
+          connection_key,
+          hmi_service_type,
+          Common_ServiceEvent::REQUEST_REJECTED,
+          update_reason);
     }
-    default: { 
-      return; 
-    }
+    default: { return; }
   }
-
-  listener_->ProcessServiceStatusUpdate(
-      connection_key, hmi_service_type, service_event, service_update_reason);
 }
 }  // namespace protocol_handler
