@@ -50,6 +50,7 @@ class MockSecurityManagerListener
   MOCK_METHOD0(OnCertificateUpdateRequired, void());
   MOCK_CONST_METHOD1(GetPolicyCertificateData, bool(std::string& data));
   MOCK_METHOD0(OnHandshakeFailed, bool());
+  MOCK_METHOD0(OnPTUFailed, void());
 };
 }  // namespace security_manager_test
 }  // namespace components
