@@ -1588,6 +1588,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       std::find(audio_transports.begin(), audio_transports.end(), transport) !=
           audio_transports.end();
 
+  const uint32_t connection_key = session_observer_.KeyFromPair(
+      packet->connection_id(), packet->session_id());
+
+  service_status_update_handler_->OnServiceUpdate(
+      connection_key, service_type, ServiceStatus::SERVICE_RECEIVED);
+
   if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
       (ServiceType::kAudio == service_type && !is_audio_allowed)) {
     LOG4CXX_DEBUG(logger_,
