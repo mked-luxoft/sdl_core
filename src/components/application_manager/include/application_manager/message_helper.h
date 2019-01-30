@@ -89,37 +89,9 @@ class MessageHelper {
       hmi_apis::FunctionID::eType function_id);
 
   /**
-   * @brief CreateOnServiceStatusUpdateNotification creates on status update hmi
-   * notification smart object
-   * @param app_id - application id
-   * @param service_type - enum value representing service_type
-   * @param service_event - enum value representing service update event
-   * @return smart object containing on status update notification
-   */
-  static smart_objects::SmartObjectSPtr CreateOnServiceStatusUpdateNotification(
-      const uint32_t app_id,
-      const hmi_apis::Common_ServiceType::eType service_type,
-      const hmi_apis::Common_ServiceEvent::eType service_event);
-
-  /**
-   * @brief CreateOnServiceStatusUpdateNotification creates on status update hmi
-   * notification smart object
-   * @param app_id - application id
-   * @param service_type - enum value representing service_type
-   * @param service_event - enum value representing service update event
-   * @param service_event_reason - enum value representing service update reason
-   * @return smart object containing on status update notification
-   */
-  static smart_objects::SmartObjectSPtr CreateOnServiceStatusUpdateNotification(
-      const uint32_t app_id,
-      const hmi_apis::Common_ServiceType::eType service_type,
-      const hmi_apis::Common_ServiceEvent::eType service_event,
-      const hmi_apis::Common_ServiceUpdateReason::eType service_update_reason);
-
-  /**
-   * @brief ServiceStatusUpdateNotificationBuilder small utility class used for
-   * more flexible construction of OnServiceUpdateNotification
-   */
+    * @brief ServiceStatusUpdateNotificationBuilder small utility class used for
+    * more flexible construction of OnServiceUpdateNotification
+    */
   class ServiceStatusUpdateNotificationBuilder {
    public:
     typedef hmi_apis::Common_ServiceType::eType ServiceType;

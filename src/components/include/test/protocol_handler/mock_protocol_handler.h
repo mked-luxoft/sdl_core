@@ -67,6 +67,7 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
                void(const ::protocol_handler::SessionContext& context,
                     std::vector<std::string>& rejected_params));
   MOCK_METHOD0(NotifyOnFailedHandshake, void());
+  MOCK_METHOD0(ProcessFailedPTU, void());
 };
 }  // namespace protocol_handler_test
 }  // namespace components
