@@ -111,7 +111,11 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
    * @brief Performs related actions if handshake was failed
    * @param params set of params used in bson part of message
    */
-  void ProcessFailedHandshake(BsonObject& params);
+  void ProcessFailedHandshake(BsonObject& params, ServiceStatus service_status);
+
+  bool CanBeProtected() const;
+
+  bool IsAlreadyProtected() const;
 
   ProtocolHandlerImpl& protocol_handler_;
   SessionObserver& session_observer_;
