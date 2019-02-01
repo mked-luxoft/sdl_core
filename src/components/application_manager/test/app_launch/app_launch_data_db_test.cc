@@ -99,14 +99,14 @@ class AppLaunchDataDBTest : public ::testing::Test {
     }
 #else
     res_db_.reset(
-              new AppLaunchDataDB(mock_app_launch_settings_, In_File_Storage));
-#endif //__QNX__
+        new AppLaunchDataDB(mock_app_launch_settings_, In_File_Storage));
+#endif  //__QNX__
     test_db_ = (res_db_->db());
 
     EXPECT_TRUE(test_db()->Open());
 #ifndef __QNX__
     EXPECT_TRUE(test_db()->IsReadWrite());
-#endif //__QNX__
+#endif  //__QNX__
   }
 
   // Memory keep and clear AppLaunchDataDb

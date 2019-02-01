@@ -47,19 +47,19 @@ typedef std::vector<std::string> StringArray;
 using namespace file_system;
 
 namespace {
-  void createTestSubdirectory(const std::string& path){
-    ASSERT_FALSE(DirectoryExists(path));
-    CreateDirectoryRecursively(path);
-    ASSERT_TRUE(DirectoryExists(path));
-    ASSERT_TRUE(IsDirectory(path));
-  }
+void createTestSubdirectory(const std::string& path) {
+  ASSERT_FALSE(DirectoryExists(path));
+  CreateDirectoryRecursively(path);
+  ASSERT_TRUE(DirectoryExists(path));
+  ASSERT_TRUE(IsDirectory(path));
+}
 
-  void removeTestSubdirectory(const std::string& path){
-    ASSERT_TRUE(DirectoryExists(path));
-    ASSERT_TRUE(IsDirectory(path));
-    RemoveDirectory(path, true);
-    ASSERT_FALSE(DirectoryExists(path));
-  }
+void removeTestSubdirectory(const std::string& path) {
+  ASSERT_TRUE(DirectoryExists(path));
+  ASSERT_TRUE(IsDirectory(path));
+  RemoveDirectory(path, true);
+  ASSERT_FALSE(DirectoryExists(path));
+}
 }
 
 TEST(FileSystemTest, CreateDeleteDirectory) {
@@ -1212,8 +1212,8 @@ TEST(FileSystemTest,
 
 TEST(FileSystemTest, GetAbsolutePath_ValidRelPaths_CorrectAbsolutePath) {
   // Array of relative dirs
-  const StringArray rel_path = {
-      "first_level_path", "first_level_path/second_level_path1"};
+  const StringArray rel_path = {"first_level_path",
+                                "first_level_path/second_level_path1"};
 
   // Create some directories in current
   CreateDirectoryRecursively(rel_path[1]);
@@ -1237,8 +1237,8 @@ TEST(FileSystemTest, GetAbsolutePath_ValidRelPaths_CorrectAbsolutePath) {
 TEST(FileSystemTest,
      GetAbsolutePath_ValidRelPathsFromParrentDir_CorrectAbsolutePath) {
   // Array of relative dirs
-  const StringArray rel_path = {
-      "../first_level_path", "../first_level_path/second_level_path1"};
+  const StringArray rel_path = {"../first_level_path",
+                                "../first_level_path/second_level_path1"};
 
   // Create some directories in parrent of this
   CreateDirectoryRecursively(rel_path[1]);
@@ -1266,11 +1266,10 @@ TEST(FileSystemTest, GetAbsolutePath_TrickiPath_CorrectAbsolutePath) {
   createTestSubdirectory("./test/a/b");
 
   // Array of relative dirs
-  const StringArray rel_path =
-      {"./test/1/../a/b/../../1/2/../../../",
-      ".",
-      "./test/../",
-      "./test/1/2/../../../"};
+  const StringArray rel_path = {"./test/1/../a/b/../../1/2/../../../",
+                                ".",
+                                "./test/../",
+                                "./test/1/2/../../../"};
 
   const std::string& absolute_current_path = CurrentWorkingDirectory();
   for (size_t i = 0; i < rel_path.size(); ++i) {

@@ -454,7 +454,8 @@ TEST_F(TestHelper, AssignmentTest) {
   objSrc = 0.5;
   objDst = 4;
   objDst = objSrc;
-  ASSERT_DOUBLE_EQ(0.5, objDst.asDouble()) << "Wrong assignment for double object";
+  ASSERT_DOUBLE_EQ(0.5, objDst.asDouble())
+      << "Wrong assignment for double object";
 
   objSrc = true;
   objDst = false;

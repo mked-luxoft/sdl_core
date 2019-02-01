@@ -42,7 +42,7 @@ namespace utils {
 namespace dbms {
 
 class SQLQuery;
-enum class StorageType {IN_MEMORY};
+enum class StorageType { IN_MEMORY };
 /**
  * Represents a connection to a database.
  */

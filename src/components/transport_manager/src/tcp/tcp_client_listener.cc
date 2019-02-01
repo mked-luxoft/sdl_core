@@ -302,7 +302,9 @@ void TcpClientListener::Loop() {
 
 #if defined(BUILD_TESTS)
       auto tcp_device = std::make_shared<TcpDevice>(
-          static_cast<in_addr_t>(client_address.sin_addr.s_addr), device_uid, device_name);
+          static_cast<in_addr_t>(client_address.sin_addr.s_addr),
+          device_uid,
+          device_name);
 #else
       auto tcp_device = std::make_shared<TcpDevice>(
           static_cast<in_addr_t>(client_address.sin_addr.s_addr), device_uid);

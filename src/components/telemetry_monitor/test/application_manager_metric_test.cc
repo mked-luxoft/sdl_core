@@ -118,10 +118,12 @@ TEST(ApplicationManagerMetricWrapper, GetJsonMetricWithGrabResources) {
   EXPECT_EQ(date_time::getuSecs(end_time),
             jvalue[telemetry_monitor::strings::end].asInt64());
 
-  EXPECT_EQ(resources->stime, jvalue[telemetry_monitor::strings::stime].asInt64());
-  EXPECT_EQ(resources->utime, jvalue[telemetry_monitor::strings::utime].asInt64());
-  EXPECT_EQ(resources->memory, jvalue[telemetry_monitor::strings::memory].asInt64());
-
+  EXPECT_EQ(resources->stime,
+            jvalue[telemetry_monitor::strings::stime].asInt64());
+  EXPECT_EQ(resources->utime,
+            jvalue[telemetry_monitor::strings::utime].asInt64());
+  EXPECT_EQ(resources->memory,
+            jvalue[telemetry_monitor::strings::memory].asInt64());
 }
 
 }  // namespace telemetry_monitor_test

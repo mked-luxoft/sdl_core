@@ -1567,7 +1567,7 @@ TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   reps.RemoveDB();
   // Check
   EXPECT_FALSE(file_system::FileExists(path));
-#endif //__QNX__
+#endif  //__QNX__
 }
 
 TEST_F(SQLPTRepresentationTest,

@@ -131,9 +131,9 @@ bool ResumptionDataDB::Init() {
   }
   if (0 == query_checks_resumption.GetInteger(0)) {
     if (!query.Exec(kInsertInitData)) {
-      LOG4CXX_ERROR(logger_,
-                    "Failed insert init data to database: "
-                        << query.LastError().text());
+      LOG4CXX_ERROR(
+          logger_,
+          "Failed insert init data to database: " << query.LastError().text());
       return false;
     }
   }

@@ -52,7 +52,8 @@ AppLaunchDataDB::AppLaunchDataDB(const AppLaunchSettings& settings,
       db()->set_path(path + "/");
     }
   } else if (db_storage == In_Memory_Storage) {
-    db_.reset(new utils::dbms::SQLDatabase(utils::dbms::StorageType::IN_MEMORY));
+    db_.reset(
+        new utils::dbms::SQLDatabase(utils::dbms::StorageType::IN_MEMORY));
 #endif  // __QNX__
     DCHECK(db_.get());
   } else {

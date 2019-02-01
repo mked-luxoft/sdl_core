@@ -2036,7 +2036,7 @@ bool SQLPTRepresentation::SetIsDefault(const std::string& app_id,
 void SQLPTRepresentation::RemoveDB() const {
 #ifndef __QNX__
   file_system::DeleteFile(db_->get_path());
-#endif //__QNX__
+#endif  //__QNX__
 }
 
 bool SQLPTRepresentation::IsDBVersionActual() const {

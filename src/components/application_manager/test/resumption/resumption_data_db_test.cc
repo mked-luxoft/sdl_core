@@ -85,7 +85,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     EXPECT_TRUE(query.Exec());
 #else
     EXPECT_TRUE(query.Exec(remove_all_tables));
-#endif //__QNX__
+#endif  //__QNX__
   }
 
   static void SetUpTestCase() {
@@ -109,7 +109,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     test_db_ = new utils::dbms::SQLDatabase(kDatabaseName);
     res_db_ = new TestResumptionDataDB(In_File_Storage);
     ASSERT_TRUE(test_db_->Open());
-#endif //__QNX__
+#endif  //__QNX__
   }
 
   static utils::dbms::SQLDatabase* test_db_;

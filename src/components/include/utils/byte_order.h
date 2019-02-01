@@ -41,7 +41,7 @@ The ENDIAN_SWAP32() macro endian-swaps the value pointed to by num
 in place. Therefore, copying is necessary so as not to damage the
 original data.
 */
-#define BYTE_SWAP_32 [](uint32_t tmp){return ENDIAN_SWAP32(&tmp);}
+#define BYTE_SWAP_32 [](uint32_t tmp) { return ENDIAN_SWAP32(&tmp); }
 #else
 #include <byteswap.h>
 #define BYTE_SWAP_32(x) bswap_32(x)
