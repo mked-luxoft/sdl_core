@@ -295,6 +295,7 @@ TEST_F(
   EXPECT_FALSE(obj.CompareIgnoreCase(CustomStringTest::mbstring2_.c_str()));
 }
 
+#ifndef __QNX__
 TEST_F(
     CustomStringTest,
     AddSameMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
@@ -313,7 +314,7 @@ TEST_F(
   EXPECT_TRUE(obj.CompareIgnoreCase(obj1));
   EXPECT_TRUE(obj.CompareIgnoreCase(mbstring.c_str()));
 }
-
+#endif //__QNX_
 }  // namespace utils_test
 }  // namespace components
 }  // namespace test

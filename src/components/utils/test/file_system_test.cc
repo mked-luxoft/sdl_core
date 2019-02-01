@@ -47,16 +47,19 @@ typedef std::vector<std::string> StringArray;
 using namespace file_system;
 
 namespace {
-StringArray MergeStringsToArray(const std::string& first,
-                                const std::string& second) {
-  StringArray array_of_strings;
-  array_of_strings.reserve(2);
+  void createTestSubdirectory(const std::string& path){
+    ASSERT_FALSE(DirectoryExists(path));
+    CreateDirectoryRecursively(path);
+    ASSERT_TRUE(DirectoryExists(path));
+    ASSERT_TRUE(IsDirectory(path));
+  }
 
-  array_of_strings.push_back(first);
-  array_of_strings.push_back(second);
-
-  return array_of_strings;
-}
+  void removeTestSubdirectory(const std::string& path){
+    ASSERT_TRUE(DirectoryExists(path));
+    ASSERT_TRUE(IsDirectory(path));
+    RemoveDirectory(path, true);
+    ASSERT_FALSE(DirectoryExists(path));
+  }
 }
 
 TEST(FileSystemTest, CreateDeleteDirectory) {
@@ -1198,7 +1201,7 @@ TEST(FileSystemTest, GetAbsolutePath) {
 TEST(FileSystemTest,
      GetAbsolutePath_InvalidOrEmptyPathName_EmptyAbsolutePathName) {
   // Array of invalid paths
-  const StringArray rel_path = MergeStringsToArray("not_exists_dir", "     ");
+  const StringArray rel_path = {"not_exists_dir", "     "};
 
   // Check
   for (size_t i = 0; i < rel_path.size(); ++i) {
@@ -1209,8 +1212,8 @@ TEST(FileSystemTest,
 
 TEST(FileSystemTest, GetAbsolutePath_ValidRelPaths_CorrectAbsolutePath) {
   // Array of relative dirs
-  const StringArray rel_path = MergeStringsToArray(
-      "first_level_path", "first_level_path/second_level_path1");
+  const StringArray rel_path = {
+      "first_level_path", "first_level_path/second_level_path1"};
 
   // Create some directories in current
   CreateDirectoryRecursively(rel_path[1]);
@@ -1234,8 +1237,8 @@ TEST(FileSystemTest, GetAbsolutePath_ValidRelPaths_CorrectAbsolutePath) {
 TEST(FileSystemTest,
      GetAbsolutePath_ValidRelPathsFromParrentDir_CorrectAbsolutePath) {
   // Array of relative dirs
-  const StringArray rel_path = MergeStringsToArray(
-      "../first_level_path", "../first_level_path/second_level_path1");
+  const StringArray rel_path = {
+      "../first_level_path", "../first_level_path/second_level_path1"};
 
   // Create some directories in parrent of this
   CreateDirectoryRecursively(rel_path[1]);
@@ -1259,10 +1262,15 @@ TEST(FileSystemTest,
 }
 
 TEST(FileSystemTest, GetAbsolutePath_TrickiPath_CorrectAbsolutePath) {
+  createTestSubdirectory("./test/1/2");
+  createTestSubdirectory("./test/a/b");
+
   // Array of relative dirs
   const StringArray rel_path =
-      MergeStringsToArray("../src/../../application_manager/../utils/test",
-                          "../../../components/utils/test");
+      {"./test/1/../a/b/../../1/2/../../../",
+      ".",
+      "./test/../",
+      "./test/1/2/../../../"};
 
   const std::string& absolute_current_path = CurrentWorkingDirectory();
   for (size_t i = 0; i < rel_path.size(); ++i) {
@@ -1270,6 +1278,8 @@ TEST(FileSystemTest, GetAbsolutePath_TrickiPath_CorrectAbsolutePath) {
     const std::string& path_for_check = GetAbsolutePath(rel_path[i]);
     EXPECT_EQ(absolute_current_path, path_for_check);
   }
+
+  removeTestSubdirectory("./test");
 }
 
 }  // namespace utils_test

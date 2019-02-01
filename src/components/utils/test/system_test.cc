@@ -113,9 +113,9 @@ TEST(SystemTest,
 
 TEST(SystemTest, ASynchronousInvokeEmptyCommand_InvokeSuccessfull) {
   const std::string test_command(
-      "");  // Possible to put here any command (existing or incorrect)
+      "echo");  // Possible to put here any command (existing or incorrect)
   const std::string test_list_args(
-      "anything");  // as command will never be executed from child process
+      "Hello, SmartDeviceLink!");  // as command will never be executed from child process
   System object(test_command, test_list_args);  // as parrent process does not
                                                 // wait for child process to be
                                                 // finished

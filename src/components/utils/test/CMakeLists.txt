@@ -103,8 +103,9 @@ set(LIBRARIES
 )
 
 create_test(utils_test "${SOURCES}" "${LIBRARIES}")
-
+   
 file(COPY testscript.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY testscript.sh DESTINATION ${TEST_BIN_DIR})
 file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
