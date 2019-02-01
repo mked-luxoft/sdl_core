@@ -30,34 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/hmi/on_service_status_update_notification.h"
+#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_MOCK_SERVICE_STATUS_UPDATE_HANDLER_LISTENER_H
+#define SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_MOCK_SERVICE_STATUS_UPDATE_HANDLER_LISTENER_H
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
+#include "gmock/gmock.h"
+#include "protocol_handler/service_status_update_handler_listener.h"
 
-namespace commands {
+namespace test {
+namespace components {
+namespace protocol_handler_test {
 
-namespace hmi {
+class MockServiceStatusUpdateHandlerListener
+    : public protocol_handler::ServiceStatusUpdateHandlerListener {
+ public:
+  MOCK_METHOD4(
+      ProcessServiceStatusUpdate,
+      void(const uint32_t,
+           hmi_apis::Common_ServiceType::eType,
+           hmi_apis::Common_ServiceEvent::eType,
+           utils::Optional<hmi_apis::Common_ServiceUpdateReason::eType>));
+};
+}  // namespace protocol_handler_test
+}  // namespace components
+}  // namespace test
 
-OnServiceStatusUpdateNotification::OnServiceStatusUpdateNotification(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : NotificationToHMI(message,
-                        application_manager,
-                        rpc_service,
-                        hmi_capabilities,
-                        policy_handle) {}
-
-OnServiceStatusUpdateNotification::~OnServiceStatusUpdateNotification() {}
-
-void OnServiceStatusUpdateNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  SendNotification();
-}
-
-}  // namespace hmi
-}  // namespace commands
-}  // namespace application_manager
+#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_MOCK_SERVICE_STATUS_UPDATE_HANDLER_LISTENER_H

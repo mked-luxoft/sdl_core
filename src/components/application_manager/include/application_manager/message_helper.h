@@ -128,7 +128,7 @@ class MessageHelper {
      */
     smart_objects::SmartObjectSPtr notification() const;
 
-   private:
+   protected:
     smart_objects::SmartObjectSPtr notification_;
 
     /**
@@ -142,7 +142,7 @@ class MessageHelper {
     /**
      * @brief class constructor
      */
-    ServiceStatusUpdateNotificationBuilder() = delete;
+    ServiceStatusUpdateNotificationBuilder(){};
   };
 
   /**

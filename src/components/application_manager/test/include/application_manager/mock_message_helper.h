@@ -309,8 +309,12 @@ class MockMessageHelper {
                     ApplicationSharedPtr application,
                     ApplicationManager& app_mngr));
 
-  class MockServiceStatusUpdateNotificationBuilder {
+  class MockServiceStatusUpdateNotificationBuilder
+      : public MessageHelper::ServiceStatusUpdateNotificationBuilder {
    public:
+    MockServiceStatusUpdateNotificationBuilder(
+        const MockServiceStatusUpdateNotificationBuilder& obj){};
+    MockServiceStatusUpdateNotificationBuilder(){};
     MOCK_METHOD2(CreateBuilder,
                  MessageHelper::ServiceStatusUpdateNotificationBuilder(
                      hmi_apis::Common_ServiceType::eType,
