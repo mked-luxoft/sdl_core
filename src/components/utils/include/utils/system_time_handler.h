@@ -50,6 +50,8 @@ class SystemTimeListener {
    * @param utc_time current system time.
    */
   virtual void OnSystemTimeArrived(const time_t utc_time) = 0;
+
+  virtual void OnSystemTimeFailed() = 0;
 };
 
 /**
