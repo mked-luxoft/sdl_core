@@ -98,6 +98,8 @@ class SystemTimeHandler {
    */
   time_t GetUTCTime();
 
+  virtual void ResetPendingSystemTimeRequests() = 0;
+
   /**
    * @brief Checks if system time is ready
    * and can be requested by GetSystemTime request

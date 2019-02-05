@@ -284,6 +284,8 @@ class SecurityManagerImpl : public SecurityManager,
 
   void OnSystemTimeFailed() OVERRIDE;
 
+  void ResetPendingSystemTimeRequests();
+
   // Thread that pumps handshake data
   SecurityMessageLoop security_messages_;
 

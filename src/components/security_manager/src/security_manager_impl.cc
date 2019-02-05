@@ -460,6 +460,10 @@ void SecurityManagerImpl::NotifyOnCertificateUpdateRequired() {
   }
 }
 
+void SecurityManagerImpl::ResetPendingSystemTimeRequests() {
+  system_time_handler_->ResetPendingSystemTimeRequests();
+}
+
 void SecurityManagerImpl::NotifyListenersOnHandshakeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();

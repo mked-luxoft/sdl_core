@@ -1110,6 +1110,7 @@ void ProtocolHandlerImpl::OnUnexpectedDisconnect(
 
 void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
   LOG4CXX_AUTO_TRACE(logger_);
+  security_manager_->ResetPendingSystemTimeRequests();
 #ifdef ENABLE_SECURITY
   security_manager_->NotifyListenersOnHandshakeFailed();
 #endif  // ENABLE_SECURITY
@@ -1805,7 +1806,11 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     } else if (ssl_context->IsInitCompleted()) {
       // mark service as protected
       session_observer_.SetProtectionFlag(connection_key, service_type);
-      // Start service as protected with current SSLContext
+      // Start service as protected with current SSLContext+
+      service_status_update_handler_->OnServiceUpdate(
+          connection_key,
+          context.service_type_,
+          ServiceStatus::SERVICE_ACCEPTED);
       SendStartSessionAck(context.connection_id_,
                           context.new_session_id_,
                           packet->protocol_version(),
