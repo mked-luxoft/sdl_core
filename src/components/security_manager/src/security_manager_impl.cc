@@ -213,6 +213,13 @@ void SecurityManagerImpl::ResumeHandshake(uint32_t connection_key) {
     return;
   }
 
+  LOG4CXX_DEBUG(logger_,
+                "Connection key : "
+                    << connection_key
+                    << " is waiting for certificate: " << std::boolalpha
+                    << waiting_for_certificate_ << " and has certificate: "
+                    << ssl_context->HasCertificate());
+
   ssl_context->ResetConnection();
   if (!waiting_for_certificate_ && !ssl_context->HasCertificate()) {
     NotifyListenersOnHandshakeDone(connection_key,
@@ -228,6 +235,15 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
   LOG4CXX_INFO(logger_, "StartHandshake: connection_key " << connection_key);
   security_manager::SSLContext* ssl_context = session_observer_->GetSSLContext(
       connection_key, protocol_handler::kControl);
+
+  LOG4CXX_DEBUG(logger_,
+                "HasCertificate: " << std::boolalpha
+                                   << ssl_context->HasCertificate());
+
+  LOG4CXX_DEBUG(logger_,
+                "IsInitied: " << std::boolalpha
+                              << ssl_context->IsInitCompleted());
+
   if (!ssl_context) {
     const std::string error_text(
         "StartHandshake failed, "
@@ -271,6 +287,14 @@ void SecurityManagerImpl::ProceedHandshake(
   if (ssl_context->IsInitCompleted()) {
     NotifyListenersOnHandshakeDone(connection_key,
                                    SSLContext::Handshake_Result_Success);
+    return;
+  }
+
+  if (waiting_for_certificate_ && !ssl_context->HasCertificate()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Still watiting for certificate for connection key: "
+                      << connection_key);
+    PostponeHandshake(connection_key);
     return;
   }
 
@@ -385,6 +409,18 @@ void SecurityManagerImpl::OnSystemTimeArrived(const time_t utc_time) {
       awaiting_time_connections_.begin(),
       awaiting_time_connections_.end(),
       std::bind1st(std::mem_fun(&SecurityManagerImpl::ResumeHandshake), this));
+
+  awaiting_time_connections_.clear();
+}
+
+void SecurityManagerImpl::OnSystemTimeFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  {
+    sync_primitives::AutoLock lock(waiters_lock_);
+    waiting_for_time_ = false;
+  }
+
+  NotifyListenersOnHandshakeFailed();
 
   awaiting_time_connections_.clear();
 }

@@ -282,6 +282,8 @@ class SecurityManagerImpl : public SecurityManager,
    */
   void OnSystemTimeArrived(const time_t utc_time) OVERRIDE;
 
+  void OnSystemTimeFailed() OVERRIDE;
+
   // Thread that pumps handshake data
   SecurityMessageLoop security_messages_;
 

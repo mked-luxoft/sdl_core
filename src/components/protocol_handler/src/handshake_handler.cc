@@ -95,9 +95,10 @@ bool HandshakeHandler::OnHandshakeFailed() {
 }
 
 void HandshakeHandler::OnPTUFailed() {
-  service_status_update_handler_.OnServiceUpdate(this->connection_key(),
-                                                 context_.service_type_,
-                                                 ServiceStatus::PTU_FAILED);
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (payload_) {
+    ProcessFailedHandshake(*payload_, ServiceStatus::PTU_FAILED);
+  }
 }
 
 bool HandshakeHandler::OnHandshakeDone(
