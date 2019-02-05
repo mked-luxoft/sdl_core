@@ -129,6 +129,8 @@ class SystemTimeHandlerImpl : public utils::SystemTimeHandler,
    */
   void ProcessSystemTimeReadyNotification();
 
+  void ResetPendingSystemTimeRequests() OVERRIDE;
+
   /**
    * @brief Checks if UTC time is ready to provided by HMI
    * and can be requested by GetSystemTime request

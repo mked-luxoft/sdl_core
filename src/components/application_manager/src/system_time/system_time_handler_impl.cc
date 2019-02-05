@@ -80,6 +80,13 @@ void SystemTimeHandlerImpl::DoSubscribe(utils::SystemTimeListener* listener) {
   system_time_listener_ = listener;
 }
 
+void SystemTimeHandlerImpl::ResetPendingSystemTimeRequests() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  unsubscribe_from_event(
+      hmi_apis::FunctionID::BasicCommunication_GetSystemTime);
+  awaiting_get_system_time_ = false;
+}
+
 void SystemTimeHandlerImpl::DoUnsubscribe(utils::SystemTimeListener* listener) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(system_time_listener_lock_);
