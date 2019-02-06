@@ -1741,6 +1741,7 @@ void PolicyHandler::OnCertificateDecrypted(bool is_succeeded) {
 
   if (!is_succeeded) {
     LOG4CXX_ERROR(logger_, "Couldn't delete file " << file_name);
+    OnPTUFinished(false);
     return;
   }
 
