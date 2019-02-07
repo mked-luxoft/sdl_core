@@ -403,9 +403,12 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnCertificateUpdated(
       const std::string& certificate_data) OVERRIDE;
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   void OnCertificateDecrypted(bool is_succeeded) OVERRIDE;
+  void OnCertDecryptFinished(const bool decrypt_result) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
+
   virtual bool CanUpdate() OVERRIDE;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,

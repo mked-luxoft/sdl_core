@@ -1741,7 +1741,7 @@ void PolicyHandler::OnCertificateDecrypted(bool is_succeeded) {
 
   if (!is_succeeded) {
     LOG4CXX_ERROR(logger_, "Couldn't delete file " << file_name);
-    OnPTUFinished(false);
+    OnCertDecryptFinished(false);
     return;
   }
 
@@ -1763,6 +1763,18 @@ void PolicyHandler::OnCertificateDecrypted(bool is_succeeded) {
       listeners_.end(),
       std::bind2nd(std::mem_fun(&PolicyHandlerObserver::OnCertificateUpdated),
                    certificate_data));
+}
+
+void PolicyHandler::OnCertDecryptFinished(const bool decrypt_result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(listeners_lock_);
+
+  std::for_each(
+      listeners_.begin(),
+      listeners_.end(),
+      std::bind2nd(std::mem_fun(&PolicyHandlerObserver::OnCertDecryptFinished),
+                   decrypt_result));
+
 }
 #else   // EXTERNAL_PROPRIETARY_MODE
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {

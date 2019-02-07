@@ -138,6 +138,10 @@ class ProtocolHandler {
 
   virtual void ProcessFailedPTU() = 0;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  virtual void ProcessFailedCertDecrypt() = 0;
+#endif
+
  protected:
   /**
    * \brief Destructor

@@ -88,9 +88,13 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
   /**
    * @brief Notification that certificate update is required.
    */
-  void OnCertificateUpdateRequired() OVERRIDE;
+  void OnCertificateUpdateRequired() OVERRIDE;  
 
   void OnPTUFailed() OVERRIDE;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  void OnCertDecryptFailed() OVERRIDE;
+#endif
 
   /**
    * @brief Get connection key of this handler

@@ -511,6 +511,11 @@ class ApplicationManagerImpl
    */
   void OnPTUFinished(const bool ptu_result) FINAL;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  void OnCertDecryptFailed() FINAL{}
+  void OnCertDecryptFinished(const bool decrypt_result) FINAL;
+#endif
+
   /**
    * @brief OnPTUTimeoutExceeded is called on policy table update timed out
    */
