@@ -1774,7 +1774,6 @@ void PolicyHandler::OnCertDecryptFinished(const bool decrypt_result) {
       listeners_.end(),
       std::bind2nd(std::mem_fun(&PolicyHandlerObserver::OnCertDecryptFinished),
                    decrypt_result));
-
 }
 #else   // EXTERNAL_PROPRIETARY_MODE
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {

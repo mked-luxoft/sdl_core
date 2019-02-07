@@ -62,7 +62,7 @@ class SecurityManagerListener {
   virtual void OnPTUFailed() = 0;
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  virtual void OnCertDecryptFailed() = 0;
+  virtual bool OnCertDecryptFailed() = 0;
 #endif
 
   /**
