@@ -74,6 +74,15 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
 
 void HandshakeHandler::OnCertificateUpdateRequired() {}
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+void HandshakeHandler::OnCertDecryptFailed(){
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (payload_) {
+    ProcessFailedHandshake(*payload_, ServiceStatus::CERT_INVALID);
+  }
+}
+#endif
+
 bool HandshakeHandler::OnHandshakeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
@@ -105,6 +114,9 @@ bool HandshakeHandler::OnHandshakeDone(
     uint32_t connection_key,
     security_manager::SSLContext::HandshakeResult result) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  LOG4CXX_DEBUG(logger_,
+                "OnHandshakeDone for service : " << context_.service_type_);
 
   if (connection_key != this->connection_key()) {
     LOG4CXX_DEBUG(logger_,

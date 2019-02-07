@@ -52,6 +52,10 @@ class PolicyHandlerObserver {
 
   virtual void OnPTUTimeoutExceeded() {}
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  virtual void OnCertDecryptFinished(const bool decrypt_result) {}
+#endif
+
   virtual ~PolicyHandlerObserver() {}
 };
 }  //  namespace policy

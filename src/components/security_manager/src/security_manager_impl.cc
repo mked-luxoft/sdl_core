@@ -436,6 +436,19 @@ void SecurityManagerImpl::ProcessFailedPTU() {
                 std::mem_fun(&SecurityManagerListener::OnPTUFailed));
 }
 
+#ifdef EXTERNAL_PROPRIETARY_MODE 
+void SecurityManagerImpl::ProcessFailedCertDecrypt(){
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
+   while (it != listeners_.end()) {
+      (*it)->OnCertDecryptFailed();
+      LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
+      //delete (*it);
+      it = listeners_.erase(it);
+    }
+}
+#endif
+
 void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
     const uint32_t& connection_key, SSLContext::HandshakeResult error) {
   LOG4CXX_AUTO_TRACE(logger_);

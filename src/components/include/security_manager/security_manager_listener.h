@@ -61,6 +61,10 @@ class SecurityManagerListener {
 
   virtual void OnPTUFailed() = 0;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  virtual void OnCertDecryptFailed() = 0;
+#endif
+
   /**
    * @brief Get certificate data from policy
    * @param reference to string where to save certificate data

@@ -1120,6 +1120,12 @@ void ProtocolHandlerImpl::ProcessFailedPTU() {
   security_manager_->ProcessFailedPTU();
 }
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+void ProtocolHandlerImpl::ProcessFailedCertDecrypt(){
+  security_manager_->ProcessFailedCertDecrypt();
+}
+#endif
+
 void ProtocolHandlerImpl::OnTransportConfigUpdated(
     const transport_manager::transport_adapter::TransportConfig& configs) {
   LOG4CXX_AUTO_TRACE(logger_);

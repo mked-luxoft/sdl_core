@@ -204,9 +204,13 @@ class ProtocolHandlerImpl
    */
   void AddProtocolObserver(ProtocolObserver* observer);
 
-  void RemoveProtocolObserver(ProtocolObserver* observer) OVERRIDE;
+  void RemoveProtocolObserver(ProtocolObserver* observer) OVERRIDE;  
 
   void ProcessFailedPTU() OVERRIDE;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  void ProcessFailedCertDecrypt() OVERRIDE;
+#endif
 
 #ifdef ENABLE_SECURITY
   /**

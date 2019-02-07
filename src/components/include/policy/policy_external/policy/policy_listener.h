@@ -114,6 +114,16 @@ class PolicyListener {
    */
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+   /**
+   * @brief OnCertDecryptFinished the callback which certificate decrypting has finished
+   *
+   * @param ptu_result the result from the PTU - true if successful,
+   * otherwise false.
+   */
+  virtual void OnCertDecryptFinished(const bool decrypt_result) = 0;
+#endif
+
   /**
    * @brief OnPTUFinishedd the callback which signals PTU has finished
    *

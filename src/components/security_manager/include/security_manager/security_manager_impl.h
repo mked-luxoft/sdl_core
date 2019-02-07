@@ -214,7 +214,11 @@ class SecurityManagerImpl : public SecurityManager,
    */
   static const char* ConfigSection();
 
-  void ProcessFailedPTU() OVERRIDE;
+  void ProcessFailedPTU() OVERRIDE;  
+
+#ifdef EXTERNAL_PROPRIETARY_MODE  
+  void ProcessFailedCertDecrypt() OVERRIDE;
+#endif
 
  private:
   /**
