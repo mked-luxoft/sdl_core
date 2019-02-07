@@ -1121,7 +1121,8 @@ void ProtocolHandlerImpl::ProcessFailedPTU() {
 }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-void ProtocolHandlerImpl::ProcessFailedCertDecrypt(){
+void ProtocolHandlerImpl::ProcessFailedCertDecrypt() {
+  LOG4CXX_AUTO_TRACE(logger_);
   security_manager_->ProcessFailedCertDecrypt();
 }
 #endif

@@ -168,9 +168,9 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
    */
   virtual void NotifyListenersOnHandshakeFailed() = 0;
 
-  virtual void ProcessFailedPTU() = 0;  
+  virtual void ProcessFailedPTU() = 0;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE 
+#ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void ProcessFailedCertDecrypt() = 0;
 #endif
 
