@@ -290,18 +290,10 @@ void SecurityManagerImpl::ProceedHandshake(
     return;
   }
 
-  if (waiting_for_certificate_ && !ssl_context->HasCertificate()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Still watiting for certificate for connection key: "
-                      << connection_key);
-    PostponeHandshake(connection_key);
-    return;
-  }
-
   time_t cert_due_date;
   if (!ssl_context->GetCertificateDueDate(cert_due_date)) {
     LOG4CXX_ERROR(logger_, "Failed to get certificate due date!");
-    NotifyListenersOnHandshakeFailed();
+    ProcessFailedPTU();
     return;
   }
 
