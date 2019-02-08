@@ -112,6 +112,8 @@ class PolicyListener {
    */
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
+  virtual void OnPTUTimeOut() = 0;
+
   /**
    * Gets devices ids by policy application id
    * @param policy_app_id

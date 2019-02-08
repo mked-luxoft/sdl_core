@@ -448,6 +448,13 @@ void PolicyManagerImpl::StartPTExchange() {
 
   const bool update_required = update_status_manager_.IsUpdateRequired();
 
+  LOG4CXX_DEBUG(logger_,
+                "Current retry_sequence_index_ " << retry_sequence_index_);
+
+  LOG4CXX_DEBUG(logger_,
+                "Current retry_sequence_seconds_.size(): "
+                    << retry_sequence_seconds_.size());
+
   if (update_status_manager_.IsAppsSearchInProgress() && update_required) {
     update_status_manager_.ScheduleUpdate();
     LOG4CXX_INFO(logger_,
@@ -475,6 +482,8 @@ void PolicyManagerImpl::StartPTExchange() {
       if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
         const uint32_t timeout_msec = NextRetryTimeout();
+
+        LOG4CXX_DEBUG(logger_, "timeout_msec is: " << timeout_msec);
 
         if (timeout_msec) {
           LOG4CXX_DEBUG(logger_,
@@ -1033,10 +1042,15 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
 }
 
 void PolicyManagerImpl::RefreshRetrySequence() {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   retry_sequence_timeout_ = cache_->TimeoutResponse();
   retry_sequence_seconds_.clear();
   cache_->SecondsBetweenRetries(retry_sequence_seconds_);
+
+  LOG4CXX_DEBUG(logger_,
+                "retry_sequence_seconds_.size()"
+                    << retry_sequence_seconds_.size());
 }
 
 void PolicyManagerImpl::ResetRetrySequence() {
@@ -1252,6 +1266,7 @@ bool PolicyManagerImpl::IsNewApplication(
 }
 
 bool PolicyManagerImpl::ResetPT(const std::string& file_name) {
+  LOG4CXX_AUTO_TRACE(logger_);
   cache_->ResetCalculatedPermissions();
   const bool result = cache_->ResetPT(file_name);
   if (result) {
@@ -1313,6 +1328,22 @@ void PolicyManagerImpl::set_cache_manager(
 
 void PolicyManagerImpl::RetrySequence() {
   LOG4CXX_INFO(logger_, "Start new retry sequence");
+
+  const bool is_exceeded_retries_count =
+      retry_sequence_index_ > retry_sequence_seconds_.size();
+
+  LOG4CXX_DEBUG(logger_,
+                "Current retry_sequence_index_ " << retry_sequence_index_);
+
+  LOG4CXX_DEBUG(logger_,
+                "Current retry_sequence_seconds_.size(): "
+                    << retry_sequence_seconds_.size());
+
+  if (is_exceeded_retries_count) {
+    LOG4CXX_WARN(logger_, "Exceeded allowed PTU retry count");
+    listener_->OnPTUTimeOut();
+  }
+
   update_status_manager_.OnUpdateTimeoutOccurs();
 
   const uint32_t timeout_msec = NextRetryTimeout();
