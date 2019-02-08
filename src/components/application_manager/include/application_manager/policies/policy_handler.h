@@ -168,6 +168,8 @@ class PolicyHandler : public PolicyHandlerInterface,
                          const std::string& policy_app_id,
                          const std::string& hmi_level) OVERRIDE;
 
+  void OnPTUTimeOut() OVERRIDE;
+
   /**
    * Gets all allowed module types
    * @param app_id unique identifier of application

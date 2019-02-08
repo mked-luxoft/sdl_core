@@ -1426,6 +1426,10 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
                     << app->app_id());
 }
 
+void PolicyHandler::OnPTUTimeOut() {
+  application_manager_.protocol_handler().ProcessFailedPTU();
+}
+
 bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
                                  std::string& snap_path) {
   const std::string& policy_snapshot_file_name =
