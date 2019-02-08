@@ -1425,10 +1425,11 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
                     << policy_app_id << " and connection_key "
                     << app->app_id());
 }
-
+#ifndef EXTERNAL_PROPRIETARY_MODE
 void PolicyHandler::OnPTUTimeOut() {
   application_manager_.protocol_handler().ProcessFailedPTU();
 }
+#endif
 
 bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
                                  std::string& snap_path) {
