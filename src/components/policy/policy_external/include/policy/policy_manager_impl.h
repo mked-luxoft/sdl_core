@@ -116,7 +116,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
    */
-  void RequestPTUpdate() OVERRIDE;
+  bool RequestPTUpdate() OVERRIDE;
 
   /**
    * @brief Check if specified RPC for specified application
@@ -862,6 +862,11 @@ class PolicyManagerImpl : public PolicyManager {
    */
   bool IsPTValid(std::shared_ptr<policy_table::Table> policy_table,
                  policy_table::PolicyTableType type) const;
+   
+   /**
+   * @brief Starts new retry sequence
+   */
+  void RetrySequence();
 
   /**
    * @brief Get resulting RPCs permissions for application which started on
@@ -1056,6 +1061,11 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Lock for guarding retry sequence
    */
   sync_primitives::Lock retry_sequence_lock_;
+
+    /**
+   * @brief Timer to retry UpdatePT
+   */
+  timer::Timer timer_retry_sequence_;
 
   /**
    * @brief Device id, which is used during PTU handling for specific

@@ -49,6 +49,7 @@
 #include "policy/cache_manager.h"
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
+#include "utils/timer_task_impl.h"
 
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
@@ -217,6 +218,9 @@ PolicyManagerImpl::PolicyManagerImpl()
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
+    , timer_retry_sequence_("Retry sequence timer",
+                            new timer::TimerTaskImpl<PolicyManagerImpl>(
+                                this, &PolicyManagerImpl::RetrySequence))
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "") {}
 
@@ -228,6 +232,9 @@ PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
+     , timer_retry_sequence_("Retry sequence timer",
+                            new timer::TimerTaskImpl<PolicyManagerImpl>(
+                                this, &PolicyManagerImpl::RetrySequence))
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
     , wrong_ptu_update_received_(false)
@@ -237,6 +244,39 @@ PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
   update_status_manager_.set_listener(listener);
+}
+
+void PolicyManagerImpl::RetrySequence() {
+  LOG4CXX_INFO(logger_, "Start new retry sequence");
+
+  const bool is_exceeded_retries_count =
+      retry_sequence_index_ > retry_sequence_seconds_.size();
+
+  LOG4CXX_DEBUG(logger_,
+                "Current retry_sequence_index_ " << retry_sequence_index_);
+
+  LOG4CXX_DEBUG(logger_,
+                "Current retry_sequence_seconds_.size(): "
+                    << retry_sequence_seconds_.size());
+
+  if (is_exceeded_retries_count) {
+    LOG4CXX_WARN(logger_, "Exceeded allowed PTU retry count");
+    listener_->OnPTUTimeOut();
+  }
+
+  update_status_manager_.OnUpdateTimeoutOccurs();
+
+  const uint32_t timeout_msec = NextRetryTimeout();
+  LOG4CXX_DEBUG(logger_, "New retry sequence timeout = " << timeout_msec);
+  if (!timeout_msec) {
+    if (timer_retry_sequence_.is_running()) {
+      timer_retry_sequence_.Stop();
+    }
+    return;
+  }
+
+  RequestPTUpdate();
+  timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
 }
 
 std::shared_ptr<policy_table::Table> PolicyManagerImpl::Parse(
@@ -614,13 +654,13 @@ void PolicyManagerImpl::GetUpdateUrls(const uint32_t service_type,
   cache_->GetUpdateUrls(service_type, out_end_points);
 }
 
-void PolicyManagerImpl::RequestPTUpdate() {
+bool PolicyManagerImpl::RequestPTUpdate() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::shared_ptr<policy_table::Table> policy_table_snapshot =
       cache_->GenerateSnapshot();
   if (!policy_table_snapshot) {
     LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
-    return;
+    return false;
   }
 
   if (IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT)) {
@@ -634,9 +674,12 @@ void PolicyManagerImpl::RequestPTUpdate() {
 
     listener_->OnSnapshotCreated(
         update, RetrySequenceDelaysSeconds(), TimeoutExchangeMSec());
+    return true;
   } else {
     LOG4CXX_ERROR(logger_, "Invalid Policy table snapshot - PTUpdate failed");
   }
+
+  return false;
 }
 
 void PolicyManagerImpl::StartPTExchange() {
@@ -672,6 +715,23 @@ void PolicyManagerImpl::StartPTExchange() {
       RequestPTUpdate();
     }
   }
+
+  if (update_status_manager_.IsUpdateRequired()) {
+      if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
+        // Start retry sequency
+        const uint32_t timeout_msec = NextRetryTimeout();
+
+        LOG4CXX_DEBUG(logger_, "timeout_msec is: " << timeout_msec);
+
+        if (timeout_msec) {
+          LOG4CXX_DEBUG(logger_,
+                        "Start retry sequence timeout = " << timeout_msec);
+          timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
+        }
+      }
+  }
+
+
 }
 
 void PolicyManagerImpl::OnAppsSearchStarted() {
