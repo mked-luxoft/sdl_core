@@ -293,11 +293,7 @@ void SecurityManagerImpl::ProceedHandshake(
   time_t cert_due_date;
   if (!ssl_context->GetCertificateDueDate(cert_due_date)) {
     LOG4CXX_ERROR(logger_, "Failed to get certificate due date!");
-#ifdef EXTERNAL_PROPRIETARY_MODE
-    ProcessFailedPTU();
-  #else
     PostponeHandshake(connection_key);
-#endif
     return;
   }
 
@@ -423,6 +419,7 @@ void SecurityManagerImpl::OnSystemTimeFailed() {
 
 void SecurityManagerImpl::ProcessFailedPTU() {
   LOG4CXX_AUTO_TRACE(logger_);
+   LOG4CXX_ERROR(logger_, "listeners arrays SIZE: " << listeners_.size());
   if (listeners_.empty()) {
     LOG4CXX_ERROR(logger_, "listeners arrays IS EMPTY!");
     return;

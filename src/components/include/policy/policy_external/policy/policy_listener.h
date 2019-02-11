@@ -125,6 +125,8 @@ class PolicyListener {
   virtual void OnCertDecryptFinished(const bool decrypt_result) = 0;
 #endif
 
+  virtual void OnPTUTimeOut() = 0;
+
   /**
    * @brief OnPTUFinishedd the callback which signals PTU has finished
    *
