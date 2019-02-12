@@ -113,6 +113,11 @@ class PolicyListener {
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
   /**
+   * @brief OnPTUTimeOut the callback which signals if PTU timeout occured
+   */
+  virtual void OnPTUTimeOut() = 0;
+
+  /**
    * Gets devices ids by policy application id
    * @param policy_app_id
    * @return list devices ids

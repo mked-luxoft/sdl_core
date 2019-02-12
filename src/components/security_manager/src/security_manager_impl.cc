@@ -235,6 +235,7 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
   LOG4CXX_INFO(logger_, "StartHandshake: connection_key " << connection_key);
   security_manager::SSLContext* ssl_context = session_observer_->GetSSLContext(
       connection_key, protocol_handler::kControl);
+
   if (!ssl_context) {
     const std::string error_text(
         "StartHandshake failed, "
@@ -284,6 +285,7 @@ void SecurityManagerImpl::ProceedHandshake(
   time_t cert_due_date;
   if (!ssl_context->GetCertificateDueDate(cert_due_date)) {
     LOG4CXX_ERROR(logger_, "Failed to get certificate due date!");
+    PostponeHandshake(connection_key);
     return;
   }
 
