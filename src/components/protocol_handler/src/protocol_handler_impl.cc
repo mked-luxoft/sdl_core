@@ -1806,6 +1806,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
       // mark service as protected
       session_observer_.SetProtectionFlag(connection_key, service_type);
       // Start service as protected with current SSLContext
+      service_status_update_handler_->OnServiceUpdate(
+          connection_key,
+          context.service_type_,
+          ServiceStatus::SERVICE_ACCEPTED);
       SendStartSessionAck(context.connection_id_,
                           context.new_session_id_,
                           packet->protocol_version(),
