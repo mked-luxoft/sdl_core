@@ -511,6 +511,24 @@ class ApplicationManagerImpl
    */
   void OnPTUFinished(const bool ptu_result) FINAL;
 
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
+  /**
+   * @brief OnCertDecryptFailed is called when certificate decryption fails in
+   * external flow
+   * @return bool value indicating whether listener instance can be deleted by
+   * calling entity
+   */
+  bool OnCertDecryptFailed() FINAL;
+
+  /**
+   * @brief OnCertDecryptFinished is called when certificate decryption is
+   * finished in the external flow
+   * @param decrypt_result bool value indicating whether decryption was
+   * successful
+   */
+  void OnCertDecryptFinished(const bool decrypt_result) FINAL;
+#endif
+
   /**
    * @brief OnPTUTimeoutExceeded is called on policy table update timed out
    */

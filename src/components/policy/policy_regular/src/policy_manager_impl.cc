@@ -1033,6 +1033,7 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
 }
 
 void PolicyManagerImpl::RefreshRetrySequence() {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   retry_sequence_timeout_ = cache_->TimeoutResponse();
   retry_sequence_seconds_.clear();
@@ -1252,6 +1253,7 @@ bool PolicyManagerImpl::IsNewApplication(
 }
 
 bool PolicyManagerImpl::ResetPT(const std::string& file_name) {
+  LOG4CXX_AUTO_TRACE(logger_);
   cache_->ResetCalculatedPermissions();
   const bool result = cache_->ResetPT(file_name);
   if (result) {

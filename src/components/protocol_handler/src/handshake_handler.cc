@@ -72,7 +72,20 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
   return false;
 }
 
-void HandshakeHandler::OnCertificateUpdateRequired() {}
+void HandshakeHandler::OnCertificateUpdateRequired() {
+  LOG4CXX_AUTO_TRACE(logger_);
+}
+
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
+bool HandshakeHandler::OnCertDecryptFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (payload_) {
+    ProcessFailedHandshake(*payload_, ServiceStatus::CERT_INVALID);
+  }
+
+  return true;
+}
+#endif
 
 bool HandshakeHandler::OnHandshakeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);

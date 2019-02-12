@@ -61,6 +61,16 @@ class SecurityManagerListener {
 
   virtual void OnPTUFailed() = 0;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief OnCertDecryptFailed is called when certificate decryption fails in
+   * external flow
+   * @return bool value indicating whether listener instance can be deleted by
+   * calling entity
+   */
+  virtual bool OnCertDecryptFailed() = 0;
+#endif
+
   /**
    * @brief Get certificate data from policy
    * @param reference to string where to save certificate data

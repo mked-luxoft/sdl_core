@@ -92,6 +92,16 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
 
   void OnPTUFailed() OVERRIDE;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief OnCertDecryptFailed is called when certificate decryption fails in
+   * external flow
+   * @return bool value indicating whether listener instance can be deleted by
+   * calling entity
+   */
+  bool OnCertDecryptFailed() OVERRIDE;
+#endif
+
   /**
    * @brief Get connection key of this handler
    * @return connection key

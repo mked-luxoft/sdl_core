@@ -208,6 +208,14 @@ class ProtocolHandlerImpl
 
   void ProcessFailedPTU() OVERRIDE;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief ProcessFailedCertDecrypt is called to notify security manager that
+   * certificate decryption failed in the external flow
+   */
+  void ProcessFailedCertDecrypt() OVERRIDE;
+#endif
+
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets pointer for SecurityManager layer for managing protection

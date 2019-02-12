@@ -170,6 +170,14 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
 
   virtual void ProcessFailedPTU() = 0;
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief ProcessFailedCertDecrypt is called to notify listeners that
+   * certificate decryption failed in the external flow
+   */
+  virtual void ProcessFailedCertDecrypt() = 0;
+#endif
+
   /**
    * @brief Check if policy certificate data is empty
    * @return true if policy certificate data is empty otherwise false

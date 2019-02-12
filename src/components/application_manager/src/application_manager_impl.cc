@@ -3420,6 +3420,21 @@ void ApplicationManagerImpl::OnPTUFinished(const bool ptu_result) {
   plugin_manager_->ForEachPlugin(on_app_policy_updated);
 }
 
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
+void ApplicationManagerImpl::OnCertDecryptFinished(const bool decrypt_result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!decrypt_result) {
+    protocol_handler_->ProcessFailedCertDecrypt();
+    return;
+  }
+}
+
+bool ApplicationManagerImpl::OnCertDecryptFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return false;
+}
+#endif
+
 void ApplicationManagerImpl::OnPTUTimeoutExceeded() {
   LOG4CXX_AUTO_TRACE(logger_);
   protocol_handler_->ProcessFailedPTU();

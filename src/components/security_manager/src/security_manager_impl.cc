@@ -213,6 +213,13 @@ void SecurityManagerImpl::ResumeHandshake(uint32_t connection_key) {
     return;
   }
 
+  LOG4CXX_DEBUG(logger_,
+                "Connection key : "
+                    << connection_key
+                    << " is waiting for certificate: " << std::boolalpha
+                    << waiting_for_certificate_ << " and has certificate: "
+                    << ssl_context->HasCertificate());
+
   ssl_context->ResetConnection();
   if (!waiting_for_certificate_ && !ssl_context->HasCertificate()) {
     NotifyListenersOnHandshakeDone(connection_key,
@@ -410,6 +417,28 @@ void SecurityManagerImpl::ProcessFailedPTU() {
                 listeners_.end(),
                 std::mem_fun(&SecurityManagerListener::OnPTUFailed));
 }
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+void SecurityManagerImpl::ProcessFailedCertDecrypt() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  {
+    sync_primitives::AutoLock lock(waiters_lock_);
+    waiting_for_certificate_ = false;
+  }
+  std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
+  while (it != listeners_.end()) {
+    if ((*it)->OnCertDecryptFailed()) {
+      LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
+      delete (*it);
+      it = listeners_.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  awaiting_certificate_connections_.clear();
+}
+#endif
 
 void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
     const uint32_t& connection_key, SSLContext::HandshakeResult error) {
