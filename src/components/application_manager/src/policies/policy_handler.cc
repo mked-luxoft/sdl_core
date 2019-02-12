@@ -1425,7 +1425,7 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
                     << policy_app_id << " and connection_key "
                     << app->app_id());
 }
-#ifdef PROPRIETARY_MODE
+#ifndef EXTERNAL_PROPRIETARY_MODE
 void PolicyHandler::OnPTUTimeOut() {
   application_manager_.protocol_handler().ProcessFailedPTU();
 }
@@ -1777,7 +1777,7 @@ void PolicyHandler::ProcessCertDecryptFailed() {
   std::for_each(
       listeners_.begin(),
       listeners_.end(),
-      std::bind2nd(std::mem_fun(&PolicyHandlerObserver::OnCertDecryptFinished),
+      std::bind2nd(std::mem_fn(&PolicyHandlerObserver::OnCertDecryptFinished),
                    false));
 }
 #else   // EXTERNAL_PROPRIETARY_MODE

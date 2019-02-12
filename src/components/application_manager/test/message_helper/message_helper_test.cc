@@ -956,8 +956,7 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
   size_t function_id = 1;
   //
   EXPECT_CALL(*appSharedPtr,
-              SubscribeToSoftButtons(function_id, SoftButtonID()))
-      .Times(1);
+              SubscribeToSoftButtons(function_id, SoftButtonID())).Times(1);
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
 }
@@ -1150,7 +1149,8 @@ TEST(ServiceStatusUpdateNotificationBuilderTest, AddAppID) {
   service_status_update_builder_.AddAppID(kAppId);
   auto notification_ = service_status_update_builder_.notification();
 
-  auto app_id_exist_ = (*notification_)[strings::msg_params].keyExists(strings::app_id);
+  auto app_id_exist_ =
+      (*notification_)[strings::msg_params].keyExists(strings::app_id);
   auto app_id_ = (*notification_)[strings::msg_params][strings::app_id].asInt();
 
   EXPECT_TRUE(app_id_exist_);
@@ -1165,9 +1165,10 @@ TEST(ServiceStatusUpdateNotificationBuilderTest, AddServiceUpdateReason) {
   service_status_update_builder_.AddServiceUpdateReason(
       UpdateReason::INVALID_CERT);
   auto notification_ = service_status_update_builder_.notification();
-  auto reason_exist_ = (*notification_)[strings::msg_params].keyExists(
-              hmi_notification::reason);
-  auto reason_ = (*notification_)[strings::msg_params][hmi_notification::reason].asInt();
+  auto reason_exist_ =
+      (*notification_)[strings::msg_params].keyExists(hmi_notification::reason);
+  auto reason_ =
+      (*notification_)[strings::msg_params][hmi_notification::reason].asInt();
 
   EXPECT_TRUE(reason_exist_);
   EXPECT_EQ(static_cast<int64_t>(UpdateReason::INVALID_CERT), reason_);

@@ -38,6 +38,7 @@
 #include "protocol_handler/protocol_packet.h"
 #include "security_manager/security_manager.h"
 #include "protocol_handler/session_observer.h"
+#include "utils/helpers.h"
 
 namespace protocol_handler {
 
@@ -154,9 +155,7 @@ bool HandshakeHandler::CanBeProtected() const {
   const auto& force_unprotected =
       protocol_handler_.get_settings().force_unprotected_service();
 
-  return std::find(force_unprotected.begin(),
-                   force_unprotected.end(),
-                   context_.service_type_) == force_unprotected.end();
+  return !(helpers::in_range(force_unprotected, context_.service_type_));
 }
 
 bool HandshakeHandler::IsAlreadyProtected() const {

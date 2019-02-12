@@ -96,8 +96,11 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
   /**
    * @brief OnCertDecryptFailed is called when certificate decryption fails in
    * external flow
-   * @return bool value indicating whether listener instance can be deleted by
-   * calling entity
+   * @return since this callback is a part of SecurityManagerListener, bool
+   * return value is used to indicate whether listener instance can be deleted
+   * by calling entity. if true - listener can be deleted and removed from
+   * listeners by SecurityManager, false - listener retains its place within
+   * SecurityManager.
    */
   bool OnCertDecryptFailed() OVERRIDE;
 #endif
@@ -126,13 +129,13 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
 
   /**
    * @brief Determines whether service can be protected
-   * @bool true is service can be protected, otherwise - false
+   * @return true is service can be protected, otherwise - false
    */
   bool CanBeProtected() const;
 
   /**
    * @brief Determines whether service is already protected
-   * @bool true is service is already protected, otherwise - false
+   * @return true is service is already protected, otherwise - false
    */
   bool IsAlreadyProtected() const;
 

@@ -151,11 +151,8 @@ void SystemTimeHandlerImpl::ProcessSystemTimeResponse(
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
-  auto result = static_cast<hmi_apis::Common_Result::eType>(
+  const auto result = static_cast<hmi_apis::Common_Result::eType>(
       message[strings::params][hmi_response::code].asInt());
-
-  LOG4CXX_DEBUG(logger_,
-                "System Time request result: " << static_cast<int64_t>(result));
 
   if (hmi_apis::Common_Result::SUCCESS != result) {
     system_time_listener_->OnSystemTimeFailed();

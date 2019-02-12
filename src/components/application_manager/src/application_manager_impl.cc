@@ -1667,7 +1667,12 @@ bool ApplicationManagerImpl::OnHandshakeDone(
   using namespace helpers;
 
   ApplicationSharedPtr app = application(connection_key);
-  DCHECK_OR_RETURN(app, false);
+  if (!app) {
+    LOG4CXX_WARN(logger_,
+                 "Application for connection key: " << connection_key
+                                                    << " was not found");
+    return false;
+  }
   if (Compare<SSLContext::HandshakeResult, EQ, ONE>(
           result,
           SSLContext::Handshake_Result_CertExpired,
@@ -3425,7 +3430,6 @@ void ApplicationManagerImpl::OnCertDecryptFinished(const bool decrypt_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!decrypt_result) {
     protocol_handler_->ProcessFailedCertDecrypt();
-    return;
   }
 }
 

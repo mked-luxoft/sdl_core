@@ -77,12 +77,6 @@ class ServiceStatusUpdateHandler {
                        const protocol_handler::ServiceType service_type,
                        const ServiceStatus service_status);
 
-  /**
-   * @brief set_listener sets listener to ServiceStatusUpdateHandler
-   * @param listener pointer to ServiceStatusUpdateHandlerListener instance
-   */
-  void set_listener(const ServiceStatusUpdateHandlerListener* listener);
-
  private:
   ServiceStatusUpdateHandlerListener* listener_;
 };

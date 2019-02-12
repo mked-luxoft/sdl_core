@@ -68,6 +68,9 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
                     std::vector<std::string>& rejected_params));
   MOCK_METHOD0(NotifyOnFailedHandshake, void());
   MOCK_METHOD0(ProcessFailedPTU, void());
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  MOCK_METHOD0(ProcessFailedCertDecrypt, void());
+#endif
 };
 }  // namespace protocol_handler_test
 }  // namespace components

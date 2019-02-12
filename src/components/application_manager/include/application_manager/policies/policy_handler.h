@@ -168,7 +168,7 @@ class PolicyHandler : public PolicyHandlerInterface,
                          const std::string& policy_app_id,
                          const std::string& hmi_level) OVERRIDE;
 
-#ifdef PROPRIETARY_MODE
+#ifndef EXTERNAL_PROPRIETARY_MODE
   void OnPTUTimeOut() OVERRIDE;
 #endif
   /**

@@ -1317,7 +1317,7 @@ void PolicyManagerImpl::StartRetrySequence() {
   LOG4CXX_DEBUG(logger_, "Start new retry sequence");
 
   const bool is_exceeded_retries_count =
-      retry_sequence_index_ > retry_sequence_seconds_.size();
+      (retry_sequence_seconds_.size() < retry_sequence_index_);
 
   if (is_exceeded_retries_count) {
     LOG4CXX_WARN(logger_, "Exceeded allowed PTU retry count");

@@ -51,6 +51,9 @@ class MockSecurityManagerListener
   MOCK_CONST_METHOD1(GetPolicyCertificateData, bool(std::string& data));
   MOCK_METHOD0(OnHandshakeFailed, bool());
   MOCK_METHOD0(OnPTUFailed, void());
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  MOCK_METHOD0(OnCertDecryptFailed, bool());
+#endif
 };
 }  // namespace security_manager_test
 }  // namespace components
