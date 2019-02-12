@@ -388,6 +388,18 @@ void SecurityManagerImpl::OnSystemTimeArrived(const time_t utc_time) {
   awaiting_time_connections_.clear();
 }
 
+void SecurityManagerImpl::OnSystemTimeFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  {
+    sync_primitives::AutoLock lock(waiters_lock_);
+    waiting_for_time_ = false;
+  }
+
+  NotifyListenersOnHandshakeFailed();
+
+  awaiting_time_connections_.clear();
+}
+
 void SecurityManagerImpl::ProcessFailedPTU() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (listeners_.empty()) {
@@ -421,6 +433,10 @@ void SecurityManagerImpl::NotifyOnCertificateUpdateRequired() {
     (*it)->OnCertificateUpdateRequired();
     ++it;
   }
+}
+
+void SecurityManagerImpl::ResetPendingSystemTimeRequests() {
+  system_time_handler_->ResetPendingSystemTimeRequests();
 }
 
 void SecurityManagerImpl::NotifyListenersOnHandshakeFailed() {

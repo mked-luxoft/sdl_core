@@ -1110,6 +1110,7 @@ void ProtocolHandlerImpl::OnUnexpectedDisconnect(
 
 void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
   LOG4CXX_AUTO_TRACE(logger_);
+  security_manager_->ResetPendingSystemTimeRequests();
 #ifdef ENABLE_SECURITY
   security_manager_->NotifyListenersOnHandshakeFailed();
 #endif  // ENABLE_SECURITY

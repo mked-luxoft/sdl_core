@@ -177,6 +177,12 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
   virtual bool IsPolicyCertificateDataEmpty() = 0;
 
   /**
+   * @brief ResetPendingSystemTimeRequests resets waiting for system time
+   * requests flag
+   */
+  virtual void ResetPendingSystemTimeRequests() = 0;
+
+  /**
    * \brief Add/Remove for SecurityManagerListener
    */
   virtual void AddListener(SecurityManagerListener* const listener) = 0;

@@ -282,6 +282,17 @@ class SecurityManagerImpl : public SecurityManager,
    */
   void OnSystemTimeArrived(const time_t utc_time) OVERRIDE;
 
+  /**
+   * @brief OnSystemTimeFailed Notify about system request failure
+   */
+  void OnSystemTimeFailed() OVERRIDE;
+
+  /**
+   * @brief ResetPendingSystemTimeRequests resets waiting for system time
+   * requests flag
+   */
+  void ResetPendingSystemTimeRequests();
+
   // Thread that pumps handshake data
   SecurityMessageLoop security_messages_;
 
