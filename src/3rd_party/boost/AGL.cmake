@@ -40,9 +40,8 @@ set(CONFIGURE_COMMAND
     --prefix=${3RD_PARTY_INSTALL_PREFIX}
     COMMAND echo ${BOOST_AGL_PROJECT_CONFIG_JAM} $<SEMICOLON> >> ./project-config.jam)
 
-set(BOOST_CXX_FLAGS $ENV{CXXFLAGS})
 set(BUILD_COMMAND
-  ./b2 toolset=gcc-agl cxxflags=${BOOST_CXX_FLAGS})
+  ./b2 toolset=gcc-agl)
 
 ExternalProject_Add(
   Boost
@@ -56,12 +55,13 @@ ExternalProject_Add(
 )
 
 set(INSTALL_COMMAND
-  "./b2 install > boost_install.log")
+  ${BUILD_COMMAND} install > boost_install.log)
 
 if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
-  set(INSTALL_COMMAND "sudo ${INSTALL_COMMAND}")
+  set(INSTALL_COMMAND sudo ${INSTALL_COMMAND})
 endif()
 
+string (REPLACE ";" " " INSTALL_COMMAND "${INSTALL_COMMAND}")
 install(
   CODE "execute_process(
     WORKING_DIRECTORY ${BOOST_SOURCE_DIRECTORY}

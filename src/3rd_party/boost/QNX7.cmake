@@ -55,8 +55,8 @@ endif ()
 
 set(BOOST_BUILD_COMMAND
   ./b2 address-model=${ADDRESS_MODEL}
-    cxxflags="-stdlib=libstdc++"
-    linkflags="-stdlib=libstdc++"
+    cxxflags=-stdlib=libstdc++
+    linkflags=-stdlib=libstdc++
     target-os=qnxnto
     toolset=gcc-nto${CMAKE_SYSTEM_PROCESSOR} define=__QNXNTO__)
 
@@ -72,12 +72,13 @@ ExternalProject_Add(
 )
 
 set(INSTALL_COMMAND
-  "./b2 install > boost_install.log")
+  ${BOOST_BUILD_COMMAND} install > boost_install.log)
 
 if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
-  set(INSTALL_COMMAND "sudo ${INSTALL_COMMAND}")
+  set(INSTALL_COMMAND sudo ${INSTALL_COMMAND})
 endif()
 
+string (REPLACE ";" " " INSTALL_COMMAND "${INSTALL_COMMAND}")
 install(
   CODE "execute_process(
     WORKING_DIRECTORY ${BOOST_SOURCE_DIRECTORY}

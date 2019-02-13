@@ -124,7 +124,7 @@ endif()
 if (Apr_FOUND)
   set(APR_FOUND ${Apr_FOUND} CACHE INTERNAL "Apr found" FORCE)
   set(APR_INCLUDE_DIR ${APR_INCLUDE} CACHE INTERNAL "Apr include path" FORCE)
-  set(APR_LIBRARY_DIR ${APR_LIBRARY_DIR} CACHE INTERNAL "Apr library path" FORCE)
+  set(APR_LIBS_DIRECTORY ${APR_LIBRARY_DIR} CACHE INTERNAL "Apr library path" FORCE)
   set(APR_VERSION ${Apr_VERSION} CACHE INTERNAL "Apr version" FORCE)
 
   message(STATUS "Found Apr: ${APR_INCLUDE_DIR} (found version \"${APR_VERSION}\")")

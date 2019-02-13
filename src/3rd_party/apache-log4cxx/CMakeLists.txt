@@ -73,6 +73,7 @@ else()
     "${LOG4CXX_SOURCE_DIRECTORY} "
     "${LOG4CXX_LIBS_DIRECTORY}"
   )
+  string (REPLACE ";" " " APPEND_COMMIT_HASH_CMD "${APPEND_COMMIT_HASH_CMD}")
   add_custom_command(TARGET liblog4cxx POST_BUILD
     COMMAND /bin/bash -c ${APPEND_COMMIT_HASH_CMD}
   )

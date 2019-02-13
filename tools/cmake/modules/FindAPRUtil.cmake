@@ -95,7 +95,7 @@ endif()
 
 if (Apr_Util_FOUND)
   set(APU_FOUND ${Apr_Util_FOUND} CACHE INTERNAL "Apr util found" FORCE)
-  set(APU_LIBRARY_DIR ${APR_UTIL_LIBRARY_DIR} CACHE INTERNAL "Apr util library path" FORCE)
+  set(APR_UTIL_LIBS_DIRECTORY ${APR_UTIL_LIBRARY_DIR} CACHE INTERNAL "Apr util library path" FORCE)
   set(APU_VERSION ${Apr_util_VERSION} CACHE INTERNAL "Apr util version" FORCE)
 
   message(STATUS "Found Apr Util: ${APU_LIBRARY_DIR}")
