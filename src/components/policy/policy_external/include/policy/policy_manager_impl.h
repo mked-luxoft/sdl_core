@@ -709,6 +709,17 @@ class PolicyManagerImpl : public PolicyManager {
   void Add(const std::string& app_id,
            usage_statistics::AppStopwatchId type,
            int32_t timespan_seconds) OVERRIDE;
+
+  /**
+   * @brief Increments PTU retry index for external flow
+   */
+  void IncrementPTURetryIndex();
+
+  /**
+   * @brief Check whether allowed PTU retry count is exceeded for external flow
+   * @return true if retry count is exceeded, otherwise -false
+   */
+  bool IsAllowedPTURetryCountExceeded() const;
   // Interface StatisticsManager (end)
 
  protected:

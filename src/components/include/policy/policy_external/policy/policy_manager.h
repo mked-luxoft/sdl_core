@@ -58,6 +58,17 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual ~PolicyManager() {}
 
   /**
+   * @brief Increments PTU retry index for external flow
+   */
+  virtual void IncrementPTURetryIndex() = 0;
+
+  /**
+   * @brief Check whether allowed PTU retry count is exceeded for external flow
+   * @return true if retry count is exceeded, otherwise -false
+   */
+  virtual bool IsAllowedPTURetryCountExceeded() const = 0;
+
+  /**
    * @brief set_listener set new policy listener instance
    * @param listener new policy listener
    */

@@ -1689,6 +1689,17 @@ int PolicyManagerImpl::NextRetryTimeout() {
   return next;
 }
 
+void PolicyManagerImpl::IncrementPTURetryIndex() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ++retry_sequence_index_;
+  LOG4CXX_DEBUG(logger_, "retry_sequence_index_ is: " << retry_sequence_index_);
+}
+
+bool PolicyManagerImpl::IsAllowedPTURetryCountExceeded() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return retry_sequence_index_ > retry_sequence_seconds_.size();
+}
+
 void PolicyManagerImpl::RefreshRetrySequence() {
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   retry_sequence_timeout_ = cache_->TimeoutResponse();

@@ -116,6 +116,10 @@ void OnSystemRequestNotification::Run() {
                 "Sending request with application id " << app->policy_app_id());
 
   params[strings::connection_key] = app->app_id();
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  policy_handler_.IncrementRetryIndex();
+#endif
   SendNotificationToMobile(message_);
 }
 

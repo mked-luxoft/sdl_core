@@ -87,6 +87,10 @@ void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (listener_->IsAllowedPTURetriesExceeded()) {
+    LOG4CXX_DEBUG(logger_, "Exceeded allowed PTU retry count");
+    listener_->OnPTUFinished(false);
+  }
   ProcessEvent(kOnUpdateTimeout);
   DCHECK(update_status_thread_delegate_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer

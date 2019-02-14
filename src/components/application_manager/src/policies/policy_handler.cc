@@ -1780,6 +1780,16 @@ void PolicyHandler::ProcessCertDecryptFailed() {
       std::bind2nd(std::mem_fn(&PolicyHandlerObserver::OnCertDecryptFinished),
                    false));
 }
+
+void PolicyHandler::IncrementRetryIndex() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_manager_->IncrementPTURetryIndex();
+}
+
+bool PolicyHandler::IsAllowedPTURetriesExceeded() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return policy_manager_->IsAllowedPTURetryCountExceeded();
+}
 #else   // EXTERNAL_PROPRIETARY_MODE
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -165,6 +165,17 @@ class PolicyListener {
   virtual void OnUpdateHMIStatus(const std::string& device_id,
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level) = 0;
+
+  /**
+   * @brief Increments PTU retry index for external flow
+   */
+  virtual void IncrementRetryIndex() = 0;
+
+  /**
+   * @brief Check whether allowed PTU retry count is exceeded for external flow
+   * @return true if retry count is exceeded, otherwise -false
+   */
+  virtual bool IsAllowedPTURetriesExceeded() const = 0;
 };
 }  // namespace policy
 #endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_POLICY_LISTENER_H_
