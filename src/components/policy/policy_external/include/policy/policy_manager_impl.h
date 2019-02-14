@@ -173,8 +173,10 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Resets retry sequence
+   * @param send_event - if true corresponding event is sent to
+   * UpdateStatusManager
    */
-  void ResetRetrySequence() OVERRIDE;
+  void ResetRetrySequence(const ResetRetryCountType reset_type) OVERRIDE;
 
   /**
    * @brief Gets timeout to wait before next retry updating PT
@@ -820,7 +822,24 @@ class PolicyManagerImpl : public PolicyManager {
   void Add(const std::string& app_id,
            usage_statistics::AppStopwatchId type,
            int32_t timespan_seconds) OVERRIDE;
+
   // Interface StatisticsManager (end)
+
+  /**
+   * @brief Check whether allowed retry sequence count is exceeded
+   * @return bool value - true is allowed count is exceeded, otherwise - false
+   */
+  bool IsAllowedRetryCountExceeded() const OVERRIDE;
+
+  /**
+   * @brief Finish PTU retry requence
+   */
+  void RetrySequenceFailed() OVERRIDE;
+
+  /**
+   * @brief Begins new retry sequence
+   */
+  void OnSystemRequestReceived() OVERRIDE;
 
  protected:
   /**
@@ -832,6 +851,11 @@ class PolicyManagerImpl : public PolicyManager {
       const BinaryMessage& pt_content);
 
  private:
+  /**
+   * @brief Increments PTU retry index for external flow
+   */
+  void IncrementRetryIndex();
+
   /**
    * @brief Checks if PT update should be started and schedules it if needed
    */
@@ -1009,11 +1033,11 @@ class PolicyManagerImpl : public PolicyManager {
   void SendAuthTokenUpdated(const std::string policy_app_id);
 
   /**
-   * @brief Gets all allowed module types
-   * @param policy_app_id unique identifier of application
-   * @param modules list of allowed module types
-   * @return true if application has allowed modules
-   */
+    * @brief Gets all allowed module types
+    * @param policy_app_id unique identifier of application
+    * @param modules list of allowed module types
+    * @return true if application has allowed modules
+    */
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
 
@@ -1212,6 +1236,12 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Flag for notifying that invalid PTU should be triggered
    */
   bool trigger_ptu_;
+
+  /**
+   * @brief Flag that indicates whether a PTU sequence (including retries) is in
+   * progress
+   */
+  bool is_ptu_in_progress_;
 };
 
 }  // namespace policy
