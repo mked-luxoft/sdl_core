@@ -412,7 +412,7 @@ void SecurityManagerImpl::OnSystemTimeFailed() {
 void SecurityManagerImpl::ProcessFailedPTU() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (listeners_.empty()) {
-    LOG4CXX_ERROR(logger_, "listeners arrays IS EMPTY!");
+    LOG4CXX_DEBUG(logger_, "listeners arrays IS EMPTY!");
     return;
   }
   std::for_each(listeners_.begin(),
@@ -427,15 +427,20 @@ void SecurityManagerImpl::ProcessFailedCertDecrypt() {
     sync_primitives::AutoLock lock(waiters_lock_);
     waiting_for_certificate_ = false;
   }
-  std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
-  while (it != listeners_.end()) {
-    if ((*it)->OnCertDecryptFailed()) {
-      LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
-      delete (*it);
-      it = listeners_.erase(it);
-    } else {
-      ++it;
+
+  std::list<SecurityManagerListener*> listeners_to_remove;
+  for (auto listener : listeners_) {
+    if (listener->OnCertDecryptFailed()) {
+      listeners_to_remove.push_back(listener);
     }
+  }
+
+  for (auto& listener : listeners_to_remove) {
+    auto it = std::find(listeners_.begin(), listeners_.end(), listener);
+    DCHECK(it != listeners_.end());
+    LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
+    delete (*it);
+    listeners_.erase(it);
   }
 
   awaiting_certificate_connections_.clear();
