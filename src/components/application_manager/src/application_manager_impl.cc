@@ -151,7 +151,6 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , is_vr_session_strated_(false)
     , hmi_cooperating_(false)
     , is_all_apps_allowed_(true)
-    , is_first_rpc_service_accepted_(false)
     , media_manager_(NULL)
     , hmi_handler_(NULL)
     , connection_handler_(NULL)
@@ -1528,20 +1527,6 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
   }
 }
 
-bool ApplicationManagerImpl::ShouldAddAppIDForService(
-    hmi_apis::Common_ServiceType::eType service_type,
-    hmi_apis::Common_ServiceEvent::eType service_event) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (hmi_apis::Common_ServiceType::RPC == service_type &&
-      !is_first_rpc_service_accepted_) {
-    if (hmi_apis::Common_ServiceEvent::REQUEST_ACCEPTED == service_event) {
-      is_first_rpc_service_accepted_ = true;
-    }
-    return false;
-  }
-  return true;
-}
-
 void ApplicationManagerImpl::ProcessServiceStatusUpdate(
     const uint32_t connection_key,
     hmi_apis::Common_ServiceType::eType service_type,
@@ -1561,10 +1546,7 @@ void ApplicationManagerImpl::ProcessServiceStatusUpdate(
       MessageHelper::ServiceStatusUpdateNotificationBuilder::CreateBuilder(
           service_type, service_event);
 
-  const bool should_add_app_id =
-      ShouldAddAppIDForService(service_type, service_event);
-
-  if (app && should_add_app_id) {
+  if (app) {
     notification_builder.AddAppID(app->app_id());
   }
 
