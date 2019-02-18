@@ -35,6 +35,7 @@
 
 #include <stdint.h>
 #include <qdb/qdb.h>
+#include "boost/variant.hpp"
 #include <string>
 #include <vector>
 #include <utility>
@@ -45,6 +46,12 @@ namespace utils {
 namespace dbms {
 
 class SQLDatabase;
+
+/**
+ * Variants data types that can be bind
+ * void* used for NULL value
+ */
+typedef boost::variant<void*, int64_t, std::string, double> BindVariant;
 
 /**
  * Provides a means of executing and manipulating SQL statements
@@ -218,17 +225,14 @@ class SQLQuery {
   int statement_;
 
   /**
-   * Containers for keeping bind data
+   * Container for keeping bind data
    */
-  std::vector<std::pair<int, int64_t> > int_binds_;
-  std::vector<std::pair<int, double> > double_binds_;
-  std::vector<std::pair<int, std::string> > string_binds_;
-  std::vector<int> null_binds_;
+  std::vector<std::pair<int, BindVariant> > binds_;
 
   /**
-   * The array for binging data to the prepare query
+   * The vector for binging data to the prepare query
    */
-  qdb_binding_t* bindings_;
+  std::vector<qdb_binding_t> qdb_bindings_;
 
   /**
    * Lock for guarding bindings
