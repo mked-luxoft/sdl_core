@@ -54,6 +54,7 @@ typedef hmi_apis::Common_ServiceEvent::eType ServiceEvent;
 
 namespace {
 const uint32_t kConnectionKey = 1232u;
+const uint32_t kHmi_app_id = 321u;
 }
 
 class OnServiceStatusUpdateNotificationTest
@@ -77,6 +78,14 @@ TEST_F(OnServiceStatusUpdateNotificationTest, SendNotificationToHMI) {
 
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(message_)).Times(1);
 
+  auto mock_app = std::make_shared<NiceMock<MockApplication> >();
+
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillRepeatedly(Return(mock_app));
+
+  EXPECT_CALL(*mock_app, hmi_app_id()).WillRepeatedly(Return(kHmi_app_id));
+
+  command_->Init();
   command_->Run();
 }
 
