@@ -61,6 +61,7 @@ using testing::ReturnRef;
 using testing::Return;
 using testing::NiceMock;
 using testing::Mock;
+using testing::AnyOf;
 
 namespace test {
 namespace components {
@@ -91,7 +92,9 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
         new policy_handler_test::MockPolicySettings());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
-    EXPECT_EQ(::policy::SUCCESS, reps->Init(policy_settings_.get()));
+    ASSERT_THAT(reps->Init(policy_settings_.get()),
+                AnyOf(::policy::EXISTS, ::policy::SUCCESS));
+    ASSERT_TRUE(reps->RefreshDB());
     query_wrapper_ = new utils::dbms::SQLQuery(reps->db());
     ASSERT_TRUE(query_wrapper_ != NULL);
   }
@@ -104,7 +107,9 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     delete query_wrapper_;
     EXPECT_TRUE(reps->Drop());
     EXPECT_TRUE(reps->Close());
+#ifndef __QNX__
     reps->RemoveDB();
+#endif  // __QNX__
     delete reps;
     policy_settings_.reset();
   }
@@ -350,6 +355,7 @@ const bool SQLPTRepresentationTest::in_memory_ = true;
 std::unique_ptr<policy_handler_test::MockPolicySettings>
     SQLPTRepresentationTest::policy_settings_;
 
+#ifndef __QNX__
 class SQLPTRepresentationTest2 : public ::testing::Test {
  protected:
   SQLPTRepresentation* reps;
@@ -382,6 +388,7 @@ TEST_F(SQLPTRepresentationTest2,
   // Check  Actual attempts number made to try to open DB
   EXPECT_EQ(kAttemptsToOpenPolicyDB, reps->open_counter());
 }
+#endif  //__QNX__
 
 TEST_F(SQLPTRepresentationTest,
        RefreshDB_DropExistedPTThenRefreshDB_ExpectTablesWithInitialData) {
@@ -504,7 +511,7 @@ TEST_F(SQLPTRepresentationTest,
 
   query.Prepare(query_select_version);
   query.Next();
-  ASSERT_EQ(0, query.GetInteger(0));
+  ASSERT_EQ("0", query.GetString(0));
 }
 
 TEST_F(
@@ -1090,11 +1097,18 @@ TEST(SQLPTRepresentationTest3, Init_InitNewDataBase_ExpectResultSuccess) {
   // Checks
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(kAppStorageFolder));
+#ifdef __QNX__
+  EXPECT_THAT(reps.Init(&policy_settings_),
+              AnyOf(::policy::SUCCESS, ::policy::EXISTS));
+  EXPECT_TRUE(reps.RefreshDB());
+#else
   EXPECT_EQ(::policy::SUCCESS, reps.Init(&policy_settings_));
+#endif  // __QNX__
   EXPECT_EQ(::policy::EXISTS, reps.Init(&policy_settings_));
   reps.RemoveDB();
 }
 
+#ifndef __QNX__
 TEST(SQLPTRepresentationTest3,
      Init_TryInitNotExistingDataBase_ExpectResultFail) {
   // Arrange
@@ -1106,6 +1120,7 @@ TEST(SQLPTRepresentationTest3,
   // Check
   EXPECT_EQ(::policy::FAIL, reps.Init(&policy_settings_));
 }
+#endif  //__QNX__
 
 TEST(SQLPTRepresentationTest3,
      Close_InitNewDataBaseThenClose_ExpectResultSuccess) {
@@ -1115,7 +1130,8 @@ TEST(SQLPTRepresentationTest3,
       .WillByDefault(ReturnRef(kAppStorageFolder));
   const bool in_memory_ = true;
   SQLPTRepresentation reps(in_memory_);
-  EXPECT_EQ(::policy::SUCCESS, reps.Init(&policy_settings_));
+  EXPECT_THAT(reps.Init(&policy_settings_),
+              AnyOf(::policy::SUCCESS, ::policy::EXISTS));
   EXPECT_TRUE(reps.Close());
   utils::dbms::SQLError error(utils::dbms::Error::OK);
   // Checks
@@ -1554,6 +1570,7 @@ TEST_F(SQLPTRepresentationTest,
   EXPECT_EQ(0, query.GetInteger(0));
 }
 
+#ifndef __QNX__
 TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   // Arrange
   const bool in_memory_ = true;
@@ -1561,14 +1578,13 @@ TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   SQLPTRepresentation reps(in_memory_);
   EXPECT_EQ(::policy::SUCCESS, reps.Init(&policy_settings_));
   EXPECT_EQ(::policy::EXISTS, reps.Init(&policy_settings_));
-#ifndef __QNX__
   std::string path = (reps.db())->get_path();
   // Act
   reps.RemoveDB();
   // Check
   EXPECT_FALSE(file_system::FileExists(path));
-#endif  //__QNX__
 }
+#endif  //__QNX__
 
 TEST_F(SQLPTRepresentationTest,
        DISABLED_GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {

@@ -43,6 +43,7 @@
 #include "policy/mock_update_status_manager.h"
 #include "policy/mock_policy_listener.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/sql_pt_representation.h"
 
 namespace test {
 namespace components {
@@ -50,6 +51,7 @@ namespace policy_test {
 
 using ::testing::NiceMock;
 using ::policy::PolicyManagerImpl;
+using ::policy::SQLPTRepresentation;
 
 typedef std::multimap<std::string, policy_table::Rpcs&>
     UserConsentPromptToRpcsConnections;
@@ -146,6 +148,9 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   uint32_t index_;
   Json::Value ptu_request_types_;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
+#ifdef __QNX__
+  SQLPTRepresentation* reps;
+#endif  // __QNX__
 
   void SetUp() OVERRIDE;
 
@@ -235,6 +240,9 @@ class PolicyManagerImplTest_RequestTypes : public ::testing::Test {
   const std::string kDefaultAppId;
   const std::string app_storage_folder_;
   const std::string preloaded_pt_filename_;
+#ifdef __QNX__
+  SQLPTRepresentation* reps;
+#endif  // __QNX__
 
   std::shared_ptr<PolicyManagerImpl> policy_manager_impl_sptr_;
   NiceMock<MockPolicyListener> listener_;

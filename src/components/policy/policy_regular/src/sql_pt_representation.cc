@@ -366,11 +366,13 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
   }
 
 #endif  // __QNX__
-  utils::dbms::SQLQuery check_pages(db());
-  if (!check_pages.Prepare(sql_pt::kCheckPgNumber) || !check_pages.Next()) {
-    LOG4CXX_WARN(logger_, "Incorrect pragma for page counting.");
+  std::string query_check_tables =
+      "SELECT COUNT(*) FROM sqlite_master WHERE `type` = 'table'";
+  utils::dbms::SQLQuery check_tables(db());
+  if (!check_tables.Prepare(query_check_tables) || !check_tables.Next()) {
+    LOG4CXX_WARN(logger_, "Incorrect query for table counting.");
   } else {
-    if (0 < check_pages.GetInteger(0)) {
+    if (0 < check_tables.GetInteger(0)) {
       utils::dbms::SQLQuery db_check(db());
       if (!db_check.Prepare(sql_pt::kCheckDBIntegrity)) {
         LOG4CXX_WARN(logger_, "Incorrect pragma for integrity check.");
@@ -1995,6 +1997,12 @@ bool SQLPTRepresentation::SetIsDefault(const std::string& app_id,
 void SQLPTRepresentation::RemoveDB() const {
 #ifndef __QNX__
   file_system::DeleteFile(db_->get_path());
+#else
+  utils::dbms::SQLQuery query(db());
+  if (!query.Exec(sql_pt::kDropSchema)) {
+    LOG4CXX_WARN(logger_,
+                 "Failed dropping database: " << query.LastError().text());
+  }
 #endif  // __QNX__
 }
 

@@ -62,6 +62,7 @@ using testing::ReturnRef;
 using testing::Return;
 using testing::NiceMock;
 using testing::Mock;
+using testing::AnyOf;
 
 namespace test {
 namespace components {
@@ -80,14 +81,23 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   std::unique_ptr<NiceMock<MockPolicySettings> > policy_settings_;
 
   void SetUp() OVERRIDE {
+#ifndef __QNX__
     file_system::CreateDirectory(kAppStorageFolder);
+#endif
     reps = new SQLPTRepresentation;
     policy_settings_ = std::unique_ptr<NiceMock<MockPolicySettings> >(
         new NiceMock<MockPolicySettings>());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
-    EXPECT_EQ(::policy::SUCCESS, reps->Init(policy_settings_.get()));
+
+    EXPECT_THAT(reps->Init(policy_settings_.get()),
+                AnyOf(::policy::SUCCESS, ::policy::EXISTS));
+    reps->RefreshDB();
+#ifndef __QNX__
     dbms = new DBMS(kAppStorageFolder + "/" + kDatabaseName);
+#else
+    dbms = new DBMS(kDatabaseName);
+#endif
     EXPECT_TRUE(dbms->Open());
   }
 
@@ -98,8 +108,10 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     reps->RemoveDB();
     delete reps;
     dbms->Close();
+#ifndef __QNX__
     file_system::remove_directory_content(kAppStorageFolder);
     file_system::RemoveDirectory(kAppStorageFolder, true);
+#endif
     policy_settings_.reset();
   }
 
@@ -350,9 +362,14 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   }
 };
 
+#ifdef __QNX__
+const std::string SQLPTRepresentationTest::kDatabaseName = "policy";
+const std::string SQLPTRepresentationTest::kAppStorageFolder = "";
+#else
 const std::string SQLPTRepresentationTest::kDatabaseName = "policy.sqlite";
 const std::string SQLPTRepresentationTest::kAppStorageFolder =
     "storage_SQLPTRepresentationTest";
+#endif
 
 class SQLPTRepresentationTest2 : public ::testing::Test {
  protected:
@@ -362,10 +379,12 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
       , kAttemptsToOpenPolicyDB(2u) {}
 
   void SetUp() OVERRIDE {
+#ifndef __QNX__
     file_system::CreateDirectory(kAppStorageFolder);
     chmod(kAppStorageFolder.c_str(), 00000);
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
+#endif
     ON_CALL(policy_settings_, open_attempt_timeout_ms())
         .WillByDefault(Return(kOpenAttemptTimeoutMs));
     ON_CALL(policy_settings_, attempts_to_open_policy_db())
@@ -374,7 +393,11 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
   }
 
   void TearDown() OVERRIDE {
+#ifndef __QNX__
     file_system::RemoveDirectory(kAppStorageFolder, true);
+#else
+    reps->RemoveDB();
+#endif
     delete reps;
   }
 
@@ -390,12 +413,16 @@ class SQLPTRepresentationTest3 : public ::testing::Test {
   SQLPTRepresentationTest3() : kAppStorageFolder("storage") {}
 
   void SetUp() OVERRIDE {
+#ifndef __QNX__
     file_system::CreateDirectory(kAppStorageFolder);
+#endif
     reps = new SQLPTRepresentation;
   }
 
   void TearDown() OVERRIDE {
+#ifndef __QNX__
     file_system::RemoveDirectory(kAppStorageFolder, true);
+#endif
     delete reps;
   }
 
@@ -477,7 +504,7 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_EQ(0, dbms->FetchOneInt(query_select_timeout_after_x_seconds));
   ASSERT_EQ(6, dbms->FetchOneInt(query_select_priorities));
   ASSERT_EQ(4, dbms->FetchOneInt(query_select_hmi_levels));
-  ASSERT_EQ(0, dbms->FetchOneInt(query_select_version));
+  ASSERT_EQ("0", dbms->FetchOneString(query_select_version));
 }
 
 TEST_F(
@@ -1015,15 +1042,18 @@ TEST_F(SQLPTRepresentationTest,
 }
 
 TEST_F(SQLPTRepresentationTest3, Init_InitNewDataBase_ExpectResultSuccess) {
-  // Arrange
+// Arrange
+#ifndef __QNX__
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(kAppStorageFolder));
+#endif
   // Checks
   EXPECT_EQ(::policy::SUCCESS, reps->Init(&policy_settings_));
   EXPECT_EQ(::policy::EXISTS, reps->Init(&policy_settings_));
   reps->RemoveDB();
 }
 
+#ifndef __QNX__
 TEST_F(SQLPTRepresentationTest3,
        Init_TryInitNotExistingDataBase_ExpectResultFail) {
   const std::string not_existing_path = "/not/existing/path";
@@ -1033,6 +1063,7 @@ TEST_F(SQLPTRepresentationTest3,
   // Check
   EXPECT_EQ(::policy::FAIL, reps->Init(&policy_settings_));
 }
+#endif
 
 TEST_F(SQLPTRepresentationTest3,
        Close_InitNewDataBaseThenClose_ExpectResultSuccess) {
@@ -1044,6 +1075,8 @@ TEST_F(SQLPTRepresentationTest3,
   utils::dbms::SQLError error(utils::dbms::Error::OK);
   // Checks
   EXPECT_EQ(error.number(), (reps->db()->LastError().number()));
+
+  EXPECT_EQ(::policy::EXISTS, reps->Init(&policy_settings_));
   reps->RemoveDB();
 }
 
@@ -1487,20 +1520,20 @@ TEST_F(SQLPTRepresentationTest,
   EXPECT_EQ(0, dbms->FetchOneInt(query_select));
 }
 
+#ifndef __QNX__
 TEST_F(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   // Arrange
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(kAppStorageFolder));
   EXPECT_EQ(::policy::SUCCESS, reps->Init(&policy_settings_));
   EXPECT_EQ(::policy::EXISTS, reps->Init(&policy_settings_));
-#ifndef __QNX__
   std::string path = (reps->db())->get_path();
   // Act
   reps->RemoveDB();
   // Check
   EXPECT_FALSE(file_system::FileExists(path));
-#endif  //__QNX__
 }
+#endif  //__QNX__
 
 // TODO {AKozoriz} : Snapshot must have module meta section, but test
 // generates snapshot without it.

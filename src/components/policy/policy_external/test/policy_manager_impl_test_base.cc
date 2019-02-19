@@ -259,6 +259,11 @@ void PolicyManagerImplTest2::SetUp() {
   policy_manager_ = new PolicyManagerImpl(in_memory_);
   ON_CALL(policy_settings_, app_storage_folder())
       .WillByDefault(ReturnRef(app_storage_folder_));
+#ifdef __QNX__
+  reps = new SQLPTRepresentation;
+  reps->Init(&policy_settings_);
+  reps->RemoveDB();
+#endif
   policy_manager_->set_listener(&listener_);
   const char* levels[] = {"BACKGROUND", "FULL", "LIMITED", "NONE"};
   hmi_level_.assign(levels, levels + sizeof(levels) / sizeof(levels[0]));
@@ -422,6 +427,11 @@ void PolicyManagerImplTest2::GetFunctionalGroupingsFromManager(
 void PolicyManagerImplTest2::TearDown() {
   delete policy_manager_;
   file_system::RemoveDirectory(app_storage_folder_, true);
+#ifdef __QNX__
+  reps->RemoveDB();
+  reps->Close();
+  delete reps;
+#endif
 }
 
 void PolicyManagerImplTest2::ResetOutputList(
@@ -639,6 +649,11 @@ void PolicyManagerImplTest_RequestTypes::SetUp() {
 
   file_system::CreateDirectory(app_storage_folder_);
   const bool in_memory = true;
+#ifdef __QNX__
+  reps = new SQLPTRepresentation;
+  reps->Init(&policy_settings_);
+  reps->RemoveDB();
+#endif
   policy_manager_impl_sptr_ = std::make_shared<PolicyManagerImpl>(in_memory);
   policy_manager_impl_sptr_->set_listener(&listener_);
 }
@@ -754,6 +769,11 @@ void PolicyManagerImplTest_RequestTypes::CompareRequestTypesContainers(
 
 void PolicyManagerImplTest_RequestTypes::TearDown() {
   file_system::RemoveDirectory(app_storage_folder_, true);
+#ifdef __QNX__
+  reps->RemoveDB();
+  reps->Close();
+  delete reps;
+#endif
 }
 
 void PolicyManagerImplTest_ExternalConsent::

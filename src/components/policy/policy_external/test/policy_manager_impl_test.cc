@@ -127,10 +127,12 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
+  EXPECT_CALL(*cache_manager_, IgnitionCyclesBeforeExchange());
   EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_))
       .WillOnce(Return(kNonZero));
   policy_manager_->ForcePTExchange();
   policy_manager_->SetSendOnUpdateFlags(true, false);
+  EXPECT_CALL(*cache_manager_, SaveUpdateRequired(true));
   policy_manager_->OnUpdateStarted();
   Json::Value table = createPTforLoad();
 
@@ -158,7 +160,11 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager_, TimeoutResponse());
   EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_));
 
+  EXPECT_CALL(*cache_manager_, GetExternalConsentStatus());
+  EXPECT_CALL(*cache_manager_, GetGroupsWithSameEntities(_));
+  EXPECT_CALL(*cache_manager_, GetKnownLinksFromPT());
   EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+
   EXPECT_CALL(*cache_manager_, IsPTPreloaded());
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
 }
@@ -287,6 +293,8 @@ TEST_F(PolicyManagerImplTest2, GetPolicyTableStatus_ExpectUpToDate) {
 TEST_F(PolicyManagerImplTest,
        SetUpdateStarted_GetPolicyTableStatus_Expect_Updating) {
   // Arrange
+  EXPECT_CALL(*cache_manager_, IgnitionCyclesBeforeExchange());
+  EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_));
   policy_manager_->ForcePTExchange();
   EXPECT_CALL(*cache_manager_, SaveUpdateRequired(true));
   policy_manager_->OnUpdateStarted();

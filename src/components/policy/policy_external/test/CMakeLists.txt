@@ -61,3 +61,7 @@ create_test("policy_test" "${POLICY_TEST_SOURCES}" "${testLibraries}")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/json)
 file(GLOB JSON_TEST_FILES json/*.json)
 file(COPY ${JSON_TEST_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/json)
+
+file(MAKE_DIRECTORY ${TEST_BIN_DIR}/json)
+file(GLOB JSON_TEST_FILES json/*.json)
+file(COPY ${JSON_TEST_FILES} DESTINATION ${TEST_BIN_DIR}/json)

@@ -40,7 +40,7 @@
 #include "policy/sql_pt_ext_representation.h"
 #include "utils/gen_hash.h"
 #include "utils/file_system.h"
-#include "utils/sqlite_wrapper/sql/sql_query.h"
+#include "policy/sql_wrapper.h"
 #include "rpc_base/rpc_base.h"
 #include "policy/policy_table/types.h"
 #include "policy/mock_policy_settings.h"
@@ -76,12 +76,16 @@ class SQLPTExtRepresentationTest : public ::testing::Test {
   const std::string kAppStorageFolder = "storage_SQLPTExtRepresentationTest";
 
   void SetUp() OVERRIDE {
+#ifndef __QNX__
     file_system::DeleteFile(kDatabaseName);
-    reps_ = new SQLPTExtRepresentation(in_memory_);
-    ASSERT_TRUE(reps_ != NULL);
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
-    ASSERT_EQ(SUCCESS, reps_->Init(&policy_settings_));
+#endif  // __QNX__
+    reps_ = new SQLPTExtRepresentation(in_memory_);
+    ASSERT_TRUE(reps_ != NULL);
+    ASSERT_THAT(reps_->Init(&policy_settings_),
+                ::testing::AnyOf(EXISTS, SUCCESS));
+    ASSERT_TRUE(reps_->RefreshDB());
     query_wrapper_ = new utils::dbms::SQLQuery(reps_->db());
     ASSERT_TRUE(query_wrapper_ != NULL);
   }

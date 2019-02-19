@@ -881,7 +881,11 @@ TEST_F(PolicyManagerImplTest2,
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Arrange
+  EXPECT_CALL(*cache_manager_, IgnitionCyclesBeforeExchange());
+  EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_));
   policy_manager_->ForcePTExchange();
+
+  EXPECT_CALL(*cache_manager_, SaveUpdateRequired(true));
   policy_manager_->OnUpdateStarted();
   Json::Value table(Json::objectValue);
 

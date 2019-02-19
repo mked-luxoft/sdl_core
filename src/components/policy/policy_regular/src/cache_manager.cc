@@ -937,6 +937,7 @@ void CacheManager::CheckSnapshotInitialization() {
 
 void CacheManager::PersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   if (backup_.use_count() != 0) {
     if (pt_.use_count() != 0) {
       // Comma expression is used to hold the lock only during the constructor
@@ -1401,6 +1402,7 @@ bool CacheManager::IsApplicationRepresented(const std::string& app_id) const {
 bool CacheManager::Init(const std::string& file_name,
                         const PolicySettings* settings) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   settings_ = settings;
   InitResult init_result = backup_->Init(settings);
 

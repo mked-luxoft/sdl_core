@@ -47,6 +47,7 @@
 #include "policy/mock_policy_listener.h"
 #include "policy/mock_cache_manager.h"
 #include "policy/mock_update_status_manager.h"
+#include "policy/sql_pt_representation.h"
 
 #include "utils/macro.h"
 #include "utils/file_system.h"
@@ -66,6 +67,7 @@ using ::testing::Return;
 
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
+using ::policy::SQLPTRepresentation;
 
 namespace test {
 namespace components {
@@ -194,10 +196,19 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   Json::Value PTU_request_types;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
   const std::string kAppStorageFolder = "storage_PolicyManagerImplTest2";
+#ifdef __QNX__
+  SQLPTRepresentation* reps;
+#endif
 
   void SetUp() OVERRIDE {
     file_system::CreateDirectory(kAppStorageFolder);
+#ifndef __QNX__
     file_system::DeleteFile("policy.sqlite");
+#else
+    reps = new SQLPTRepresentation;
+    reps->Init(&policy_settings_);
+    reps->RemoveDB();
+#endif
 
     manager = new PolicyManagerImpl();
     ON_CALL(policy_settings_, app_storage_folder())
@@ -363,6 +374,11 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     delete manager;
     file_system::remove_directory_content(kAppStorageFolder);
     file_system::RemoveDirectory(kAppStorageFolder, true);
+#ifdef __QNX__
+    reps->RemoveDB();
+    reps->Close();
+    delete reps;
+#endif
   }
 };
 
@@ -710,6 +726,8 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
 TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
   manager->ForcePTExchange();
+
+  EXPECT_CALL(*cache_manager, SaveUpdateRequired(true));
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
   policy_table::Table update(&table);
@@ -743,6 +761,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Arrange
   Json::Value table(Json::objectValue);
   manager->ForcePTExchange();
+
+  EXPECT_CALL(*cache_manager, SaveUpdateRequired(true));
   manager->OnUpdateStarted();
 
   policy_table::Table update(&table);
