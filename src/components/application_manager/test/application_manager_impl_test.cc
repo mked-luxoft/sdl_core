@@ -96,18 +96,39 @@ connection_handler::DeviceHandle kDeviceId = 12345u;
 const std::string kAppId = "someID";
 const uint32_t kConnectionKey = 1232u;
 const std::string kAppName = "appName";
+typedef MockMessageHelper::MockServiceStatusUpdateNotificationBuilder*
+    MockServiceStatusUpdatePtr;
+typedef hmi_apis::Common_ServiceUpdateReason::eType ServiceUpdateReason;
+typedef hmi_apis::Common_ServiceType::eType ServiceType;
+typedef hmi_apis::Common_ServiceEvent::eType ServiceEvent;
+typedef utils::Optional<ServiceUpdateReason> UpdateReasonOptional;
+
 }  // namespace
 
-class ApplicationManagerImplTest : public ::testing::Test {
+struct ServiceStatus {
+  ServiceType service_type_;
+  ServiceEvent service_event_;
+  UpdateReasonOptional reason_;
+
+  ServiceStatus(ServiceType type,
+                ServiceEvent event,
+                UpdateReasonOptional reason)
+      : service_type_(type), service_event_(event), reason_(reason) {}
+};
+
+class ApplicationManagerImplTest
+    : public ::testing::Test,
+      public ::testing::WithParamInterface<ServiceStatus> {
  public:
   ApplicationManagerImplTest()
       : app_id_(0u)
       , mock_storage_(
             std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_))
-      , mock_rpc_service_(new MockRPCService)
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
+      , mock_service_status_update_(application_manager::MockMessageHelper::
+                                        on_service_update_builder_mock())
 
   {
 #ifdef ENABLE_LOG
@@ -126,7 +147,13 @@ class ApplicationManagerImplTest : public ::testing::Test {
         .WillByDefault(DoAll(SetArgPointee<3u>(app_id_), Return(0)));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
-    app_manager_impl_->SetRPCService(mock_rpc_service_);
+
+    std::unique_ptr<rpc_service::RPCService> unique_rpc_service(
+        new MockRPCService);
+    app_manager_impl_->SetRPCService(unique_rpc_service);
+    mock_rpc_service_ =
+        static_cast<MockRPCService*>(&(app_manager_impl_->GetRPCService()));
+
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
     app_manager_impl_->set_connection_handler(&mock_connection_handler_);
@@ -200,17 +227,89 @@ class ApplicationManagerImplTest : public ::testing::Test {
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
   std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
 
-  std::unique_ptr<rpc_service::RPCService> mock_rpc_service_;
+  MockRPCService* mock_rpc_service_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
   std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   application_manager::MockMessageHelper* mock_message_helper_;
+  MockServiceStatusUpdatePtr mock_service_status_update_;
 
   std::shared_ptr<MockApplication> mock_app_ptr_;
   NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
 };
+
+INSTANTIATE_TEST_CASE_P(
+    ProcessServiceStatusUpdate_REQUEST_ACCEPTED,
+    ApplicationManagerImplTest,
+    ::testing::Values(ServiceStatus(ServiceType::AUDIO,
+                                    ServiceEvent::REQUEST_ACCEPTED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::VIDEO,
+                                    ServiceEvent::REQUEST_ACCEPTED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::RPC,
+                                    ServiceEvent::REQUEST_ACCEPTED,
+                                    UpdateReasonOptional::EMPTY)));
+
+INSTANTIATE_TEST_CASE_P(
+    ProcessServiceStatusUpdate_REQUEST_RECEIVED,
+    ApplicationManagerImplTest,
+    ::testing::Values(ServiceStatus(ServiceType::AUDIO,
+                                    ServiceEvent::REQUEST_RECEIVED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::VIDEO,
+                                    ServiceEvent::REQUEST_RECEIVED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::RPC,
+                                    ServiceEvent::REQUEST_RECEIVED,
+                                    UpdateReasonOptional::EMPTY)));
+
+INSTANTIATE_TEST_CASE_P(
+    ProcessServiceStatusUpdate_REQUEST_REJECTED,
+    ApplicationManagerImplTest,
+    ::testing::Values(ServiceStatus(ServiceType::AUDIO,
+                                    ServiceEvent::REQUEST_REJECTED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::VIDEO,
+                                    ServiceEvent::REQUEST_REJECTED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::RPC,
+                                    ServiceEvent::REQUEST_REJECTED,
+                                    UpdateReasonOptional::EMPTY)));
+
+TEST_P(ApplicationManagerImplTest,
+       ProcessServiceStatusUpdate_SendMessageToHMI) {
+  smart_objects::SmartObjectSPtr notification_(
+      new smart_objects::SmartObject(smart_objects::SmartType_Map));
+  (*notification_)[strings::msg_params][hmi_notification::service_type] =
+      GetParam().service_type_;
+  (*notification_)[strings::msg_params][hmi_notification::service_event] =
+      GetParam().service_event_;
+  (*notification_)[strings::msg_params][strings::app_id] = kConnectionKey;
+
+  AddMockApplication();
+
+  ON_CALL(*mock_app_ptr_, app_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*mock_service_status_update_,
+          CreateBuilder(GetParam().service_type_, GetParam().service_event_))
+      .WillByDefault(Return(*mock_service_status_update_));
+  ON_CALL(*mock_service_status_update_, AddAppID(kConnectionKey))
+      .WillByDefault(ReturnRef(*mock_service_status_update_));
+  ON_CALL(*mock_service_status_update_, AddServiceUpdateReason(_))
+      .WillByDefault(ReturnRef(*mock_service_status_update_));
+  ON_CALL(*mock_service_status_update_, notification())
+      .WillByDefault(Return(notification_));
+
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(notification_))
+      .WillOnce(Return(true));
+
+  app_manager_impl_->ProcessServiceStatusUpdate(kConnectionKey,
+                                                GetParam().service_type_,
+                                                GetParam().service_event_,
+                                                GetParam().reason_);
+}
 
 TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
   using namespace ns_smart_device_link::ns_smart_objects;
