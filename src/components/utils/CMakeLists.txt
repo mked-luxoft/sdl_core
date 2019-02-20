@@ -45,7 +45,7 @@ set(EXCLUDE_PATHS
   ${DBMS_PATHS}
 )
 
-set(LIBRARIES)
+set(LIBRARIES ConfigProfile)
 
 if(NOT BUILD_BACKTRACE_SUPPORT)
   list(APPEND EXCLUDE_PATHS
@@ -58,7 +58,6 @@ if(ENABLE_LOG)
     log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
     apr-1 -L${APR_LIBS_DIRECTORY}
     aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY}
-    ConfigProfile
   )
 else()
   list(APPEND EXCLUDE_PATHS

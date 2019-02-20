@@ -59,7 +59,6 @@
 #include "utils/file_system.h"
 #include "utils/lock.h"
 
-#include "utils/push_log.h"
 #include "encryption/hashing.h"
 
 namespace test {

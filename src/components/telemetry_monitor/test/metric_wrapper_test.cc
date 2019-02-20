@@ -70,9 +70,9 @@ TEST(MetricWrapper, GetJsonMetricWithGrabResources) {
   EXPECT_NE("null/n", jvalue[strings::utime].toStyledString());
   EXPECT_NE("null/n", jvalue[strings::memory].toStyledString());
 
-  EXPECT_EQ(resources->stime, jvalue[strings::stime].asInt());
-  EXPECT_EQ(resources->utime, jvalue[strings::utime].asInt());
-  EXPECT_EQ(resources->memory, jvalue[strings::memory].asInt());
+  EXPECT_EQ(resources->stime, jvalue[strings::stime].asInt64());
+  EXPECT_EQ(resources->utime, jvalue[strings::utime].asInt64());
+  EXPECT_EQ(resources->memory, jvalue[strings::memory].asInt64());
 }
 
 }  // namespace telemetry_monitor_test
