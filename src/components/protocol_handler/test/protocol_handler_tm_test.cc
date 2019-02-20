@@ -33,15 +33,20 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "gtest/gtest.h"
+#include <string>
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/protocol_handler_impl.h"
 #include "protocol/bson_object_keys.h"
 #include "protocol/common.h"
 #include "protocol_handler/control_message_matcher.h"
 #include "protocol_handler/mock_protocol_handler.h"
 #include "protocol_handler/mock_protocol_handler_settings.h"
 #include "protocol_handler/mock_protocol_observer.h"
+#include "protocol_handler/mock_protocol_handler_settings.h"
 #include "protocol_handler/mock_session_observer.h"
-#include "protocol_handler/protocol_handler.h"
-#include "protocol_handler/protocol_handler_impl.h"
+#include "connection_handler/mock_connection_handler.h"
+#include "protocol_handler/mock_service_status_update_handler_listener.h"
+#include "connection_handler/connection_handler_impl.h"
 #ifdef ENABLE_SECURITY
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
@@ -50,8 +55,8 @@
 #include "utils/mock_system_time_handler.h"
 #include "utils/semantic_version.h"
 
-#include <bson_object.h>
 #include "utils/test_async_waiter.h"
+#include <bson_object.h>
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -106,6 +111,7 @@ using protocol_handler::PROTOCOL_VERSION_4;
 using protocol_handler::PROTOCOL_VERSION_5;
 using protocol_handler::PROTOCOL_VERSION_MAX;
 using protocol_handler::ProtocolHandlerImpl;
+using protocol_handler::ServiceStatusUpdateHandler;
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;
 using protocol_handler::ServiceType;
@@ -122,23 +128,26 @@ using ContextCreationStrategy =
 // For CH entities
 using connection_handler::DeviceHandle;
 // Google Testing Framework Entities
-using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
+using ::testing::ReturnNull;
 using ::testing::An;
 using ::testing::AnyOf;
 using ::testing::AtLeast;
 using ::testing::ByRef;
 using ::testing::DoAll;
-using ::testing::Eq;
-using ::testing::Invoke;
-using ::testing::Return;
-using ::testing::ReturnNull;
-using ::testing::ReturnRef;
-using ::testing::ReturnRefOfCopy;
 using ::testing::SaveArg;
-using ::testing::SetArgPointee;
+using ::testing::Eq;
+using ::testing::_;
+using ::testing::Invoke;
 using ::testing::SetArgReferee;
+using ::testing::SetArgPointee;
 
 typedef std::vector<uint8_t> UCharDataVector;
+typedef std::shared_ptr<
+    testing::NiceMock<MockServiceStatusUpdateHandlerListener> >
+    MockServiceStatusUpdateHandlerListenerPtr;
 
 // custom action to call a member function with 6 arguments
 ACTION_P4(InvokeMemberFuncWithArg2, ptr, memberFunc, a, b) {
@@ -186,10 +195,17 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                 session_observer_mock,
                                 connection_handler_mock,
                                 transport_manager_mock));
+    std::unique_ptr<ServiceStatusUpdateHandler> service_status_update_handler_(
+        new ServiceStatusUpdateHandler(
+            &(*mock_service_status_update_handler_listener_)));
+    protocol_handler_impl->set_service_status_update_handler(
+        std::move(service_status_update_handler_));
     tm_listener = protocol_handler_impl.get();
   }
 
   void SetUp() OVERRIDE {
+    mock_service_status_update_handler_listener_ = std::make_shared<
+        testing::NiceMock<MockServiceStatusUpdateHandlerListener> >();
     InitProtocolHandlerImpl(0u, 0u);
     connection_id = 0xAu;
     session_id = 0xFFu;
@@ -390,6 +406,8 @@ class ProtocolHandlerImplTest : public ::testing::Test {
 
   testing::NiceMock<MockProtocolHandlerSettings> protocol_handler_settings_mock;
   std::shared_ptr<ProtocolHandlerImpl> protocol_handler_impl;
+  MockServiceStatusUpdateHandlerListenerPtr
+      mock_service_status_update_handler_listener_;
   TransportManagerListener* tm_listener;
   // Uniq connection
   ::transport_manager::ConnectionUID connection_id;
@@ -737,7 +755,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddSecurityManager();
 
   EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id2, session_id2))
-      .WillOnce(Return(connection_key));
+      .WillRepeatedly(Return(connection_key));
 
   EXPECT_CALL(session_observer_mock,
               GetSSLContext(connection_key, start_service))
