@@ -85,9 +85,11 @@ class TestAsyncWaiter {
    * Notifies async waiter
    */
   void Notify() {
-    sync_primitives::AutoLock auto_lock(lock_);
-    notified_ = true;
-    ++count_;
+    {
+      sync_primitives::AutoLock auto_lock(lock_);
+      notified_ = true;
+      ++count_;
+    }
     cond_var_.Broadcast();
   }
 

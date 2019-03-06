@@ -184,23 +184,27 @@ void MessageQueue<T, Q>::push(const T& element) {
 
 template <typename T, class Q>
 bool MessageQueue<T, Q>::pop(T& element) {
-  sync_primitives::AutoLock auto_lock(queue_lock_);
-  if (queue_.empty()) {
-    return false;
+  {
+    sync_primitives::AutoLock auto_lock(queue_lock_);
+    if (queue_.empty()) {
+      return false;
+    }
+    element = queue_.front();
+    queue_.pop();
   }
-  element = queue_.front();
-  queue_.pop();
   queue_new_items_.NotifyOne();
   return true;
 }
 
 template <typename T, class Q>
 void MessageQueue<T, Q>::Shutdown() {
-  sync_primitives::AutoLock auto_lock(queue_lock_);
-  shutting_down_ = true;
-  if (!queue_.empty()) {
-    Queue empty_queue;
-    std::swap(queue_, empty_queue);
+  {
+    sync_primitives::AutoLock auto_lock(queue_lock_);
+    shutting_down_ = true;
+    if (!queue_.empty()) {
+      Queue empty_queue;
+      std::swap(queue_, empty_queue);
+    }
   }
   queue_new_items_.Broadcast();
 }

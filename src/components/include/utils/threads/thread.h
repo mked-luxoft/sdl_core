@@ -91,13 +91,12 @@ class Thread {
   PlatformThreadHandle handle_;
   ThreadOptions thread_options_;
   // Should be locked to protect isThreadRunning_ and thread_created_ values
+  sync_primitives::Lock run_lock_;
   sync_primitives::Lock state_lock_;
   volatile unsigned int isThreadRunning_;
   volatile bool stopped_;
   volatile bool finalized_;
   bool thread_created_;
-  // Signalled when Thread::start() is called
-  sync_primitives::ConditionalVariable run_cond_;
 
  public:
   static int count;
