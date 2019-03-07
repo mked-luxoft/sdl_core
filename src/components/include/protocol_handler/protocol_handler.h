@@ -39,6 +39,11 @@
  *\namespace protocol_handlerHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
+
+namespace application_manager {
+class RPCProtectionMediator;
+}
+
 namespace protocol_handler {
 
 class ProtocolObserver;
@@ -73,6 +78,7 @@ class ProtocolHandler {
    * connection must be closed when message is processed
    */
   virtual void SendMessageToMobileApp(const RawMessagePtr message,
+                                      bool needs_encryption,
                                       bool final_message) = 0;
 
   /**
@@ -135,6 +141,9 @@ class ProtocolHandler {
   virtual void NotifySessionStarted(
       const SessionContext& context,
       std::vector<std::string>& rejected_params) = 0;
+
+  virtual application_manager::RPCProtectionMediator* rpc_protection_mediator()
+      const = 0;
 
  protected:
   /**

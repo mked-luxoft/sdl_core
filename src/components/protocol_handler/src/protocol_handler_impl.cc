@@ -87,6 +87,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     , start_session_frame_map_lock_()
     , start_session_frame_map_()
     , tcp_enabled_(false)
+    , rpc_protection_mediator_(nullptr)
 #ifdef TELEMETRY_MONITOR
     , metric_observer_(NULL)
 #endif  // TELEMETRY_MONITOR
@@ -836,6 +837,7 @@ void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
 }
 
 void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
+                                                 bool needs_encryption,
                                                  bool final_message) {
 #ifdef TELEMETRY_MONITOR
   const date_time::TimeDuration start_time = date_time::getCurrentTime();
@@ -903,6 +905,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                 message->service_type(),
                                                 message->data_size(),
                                                 message->data(),
+                                                needs_encryption,
                                                 final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
@@ -920,6 +923,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                message->data_size(),
                                                message->data(),
                                                frame_size,
+                                               needs_encryption,
                                                final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
@@ -1181,6 +1185,12 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
   }
 }
 
+application_manager::RPCProtectionMediator*
+ProtocolHandlerImpl::rpc_protection_mediator() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return rpc_protection_mediator_;
+}
+
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!packet) {
@@ -1225,13 +1235,14 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     const uint8_t service_type,
     const size_t data_size,
     const uint8_t* data,
+    const bool needs_encryption,
     const bool is_final_message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ProtocolFramePtr ptr(
       new protocol_handler::ProtocolPacket(connection_id,
                                            protocol_version,
-                                           PROTECTION_OFF,
+                                           needs_encryption,
                                            FRAME_TYPE_SINGLE,
                                            service_type,
                                            FRAME_DATA_SINGLE,
@@ -1253,6 +1264,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     const size_t data_size,
     const uint8_t* data,
     const size_t max_frame_size,
+    const bool needs_encryption,
     const bool is_final_message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -1293,7 +1305,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   const ProtocolFramePtr firstPacket(
       new protocol_handler::ProtocolPacket(connection_id,
                                            protocol_version,
-                                           PROTECTION_OFF,
+                                           needs_encryption,
                                            FRAME_TYPE_FIRST,
                                            service_type,
                                            FRAME_DATA_FIRST,
@@ -1317,7 +1329,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     const ProtocolFramePtr ptr(
         new protocol_handler::ProtocolPacket(connection_id,
                                              protocol_version,
-                                             PROTECTION_OFF,
+                                             needs_encryption,
                                              FRAME_TYPE_CONSECUTIVE,
                                              service_type,
                                              data_type,

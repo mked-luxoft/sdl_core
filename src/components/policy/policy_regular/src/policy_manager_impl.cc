@@ -916,6 +916,13 @@ void PolicyManagerImpl::GetPermissionsForApp(
   return;
 }
 
+bool PolicyManagerImpl::RPCNeedsEncryption(const std::string& app_id,
+                                           const uint32_t function_id) {
+  LOG4CXX_ERROR(logger_, "NOT YET IMPLEMENTED");
+
+  return false;
+}
+
 std::string& PolicyManagerImpl::GetCurrentDeviceId(
     const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);

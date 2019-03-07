@@ -329,6 +329,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
       const std::string& policy_app_id,
       std::vector<FunctionalGroupPermission>& permissions) = 0;
 
+  virtual bool RPCNeedsEncryption(const std::string& app_id,
+                                  const uint32_t function_id) = 0;
+
   /**
    * @brief Gets specific application permissions changes since last policy
    * table update

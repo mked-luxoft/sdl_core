@@ -343,6 +343,9 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& policy_app_id,
       std::vector<FunctionalGroupPermission>& permissions) OVERRIDE;
 
+  bool RPCNeedsEncryption(const std::string& app_id,
+                          const uint32_t function_id) OVERRIDE;
+
   /**
    * @brief Return device id, which hosts specific application
    * @param policy_app_id Application id, which is required to update device id

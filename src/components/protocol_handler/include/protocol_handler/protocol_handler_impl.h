@@ -60,6 +60,7 @@
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "connection_handler/connection_handler.h"
 #include "application_manager/policies/policy_handler_observer.h"
+#include "application_manager/rpc_protection_mediator.h"
 
 #ifdef TELEMETRY_MONITOR
 #include "protocol_handler/telemetry_observer.h"
@@ -225,6 +226,7 @@ class ProtocolHandlerImpl
    * \param message Message with params to be sent to Mobile App
    */
   void SendMessageToMobileApp(const RawMessagePtr message,
+                              bool needs_encryption,
                               bool final_message) OVERRIDE;
 
   /**
@@ -557,6 +559,7 @@ class ProtocolHandlerImpl
                                      const uint8_t service_type,
                                      const size_t data_size,
                                      const uint8_t* data,
+                                     const bool needs_encryption,
                                      const bool is_final_message);
 
   /**
@@ -579,6 +582,7 @@ class ProtocolHandlerImpl
                                     const size_t data_size,
                                     const uint8_t* data,
                                     const size_t max_frame_size,
+                                    const bool needs_encryption,
                                     const bool is_final_message);
 
   /**
@@ -687,6 +691,9 @@ class ProtocolHandlerImpl
   const std::string TransportTypeFromTransport(
       const utils::custom_string::CustomString& transport) const;
 
+  application_manager::RPCProtectionMediator* rpc_protection_mediator()
+      const OVERRIDE;
+
   const ProtocolHandlerSettings& settings_;
 
   /**
@@ -776,6 +783,8 @@ class ProtocolHandlerImpl
   bool tcp_enabled_;
   std::string tcp_port_;
   std::string tcp_ip_address_;
+
+  application_manager::RPCProtectionMediator* rpc_protection_mediator_;
 
 #ifdef TELEMETRY_MONITOR
   PHTelemetryObserver* metric_observer_;

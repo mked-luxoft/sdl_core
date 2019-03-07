@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/rpc_service_impl.h"
+#include "application_manager/rpc_protection_mediator_impl.h"
 
 namespace application_manager {
 namespace rpc_service {
@@ -344,7 +345,15 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
     }
   }
 
-  protocol_handler_->SendMessageToMobileApp(rawMessage, is_final);
+  const auto function_id = message->function_id();
+  const auto app_id = app_manager_.application_id(message->correlation_id());
+
+  const bool needs_encryption =
+      protocol_handler_->rpc_protection_mediator()->DoesRPCNeedEncryption(
+          function_id, app_id);
+  UNUSED(needs_encryption);
+  protocol_handler_->SendMessageToMobileApp(
+      rawMessage, needs_encryption, is_final);
   LOG4CXX_INFO(logger_, "Message for mobile given away");
 
   if (close_session) {
