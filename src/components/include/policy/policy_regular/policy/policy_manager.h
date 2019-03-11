@@ -48,9 +48,18 @@ namespace policy {
 class PolicySettings;
 typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
+class RPCProtectionAccessor {
+ public:
+  virtual ~RPCProtectionAccessor() {}
+  virtual bool DoesRPCNeedEncryption(const std::string& function_id,
+                                     const std::string& app_id) = 0;
+};
+
 class PolicyManager : public usage_statistics::StatisticsManager {
  public:
   virtual ~PolicyManager() {}
+
+  virtual RPCProtectionAccessor* rpc_protection_accessor() = 0;
 
   /**
    * @brief set_listener set new policy listener instance

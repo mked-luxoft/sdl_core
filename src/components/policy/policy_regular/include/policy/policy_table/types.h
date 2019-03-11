@@ -143,6 +143,7 @@ struct ApplicationParams : PolicyBase {
   Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
   Optional<String<0, 255> > certificate;
+  Optional<Boolean> encryption_required;
   mutable Optional<ModuleTypes> moduleType;
 
  public:
@@ -207,6 +208,7 @@ struct RpcParameters : CompositeType {
 
 struct Rpcs : CompositeType {
  public:
+  Optional<Boolean> encryption_required;
   Optional<String<1, 255> > user_consent_prompt;
   Nullable<Rpc> rpcs;
 

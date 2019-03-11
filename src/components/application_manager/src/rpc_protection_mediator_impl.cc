@@ -13,8 +13,9 @@ RPCProtectionMediatorImpl::RPCProtectionMediatorImpl(
 bool RPCProtectionMediatorImpl::DoesRPCNeedEncryption(
     const uint32_t function_id, const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_WARN(logger_, "NOT YET IMPLEMENTED!");
-  return false;
+  std::string policy_app_id = app_manager_.application(app_id)->policy_app_id();
+  return policy_manager_.rpc_protection_accessor()->DoesRPCNeedEncryption(
+      "function_id", policy_app_id);
 }
 
 void RPCProtectionMediatorImpl::SendEncryptionNeededError(

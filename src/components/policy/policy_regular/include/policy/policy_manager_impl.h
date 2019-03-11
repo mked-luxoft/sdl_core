@@ -54,9 +54,16 @@ namespace policy_table = rpc::policy_table_interface_base;
 namespace policy {
 struct CheckAppPolicy;
 
-class PolicyManagerImpl : public PolicyManager {
+class PolicyManagerImpl : public PolicyManager, public RPCProtectionAccessor {
  public:
   PolicyManagerImpl();
+
+  RPCProtectionAccessor* rpc_protection_accessor() FINAL {
+    return this;
+  }
+
+  bool DoesRPCNeedEncryption(const std::string& function_id,
+                             const std::string& app_id) FINAL;
 
   /**
    * @brief set_listener set new policy listener instance

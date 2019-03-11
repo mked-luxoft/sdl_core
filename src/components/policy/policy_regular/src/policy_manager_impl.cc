@@ -1430,6 +1430,32 @@ void PolicyManagerImpl::OnPrimaryGroupsChanged(
   }
 }
 
+bool PolicyManagerImpl::DoesRPCNeedEncryption(const std::string& function_id,
+                                              const std::string& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto policies_section = cache_->pt()->policy_table.app_policies_section.apps;
+
+  auto app_policies = policies_section.find(app_id);
+
+  if (app_policies != policies_section.end()) {
+    if ((*app_policies).second.encryption_required) {
+      return (*app_policies).second.encryption_required;
+    } else {
+      LOG4CXX_DEBUG(logger_,
+                    "Cheking encryption required for rpc function groups");
+      const auto& function_groups =
+          cache_->pt()->policy_table.functional_groupings;
+    }
+
+  } else {
+    LOG4CXX_WARN(logger_, "Application for app id " << app_id << " not found");
+    return false;
+  }
+
+  return false;
+}
+
 bool PolicyManagerImpl::GetModuleTypes(
     const std::string& application_id,
     std::vector<std::string>* modules) const {
