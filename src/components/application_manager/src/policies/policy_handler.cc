@@ -333,6 +333,10 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
 
 PolicyHandler::~PolicyHandler() {}
 
+RPCEncryptionManagerInterface* PolicyHandler::RPCEncryptionManager() const {
+  return policy_manager_.get();
+}
+
 bool PolicyHandler::PolicyEnabled() const {
   return get_settings().enable_policy();
 }

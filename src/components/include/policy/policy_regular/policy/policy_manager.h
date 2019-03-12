@@ -43,6 +43,7 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "policy/cache_manager_interface.h"
 #include "policy/access_remote.h"
+#include "application_manager/policies/rpc_encryption_manager_interface.h"
 
 namespace policy {
 class PolicySettings;
@@ -55,7 +56,8 @@ class RPCProtectionAccessor {
                                      const std::string& app_id) = 0;
 };
 
-class PolicyManager : public usage_statistics::StatisticsManager {
+class PolicyManager : public usage_statistics::StatisticsManager,
+                      public RPCEncryptionManagerInterface {
  public:
   virtual ~PolicyManager() {}
 
