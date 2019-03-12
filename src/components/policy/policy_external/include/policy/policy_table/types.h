@@ -135,6 +135,7 @@ struct PolicyBase : CompositeType {
   Enum<HmiLevel> default_hmi;
   Boolean keep_context;
   Boolean steal_focus;
+  Optional<Boolean> encryption_required;
 
  public:
   PolicyBase();
@@ -225,6 +226,7 @@ struct RpcParameters : CompositeType {
  public:
   HmiLevels hmi_levels;
   Optional<Parameters> parameters;
+  Optional<Boolean> encryption_required;
 
  public:
   RpcParameters();
@@ -271,6 +273,7 @@ struct Rpcs : CompositeType {
       disallowed_by_external_consent_entities_on;
   Optional<DisallowedByExternalConsentEntities>
       disallowed_by_external_consent_entities_off;
+  Optional<Boolean> encryption_required;
 
  public:
   Rpcs();

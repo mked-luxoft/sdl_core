@@ -44,7 +44,8 @@ PolicyBase::PolicyBase(const Json::Value* value__)
     , priority(impl::ValueMember(value__, "priority"))
     , default_hmi(impl::ValueMember(value__, "default_hmi"))
     , keep_context(impl::ValueMember(value__, "keep_context"))
-    , steal_focus(impl::ValueMember(value__, "steal_focus")) {}
+    , steal_focus(impl::ValueMember(value__, "steal_focus"))
+    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
 
 Json::Value PolicyBase::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -54,6 +55,7 @@ Json::Value PolicyBase::ToJsonValue() const {
   impl::WriteJsonField("default_hmi", default_hmi, &result__);
   impl::WriteJsonField("keep_context", keep_context, &result__);
   impl::WriteJsonField("steal_focus", steal_focus, &result__);
+  impl::WriteJsonField("encryption_required", encryption_required, &result__);
   return result__;
 }
 
@@ -74,6 +76,9 @@ bool PolicyBase::is_valid() const {
     return false;
   }
   if (!steal_focus.is_valid()) {
+    return false;
+  }
+  if (!encryption_required.is_valid()) {
     return false;
   }
   return Validate();
@@ -102,6 +107,9 @@ bool PolicyBase::struct_empty() const {
   if (steal_focus.is_initialized()) {
     return false;
   }
+  if (encryption_required.is_initialized()) {
+    return false;
+  }
   return true;
 }
 
@@ -127,6 +135,10 @@ void PolicyBase::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!steal_focus.is_valid()) {
     steal_focus.ReportErrors(&report__->ReportSubobject("steal_focus"));
+  }
+  if (!encryption_required.is_valid()) {
+    encryption_required.ReportErrors(
+        &report__->ReportSubobject("encryption_required"));
   }
 }
 
@@ -380,12 +392,14 @@ RpcParameters::~RpcParameters() {}
 RpcParameters::RpcParameters(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , hmi_levels(impl::ValueMember(value__, "hmi_levels"))
-    , parameters(impl::ValueMember(value__, "parameters")) {}
+    , parameters(impl::ValueMember(value__, "parameters"))
+    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
 
 Json::Value RpcParameters::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("hmi_levels", hmi_levels, &result__);
   impl::WriteJsonField("parameters", parameters, &result__);
+  impl::WriteJsonField("encryption_required", encryption_required, &result__);
   return result__;
 }
 
@@ -394,6 +408,9 @@ bool RpcParameters::is_valid() const {
     return false;
   }
   if (!parameters.is_valid()) {
+    return false;
+  }
+  if (!encryption_required.is_valid()) {
     return false;
   }
   return Validate();
@@ -410,6 +427,9 @@ bool RpcParameters::struct_empty() const {
   if (parameters.is_initialized()) {
     return false;
   }
+  if (encryption_required.is_initialized()) {
+    return false;
+  }
   return true;
 }
 
@@ -422,6 +442,10 @@ void RpcParameters::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!parameters.is_valid()) {
     parameters.ReportErrors(&report__->ReportSubobject("parameters"));
+  }
+  if (!encryption_required.is_valid()) {
+    encryption_required.ReportErrors(
+        &report__->ReportSubobject("encryption_required"));
   }
 }
 
@@ -445,7 +469,8 @@ Rpcs::Rpcs(const Json::Value* value__)
     , disallowed_by_external_consent_entities_on(impl::ValueMember(
           value__, "disallowed_by_external_consent_entities_on"))
     , disallowed_by_external_consent_entities_off(impl::ValueMember(
-          value__, "disallowed_by_external_consent_entities_off")) {}
+          value__, "disallowed_by_external_consent_entities_off"))
+    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
 
 Json::Value Rpcs::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -457,6 +482,7 @@ Json::Value Rpcs::ToJsonValue() const {
   impl::WriteJsonField("disallowed_by_external_consent_entities_off",
                        disallowed_by_external_consent_entities_off,
                        &result__);
+  impl::WriteJsonField("encryption_required", encryption_required, &result__);
   return result__;
 }
 
@@ -471,6 +497,9 @@ bool Rpcs::is_valid() const {
     return false;
   }
   if (!disallowed_by_external_consent_entities_off.is_valid()) {
+    return false;
+  }
+  if (!encryption_required.is_valid()) {
     return false;
   }
   return Validate();
@@ -491,6 +520,9 @@ bool Rpcs::struct_empty() const {
     return false;
   }
   if (disallowed_by_external_consent_entities_off.is_initialized()) {
+    return false;
+  }
+  if (encryption_required.is_initialized()) {
     return false;
   }
   return true;
@@ -516,6 +548,10 @@ void Rpcs::ReportErrors(rpc::ValidationReport* report__) const {
     disallowed_by_external_consent_entities_off.ReportErrors(
         &report__->ReportSubobject(
             "disallowed_by_external_consent_entities_off"));
+  }
+  if (!encryption_required.is_valid()) {
+    encryption_required.ReportErrors(
+        &report__->ReportSubobject("encryption_required"));
   }
 }
 

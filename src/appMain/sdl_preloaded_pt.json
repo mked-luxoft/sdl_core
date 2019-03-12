@@ -37,231 +37,275 @@
         },
         "functional_groupings": {
             "Base-4": {
+                "encryption_required": false,
                 "rpcs": {
                     "AddCommand": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "AddSubMenu": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "Alert": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
                     "ChangeRegistration": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "CreateInteractionChoiceSet": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "DeleteCommand": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "DeleteFile": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "DeleteInteractionChoiceSet": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "DeleteSubMenu": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "EncodedSyncPData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "EndAudioPassThru": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "GenericResponse": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "GetSystemCapability": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "ListFiles": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnAppInterfaceUnregistered": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnAudioPassThru": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "OnButtonEvent": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED",
                         "BACKGROUND"]
                     },
                     "OnButtonPress": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED",
                         "BACKGROUND"]
                     },
                     "OnCommand": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "OnDriverDistraction": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnEncodedSyncPData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnHashChange": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnHMIStatus": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnLanguageChange": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnPermissionsChange": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnSystemRequest": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "PerformAudioPassThru": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
                     "PerformInteraction": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
                     "PutFile": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "RegisterAppInterface": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "ResetGlobalProperties": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "ScrollableMessage": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL"]
                     },
                     "SetAppIcon": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "SetDisplayLayout": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "SetGlobalProperties": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "SetMediaClockTimer": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED",
                         "BACKGROUND"]
                     },
                     "Show": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "Slider": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL"]
                     },
                     "Speak": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
                     "SubscribeButton": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "SystemRequest": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "UnregisterAppInterface": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "UnsubscribeButton": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
@@ -269,9 +313,11 @@
                 }
             },
             "Location-1": {
+                "encryption_required": false,
                 "user_consent_prompt": "Location",
                 "rpcs": {
                     "GetVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -279,6 +325,7 @@
                         "speed"]
                     },
                     "OnVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -286,6 +333,7 @@
                         "speed"]
                     },
                     "SubscribeVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -293,6 +341,7 @@
                         "speed"]
                     },
                     "UnsubscribeVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -302,16 +351,20 @@
                 }
             },
             "Notifications": {
+                "encryption_required": false,
                 "user_consent_prompt": "Notifications",
                 "rpcs": {
                     "Alert": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND"]
                     }
                 }
             },
             "Notifications-RC": {
+                "encryption_required": false,
                 "rpcs": {
                     "OnHMIStatus": {
+                       "encryption_required": false,
                         "hmi_levels": [
                             "BACKGROUND",
                             "FULL",
@@ -320,6 +373,7 @@
                         ]
                     },
                     "OnPermissionsChange": {
+                       "encryption_required": false,
                         "hmi_levels": [
                             "BACKGROUND",
                             "FULL",
@@ -328,6 +382,7 @@
                         ]
                     },
                     "OnSystemRequest": {
+                       "encryption_required": false,
                         "hmi_levels": [
                             "BACKGROUND",
                             "FULL",
@@ -338,9 +393,11 @@
                 }
             },
             "DrivingCharacteristics-3": {
+                "encryption_required": false,
                 "user_consent_prompt": "DrivingCharacteristics",
                 "rpcs": {
                     "GetVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -354,6 +411,7 @@
                         "steeringWheelAngle"]
                     },
                     "OnVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -367,6 +425,7 @@
                         "steeringWheelAngle"]
                     },
                     "SubscribeVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -380,6 +439,7 @@
                         "steeringWheelAngle"]
                     },
                     "UnsubscribeVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -395,9 +455,11 @@
                 }
             },
             "VehicleInfo-3": {
+                "encryption_required": false,
                 "user_consent_prompt": "VehicleInfo",
                 "rpcs": {
                     "GetVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -418,6 +480,7 @@
                         "wiperStatus"]
                     },
                     "OnVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -438,6 +501,7 @@
                         "wiperStatus"]
                     },
                     "SubscribeVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -457,6 +521,7 @@
                         "wiperStatus"]
                     },
                     "UnsubscribeVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -478,18 +543,22 @@
                 }
             },
             "PropriataryData-1": {
+                "encryption_required": false,
                 "rpcs": {
                     "DiagnosticMessage": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "GetDTCs": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "ReadDID": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
@@ -497,18 +566,22 @@
                 }
             },
             "PropriataryData-2": {
+                "encryption_required": false,
                 "rpcs": {
                     "DiagnosticMessage": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "GetDTCs": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "ReadDID": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
@@ -516,13 +589,16 @@
                 }
             },
             "ProprietaryData-3": {
+                "encryption_required": false,
                 "rpcs": {
                     "GetDTCs": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "ReadDID": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
@@ -530,34 +606,41 @@
                 }
             },
             "RemoteControl": {
+                "encryption_required": false,
                 "rpcs": {
                     "ButtonPress": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "GetInteriorVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "SetInteriorVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "OnInteriorVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "SystemRequest": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnRCStatus": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
@@ -566,8 +649,10 @@
                 }
             },
             "Emergency-1": {
+                "encryption_required": false,
                 "rpcs": {
                     "GetVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -577,6 +662,7 @@
                         "emergencyEvent"]
                     },
                     "OnVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -586,6 +672,7 @@
                         "emergencyEvent"]
                     },
                     "SubscribeVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -595,6 +682,7 @@
                         "emergencyEvent"]
                     },
                     "UnsubscribeVehicleData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"],
@@ -606,18 +694,22 @@
                 }
             },
             "Navigation-1": {
+                "encryption_required": false,
                 "rpcs": {
                     "AlertManeuver": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "ShowConstantTBT": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "UpdateTurnList": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
@@ -625,217 +717,260 @@
                 }
             },
             "Base-6": {
+                "encryption_required": false,
                 "rpcs": {
                     "AddCommand": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "AddSubMenu": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "Alert": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
                     "ChangeRegistration": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "CreateInteractionChoiceSet": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "DeleteCommand": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "DeleteFile": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "DeleteInteractionChoiceSet": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "DeleteSubMenu": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "EncodedSyncPData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "EndAudioPassThru": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "GenericResponse": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "ListFiles": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnAppInterfaceUnregistered": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnAudioPassThru": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "OnButtonEvent": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
                     "OnButtonPress": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
                     "OnCommand": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
                     "OnDriverDistraction": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnEncodedSyncPData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnHMIStatus": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnLanguageChange": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnPermissionsChange": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnSyncPData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnTBTClientState": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "PerformAudioPassThru": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
                     "PerformInteraction": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
                     "PutFile": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "RegisterAppInterface": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "ResetGlobalProperties": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "ScrollableMessage": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL"]
                     },
                     "SetAppIcon": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "SetDisplayLayout": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "SetGlobalProperties": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "SetMediaClockTimer": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL"]
                     },
                     "Show": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "Slider": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL"]
                     },
                     "Speak": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
                     "SubscribeButton": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "SyncPData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "UnregisterAppInterface": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "UnsubscribeButton": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
@@ -843,22 +978,28 @@
                 }
             },
             "OnKeyboardInputOnlyGroup": {
+                "encryption_required": false,
                 "rpcs": {
                     "OnKeyboardInput": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL"]
                     }
                 }
             },
             "OnTouchEventOnlyGroup": {
+                "encryption_required": false,
                 "rpcs": {
                     "OnTouchEvent": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL"]
                     }
                 }
             },
             "DiagnosticMessageOnly": {
+                "encryption_required": false,
                 "rpcs": {
                     "DiagnosticMessage": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
@@ -866,120 +1007,141 @@
                 }
             },
             "DataConsent-2": {
+                "encryption_required": false,
                 "user_consent_prompt": "DataConsent",
                 "rpcs": null
             },
             "BaseBeforeDataConsent": {
+                "encryption_required": false,
                 "rpcs": {
                     "ChangeRegistration": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "DeleteFile": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "EncodedSyncPData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "ListFiles": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnAppInterfaceUnregistered": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnEncodedSyncPData": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnHashChange": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnHMIStatus": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnLanguageChange": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnPermissionsChange": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "OnSystemRequest": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "PutFile": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "RegisterAppInterface": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "ResetGlobalProperties": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "SetGlobalProperties": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "SetAppIcon": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "SetDisplayLayout": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "SystemRequest": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
                         "NONE"]
                     },
                     "UnregisterAppInterface": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED",
@@ -988,8 +1150,10 @@
                 }
             },
             "SendLocation": {
+                "encryption_required": false,
                 "rpcs": {
                     "SendLocation": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
@@ -997,18 +1161,22 @@
                 }
             },
             "WayPoints": {
+                "encryption_required": false,
                 "rpcs": {
                     "GetWayPoints": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "SubscribeWayPoints": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
                     },
                     "UnsubscribeWayPoints": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
@@ -1016,24 +1184,31 @@
                 }
             },
             "BackgroundAPT": {
+                "encryption_required": false,
                 "rpcs": {
                     "EndAudioPassThru": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND"]
                     },
                     "OnAudioPassThru": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND"]
                     },
                     "PerformAudioPassThru": {
+                       "encryption_required": false,
                         "hmi_levels": ["BACKGROUND"]
                     }
                 }
             },
             "HapticGroup": {
+                "encryption_required": false,
                 "rpcs": {
                     "OnTouchEvent": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL"]
                     },
                     "SendHapticData": {
+                       "encryption_required": false,
                         "hmi_levels": ["FULL"]
                     }
                 }
@@ -2365,6 +2540,7 @@
         },
         "app_policies": {
             "default": {
+                "encryption_required": false,
                 "keep_context": false,
                 "steal_focus": false,
                 "priority": "NONE",
@@ -2374,6 +2550,7 @@
                 "RequestSubType": []
             },
             "device": {
+                "encryption_required": false,
                 "keep_context": false,
                 "steal_focus": false,
                 "priority": "NONE",
@@ -2381,6 +2558,7 @@
                 "groups": ["DataConsent-2"]
             },
             "pre_DataConsent": {
+                "encryption_required": false,
                 "keep_context": false,
                 "steal_focus": false,
                 "priority": "NONE",
