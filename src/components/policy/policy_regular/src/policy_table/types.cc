@@ -30,16 +30,21 @@ PolicyBase::~PolicyBase() {}
 
 PolicyBase::PolicyBase(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
-    , priority(impl::ValueMember(value__, "priority")) {}
+    , priority(impl::ValueMember(value__, "priority"))
+    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
 
 Json::Value PolicyBase::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("priority", priority, &result__);
+  impl::WriteJsonField("encryption_required", encryption_required, &result__);
   return result__;
 }
 
 bool PolicyBase::is_valid() const {
   if (!priority.is_valid()) {
+    return false;
+  }
+  if (!encryption_required.is_valid()) {
     return false;
   }
   return Validate();
@@ -53,6 +58,9 @@ bool PolicyBase::struct_empty() const {
   if (priority.is_initialized()) {
     return false;
   }
+  if (encryption_required.is_initialized()) {
+    return false;
+  }
   return true;
 }
 
@@ -62,6 +70,10 @@ void PolicyBase::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!priority.is_valid()) {
     priority.ReportErrors(&report__->ReportSubobject("priority"));
+  }
+  if (!encryption_required.is_valid()) {
+    encryption_required.ReportErrors(
+        &report__->ReportSubobject("encryption_required"));
   }
 }
 
@@ -313,12 +325,14 @@ RpcParameters::~RpcParameters() {}
 RpcParameters::RpcParameters(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , hmi_levels(impl::ValueMember(value__, "hmi_levels"))
-    , parameters(impl::ValueMember(value__, "parameters")) {}
+    , parameters(impl::ValueMember(value__, "parameters"))
+    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
 
 Json::Value RpcParameters::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("hmi_levels", hmi_levels, &result__);
   impl::WriteJsonField("parameters", parameters, &result__);
+  impl::WriteJsonField("encryption_required", encryption_required, &result__);
   return result__;
 }
 
@@ -327,6 +341,9 @@ bool RpcParameters::is_valid() const {
     return false;
   }
   if (!parameters.is_valid()) {
+    return false;
+  }
+  if (!encryption_required.is_valid()) {
     return false;
   }
   return Validate();
@@ -343,7 +360,9 @@ bool RpcParameters::struct_empty() const {
   if (parameters.is_initialized()) {
     return false;
   }
-
+  if (encryption_required.is_initialized()) {
+    return false;
+  }
   return true;
 }
 
@@ -356,6 +375,10 @@ void RpcParameters::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!parameters.is_valid()) {
     parameters.ReportErrors(&report__->ReportSubobject("parameters"));
+  }
+  if (!encryption_required.is_valid()) {
+    encryption_required.ReportErrors(
+        &report__->ReportSubobject("encryption_required"));
   }
 }
 
@@ -375,12 +398,14 @@ Rpcs::~Rpcs() {}
 Rpcs::Rpcs(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , user_consent_prompt(impl::ValueMember(value__, "user_consent_prompt"))
-    , rpcs(impl::ValueMember(value__, "rpcs")) {}
+    , rpcs(impl::ValueMember(value__, "rpcs"))
+    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
 
 Json::Value Rpcs::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("user_consent_prompt", user_consent_prompt, &result__);
   impl::WriteJsonField("rpcs", rpcs, &result__);
+  impl::WriteJsonField("encryption_required", encryption_required, &result__);
   return result__;
 }
 
@@ -389,6 +414,9 @@ bool Rpcs::is_valid() const {
     return false;
   }
   if (!rpcs.is_valid()) {
+    return false;
+  }
+  if (!encryption_required.is_valid()) {
     return false;
   }
   return Validate();
@@ -405,7 +433,9 @@ bool Rpcs::struct_empty() const {
   if (rpcs.is_initialized()) {
     return false;
   }
-
+  if (encryption_required.is_initialized()) {
+    return false;
+  }
   return true;
 }
 
@@ -419,6 +449,10 @@ void Rpcs::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!rpcs.is_valid()) {
     rpcs.ReportErrors(&report__->ReportSubobject("rpcs"));
+  }
+  if (!encryption_required.is_valid()) {
+    encryption_required.ReportErrors(
+        &report__->ReportSubobject("encryption_required"));
   }
 }
 
