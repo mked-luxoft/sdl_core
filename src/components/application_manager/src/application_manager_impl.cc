@@ -1667,7 +1667,7 @@ bool ApplicationManagerImpl::OnHandshakeDone(
   return false;
 }
 
-bool ApplicationManagerImpl::OnHandshakeFailed() {
+bool ApplicationManagerImpl::OnGetSystemTimeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
   return false;
 }

@@ -166,7 +166,7 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
   /**
    * @brief Notify all listeners that handshake was failed
    */
-  virtual void NotifyListenersOnHandshakeFailed() = 0;
+  virtual void NotifyListenersOnGetSystemTimeFailed() = 0;
 
   virtual void ProcessFailedPTU() = 0;
 

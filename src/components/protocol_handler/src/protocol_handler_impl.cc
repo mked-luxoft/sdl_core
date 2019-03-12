@@ -1108,11 +1108,11 @@ void ProtocolHandlerImpl::OnUnexpectedDisconnect(
   OnConnectionClosed(connection_id);
 }
 
-void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
+void ProtocolHandlerImpl::NotifyOnGetSystemTimeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
   security_manager_->ResetPendingSystemTimeRequests();
 #ifdef ENABLE_SECURITY
-  security_manager_->NotifyListenersOnHandshakeFailed();
+  security_manager_->NotifyListenersOnGetSystemTimeFailed();
 #endif  // ENABLE_SECURITY
 }
 

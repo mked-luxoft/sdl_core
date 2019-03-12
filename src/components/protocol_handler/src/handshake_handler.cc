@@ -88,7 +88,7 @@ bool HandshakeHandler::OnCertDecryptFailed() {
 }
 #endif
 
-bool HandshakeHandler::OnHandshakeFailed() {
+bool HandshakeHandler::OnGetSystemTimeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (payload_) {

@@ -200,7 +200,7 @@ class SecurityManagerImpl : public SecurityManager,
   /**
    * @brief Notify all listeners that handshake was failed
    */
-  void NotifyListenersOnHandshakeFailed() OVERRIDE;
+  void NotifyListenersOnGetSystemTimeFailed() OVERRIDE;
 
   /**
    * @brief Check is policy certificate data is empty

@@ -115,7 +115,7 @@ class ProtocolHandler {
   /**
    * \brief Called to notify all handsheke handlers about handshake failure.
    */
-  virtual void NotifyOnFailedHandshake() = 0;
+  virtual void NotifyOnGetSystemTimeFailed() = 0;
 
   /**
    * \brief Protocol handler settings getter

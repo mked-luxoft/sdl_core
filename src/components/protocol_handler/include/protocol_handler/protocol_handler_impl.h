@@ -284,7 +284,7 @@ class ProtocolHandlerImpl
                       uint8_t session_id,
                       uint8_t service_type);
 
-  void NotifyOnFailedHandshake() OVERRIDE;
+  void NotifyOnGetSystemTimeFailed() OVERRIDE;
 
   // TODO(Ezamakhov): move Ack/Nack as interface for StartSessionHandler
   /**

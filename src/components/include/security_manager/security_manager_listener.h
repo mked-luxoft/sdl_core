@@ -52,7 +52,7 @@ class SecurityManagerListener {
    * @brief Notification about handshake failure
    * @return true on success notification handling or false otherwise
    */
-  virtual bool OnHandshakeFailed() = 0;
+  virtual bool OnGetSystemTimeFailed() = 0;
 
   /**
    * @brief Notify listeners that certificate update is required.

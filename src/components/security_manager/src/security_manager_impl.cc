@@ -404,7 +404,7 @@ void SecurityManagerImpl::OnSystemTimeFailed() {
     waiting_for_time_ = false;
   }
 
-  NotifyListenersOnHandshakeFailed();
+  NotifyListenersOnGetSystemTimeFailed();
 
   awaiting_time_connections_.clear();
 }
@@ -475,11 +475,11 @@ void SecurityManagerImpl::ResetPendingSystemTimeRequests() {
   system_time_handler_->ResetPendingSystemTimeRequests();
 }
 
-void SecurityManagerImpl::NotifyListenersOnHandshakeFailed() {
+void SecurityManagerImpl::NotifyListenersOnGetSystemTimeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
   while (it != listeners_.end()) {
-    if ((*it)->OnHandshakeFailed()) {
+    if ((*it)->OnGetSystemTimeFailed()) {
       LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
       delete (*it);
       it = listeners_.erase(it);
