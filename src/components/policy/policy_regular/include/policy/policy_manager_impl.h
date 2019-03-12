@@ -58,6 +58,17 @@ class PolicyManagerImpl : public PolicyManager, public RPCProtectionAccessor {
  public:
   PolicyManagerImpl();
 
+  bool AppNeedEncryption(const std::string& policy_app_id) const OVERRIDE;
+
+  const Strings& GetGroupsForApp(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  bool FunctionNeedEncryption(
+      const std::string& policy_group,
+      const std::string& policy_function_id) const OVERRIDE;
+
+  bool GroupNeedEncryption(const std::string& policy_group) const OVERRIDE;
+
   RPCProtectionAccessor* rpc_protection_accessor() FINAL {
     return this;
   }

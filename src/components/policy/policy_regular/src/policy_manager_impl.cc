@@ -1446,6 +1446,7 @@ bool PolicyManagerImpl::DoesRPCNeedEncryption(const std::string& function_id,
                     "Cheking encryption required for rpc function groups");
       const auto& function_groups =
           cache_->pt()->policy_table.functional_groupings;
+      UNUSED(function_groups);
     }
 
   } else {
@@ -1465,6 +1466,28 @@ bool PolicyManagerImpl::GetModuleTypes(
 void PolicyManagerImpl::set_access_remote(
     std::shared_ptr<AccessRemote> access_remote) {
   access_remote_ = access_remote;
+}
+
+Strings str;
+bool PolicyManagerImpl::AppNeedEncryption(
+    const std::string& policy_app_id) const {
+  return false;
+}
+
+const Strings& PolicyManagerImpl::GetGroupsForApp(
+    const std::string& policy_app_id) const {
+  return str;
+}
+
+bool PolicyManagerImpl::FunctionNeedEncryption(
+    const std::string& policy_group,
+    const std::string& policy_function_id) const {
+  return false;
+}
+
+bool PolicyManagerImpl::GroupNeedEncryption(
+    const std::string& policy_group) const {
+  return false;
 }
 
 }  //  namespace policy
