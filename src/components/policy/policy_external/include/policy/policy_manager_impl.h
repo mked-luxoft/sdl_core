@@ -55,6 +55,17 @@ class PolicyManagerImpl : public PolicyManager {
   PolicyManagerImpl();
   explicit PolicyManagerImpl(bool in_memory);
 
+  bool AppNeedEncryption(const std::string& policy_app_id) const OVERRIDE;
+
+  const Strings& GetGroupsForApp(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  bool FunctionNeedEncryption(
+      const std::string& policy_group,
+      const std::string& policy_function_id) const OVERRIDE;
+
+  bool GroupNeedEncryption(const Strings& policy_groups) const OVERRIDE;
+
   /**
    * @brief set_listener set new policy listener instance
    * @param listener new policy listener

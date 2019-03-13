@@ -36,6 +36,7 @@
 #include <vector>
 #include <cstdint>
 
+#include "application_manager/policies/rpc_encryption_manager_interface.h"
 #include "utils/callable.h"
 #include "policy/policy_types.h"
 #include "policy/policy_table/types.h"
@@ -43,7 +44,6 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "policy/cache_manager_interface.h"
 #include "policy/access_remote.h"
-#include "application_manager/policies/rpc_encryption_manager_interface.h"
 
 namespace policy {
 class PolicySettings;
