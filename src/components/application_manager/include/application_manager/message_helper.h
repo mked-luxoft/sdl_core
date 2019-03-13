@@ -492,7 +492,8 @@ class MessageHelper {
   static void SendOnPermissionsChangeNotification(
       uint32_t connection_key,
       const policy::Permissions& permissions,
-      ApplicationManager& app_mngr);
+      ApplicationManager& app_mngr,
+      const bool require_encryption);
 
   /*
   * @brief Send notification to HMI on application permissions update

@@ -42,6 +42,7 @@
 #include <memory>
 
 #include "utils/helpers.h"
+#include "utils/optional.h"
 #include "transport_manager/common.h"
 
 namespace policy {
@@ -88,6 +89,7 @@ typedef std::string RpcName;
 typedef std::set<std::string> RPCParams;
 
 typedef std::map<std::string, std::set<policy::HMILevel> > HMIPermissions;
+typedef utils::Optional<bool> RequireEncryption;
 struct ParameterPermissions
     : std::map<std::string, std::set<policy::Parameter> > {
   ParameterPermissions()
@@ -102,6 +104,10 @@ struct ParameterPermissions
 struct RpcPermissions {
   HMIPermissions hmi_permissions;
   ParameterPermissions parameter_permissions;
+  RequireEncryption require_encryption;
+
+  RpcPermissions()
+      : require_encryption(RequireEncryption::OptionalEmpty::EMPTY) {}
 };
 
 typedef std::map<RpcName, RpcPermissions> Permissions;
