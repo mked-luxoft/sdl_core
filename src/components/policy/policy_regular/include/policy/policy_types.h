@@ -105,6 +105,9 @@ struct RpcPermissions {
   HMIPermissions hmi_permissions;
   ParameterPermissions parameter_permissions;
   RequireEncryption require_encryption;
+
+  RpcPermissions()
+      : require_encryption(RequireEncryption::OptionalEmpty::EMPTY) {}
 };
 
 typedef std::map<RpcName, RpcPermissions> Permissions;
