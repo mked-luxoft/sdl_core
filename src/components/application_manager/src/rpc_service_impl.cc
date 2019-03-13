@@ -45,11 +45,13 @@ RPCServiceImpl::RPCServiceImpl(
     request_controller::RequestController& request_ctrl,
     protocol_handler::ProtocolHandler* protocol_handler,
     hmi_message_handler::HMIMessageHandler* hmi_handler,
-    CommandHolder& commands_holder)
+    CommandHolder& commands_holder,
+    std::unique_ptr<RPCProtectionMediator> rpc_protection_mediator)
     : app_manager_(app_manager)
     , request_ctrl_(request_ctrl)
     , protocol_handler_(protocol_handler)
     , hmi_handler_(hmi_handler)
+    , rpc_protection_mediator_(std::move(rpc_protection_mediator))
     , commands_holder_(commands_holder)
     , messages_to_mobile_("AM ToMobile", this)
     , messages_to_hmi_("AM ToHMI", this)
@@ -347,11 +349,21 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
 
   const auto function_id = message->function_id();
   const auto app_id = app_manager_.application_id(message->correlation_id());
+  const auto connection_key = message->connection_key();
+  const auto correlation_id = message->correlation_id();
 
   const bool needs_encryption =
-      protocol_handler_->rpc_protection_mediator()->DoesRPCNeedEncryption(
-          function_id, app_id);
-  UNUSED(needs_encryption);
+      rpc_protection_mediator_->DoesRPCNeedEncryption(function_id, app_id);
+
+  if (needs_encryption &&
+      !protocol_handler_->IsRPCServiceSecure(
+          connection_key &&
+          !rpc_protection_mediator_->IsException(function_id))) {
+    rpc_protection_mediator_->SendEncryptionNeededError(
+        function_id, correlation_id, connection_key);
+    return;
+  }
+
   protocol_handler_->SendMessageToMobileApp(
       rawMessage, needs_encryption, is_final);
   LOG4CXX_INFO(logger_, "Message for mobile given away");

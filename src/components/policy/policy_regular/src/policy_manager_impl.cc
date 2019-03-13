@@ -1430,33 +1430,6 @@ void PolicyManagerImpl::OnPrimaryGroupsChanged(
   }
 }
 
-bool PolicyManagerImpl::DoesRPCNeedEncryption(const std::string& function_id,
-                                              const std::string& app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  auto policies_section = cache_->pt()->policy_table.app_policies_section.apps;
-
-  auto app_policies = policies_section.find(app_id);
-
-  if (app_policies != policies_section.end()) {
-    if ((*app_policies).second.encryption_required) {
-      return (*app_policies).second.encryption_required;
-    } else {
-      LOG4CXX_DEBUG(logger_,
-                    "Cheking encryption required for rpc function groups");
-      const auto& function_groups =
-          cache_->pt()->policy_table.functional_groupings;
-      UNUSED(function_groups);
-    }
-
-  } else {
-    LOG4CXX_WARN(logger_, "Application for app id " << app_id << " not found");
-    return false;
-  }
-
-  return false;
-}
-
 bool PolicyManagerImpl::GetModuleTypes(
     const std::string& application_id,
     std::vector<std::string>* modules) const {
@@ -1528,6 +1501,25 @@ bool PolicyManagerImpl::GroupNeedEncryption(
              ? *grouping.encryption_required
              : false;
   return false;
+}
+
+const std::string PolicyManagerImpl::GetPolicyFunctionName(
+    const uint32_t function_id) const {
+  return policy_table::EnumToJsonString(
+      static_cast<policy_table::FunctionID>(function_id));
+}
+
+const std::vector<std::string> PolicyManagerImpl::GetRPCsForGroup(
+    const std::string& group) const {
+  std::vector<std::string> rpcs_for_group;
+  const auto& rpcs =
+      cache_->pt()->policy_table.functional_groupings[group].rpcs;
+
+  for (const auto& rpc : rpcs) {
+    rpcs_for_group.push_back(rpc.first);
+  }
+
+  return rpcs_for_group;
 }
 
 }  //  namespace policy

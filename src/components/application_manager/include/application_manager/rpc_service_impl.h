@@ -40,6 +40,7 @@
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/command_holder_impl.h"
+#include "application_manager/rpc_protection_mediator.h"
 
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
@@ -99,11 +100,13 @@ class RPCServiceImpl : public RPCService,
    * @param hmi_handler HMIMessageHandler
    * @param commands_holder CommandHolder
    **/
-  RPCServiceImpl(ApplicationManager& app_manager,
-                 request_controller::RequestController& request_ctrl,
-                 protocol_handler::ProtocolHandler* protocol_handler,
-                 hmi_message_handler::HMIMessageHandler* hmi_handler,
-                 CommandHolder& commands_holder);
+  RPCServiceImpl(
+      ApplicationManager& app_manager,
+      request_controller::RequestController& request_ctrl,
+      protocol_handler::ProtocolHandler* protocol_handler,
+      hmi_message_handler::HMIMessageHandler* hmi_handler,
+      CommandHolder& commands_holder,
+      std::unique_ptr<RPCProtectionMediator> rpc_protection_mediator);
   ~RPCServiceImpl();
 
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
@@ -134,6 +137,7 @@ class RPCServiceImpl : public RPCService,
   request_controller::RequestController& request_ctrl_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   hmi_message_handler::HMIMessageHandler* hmi_handler_;
+  std::unique_ptr<RPCProtectionMediator> rpc_protection_mediator_;
   CommandHolder& commands_holder_;
   // Thread that pumps messages being passed to mobile side.
   impl::ToMobileQueue messages_to_mobile_;

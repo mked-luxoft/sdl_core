@@ -60,7 +60,6 @@
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "connection_handler/connection_handler.h"
 #include "application_manager/policies/policy_handler_observer.h"
-#include "application_manager/rpc_protection_mediator.h"
 
 #ifdef TELEMETRY_MONITOR
 #include "protocol_handler/telemetry_observer.h"
@@ -228,6 +227,8 @@ class ProtocolHandlerImpl
   void SendMessageToMobileApp(const RawMessagePtr message,
                               bool needs_encryption,
                               bool final_message) OVERRIDE;
+
+  bool IsRPCServiceSecure(const uint32_t connection_key) const OVERRIDE;
 
   /**
    * \brief Sends number of processed frames in case of binary nav streaming
@@ -691,9 +692,6 @@ class ProtocolHandlerImpl
   const std::string TransportTypeFromTransport(
       const utils::custom_string::CustomString& transport) const;
 
-  application_manager::RPCProtectionMediator* rpc_protection_mediator()
-      const OVERRIDE;
-
   const ProtocolHandlerSettings& settings_;
 
   /**
@@ -783,8 +781,6 @@ class ProtocolHandlerImpl
   bool tcp_enabled_;
   std::string tcp_port_;
   std::string tcp_ip_address_;
-
-  application_manager::RPCProtectionMediator* rpc_protection_mediator_;
 
 #ifdef TELEMETRY_MONITOR
   PHTelemetryObserver* metric_observer_;

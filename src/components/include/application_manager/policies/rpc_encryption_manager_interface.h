@@ -51,6 +51,12 @@ class RPCEncryptionManagerInterface {
       const std::string& policy_group,
       const std::string& policy_function_id) const = 0;
   virtual bool GroupNeedEncryption(const std::string& policy_group) const = 0;
+
+  virtual const std::vector<std::string> GetRPCsForGroup(
+      const std::string& group) const = 0;
+
+  virtual const std::string GetPolicyFunctionName(
+      const uint32_t function_id) const = 0;
 };
 
 }  // policy
