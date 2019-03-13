@@ -48,13 +48,14 @@
 #include "utils/timer.h"
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
+#include "application_manager/policies/rpc_encryption_manager_interface.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
 struct CheckAppPolicy;
 
-class PolicyManagerImpl : public PolicyManager, public RPCProtectionAccessor {
+class PolicyManagerImpl : public PolicyManager {
  public:
   PolicyManagerImpl();
 
@@ -69,12 +70,11 @@ class PolicyManagerImpl : public PolicyManager, public RPCProtectionAccessor {
 
   bool GroupNeedEncryption(const std::string& policy_group) const OVERRIDE;
 
-  RPCProtectionAccessor* rpc_protection_accessor() FINAL {
-    return this;
-  }
+  const std::vector<std::string> GetRPCsForGroup(
+      const std::string& group) const OVERRIDE;
 
-  bool DoesRPCNeedEncryption(const std::string& function_id,
-                             const std::string& app_id) FINAL;
+  const std::string GetPolicyFunctionName(
+      const uint32_t function_id) const OVERRIDE;
 
   /**
    * @brief set_listener set new policy listener instance

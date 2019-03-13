@@ -42,7 +42,11 @@ class RPCProtectionMediator {
 
   virtual bool DoesRPCNeedEncryption(const uint32_t function_id,
                                      const uint32_t app_id) = 0;
-  virtual void SendEncryptionNeededError(const uint32_t function_id) = 0;
+  virtual void SendEncryptionNeededError(const uint32_t function_id,
+                                         const uint32_t conrrelation_id,
+                                         const uint32_t connection_key) = 0;
+
+  virtual bool IsException(const uint32_t function_id) const = 0;
 };
 }  // namespace policy
 

@@ -34,22 +34,30 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_PROTOCOL_HANDLER_RPC_PROTECTION_MEDIATOR_IMPL_H_
 
 #include "application_manager/rpc_protection_mediator.h"
-#include "policy/policy_manager.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_manager.h"
 
 namespace application_manager {
-class RPCProtectionMediatorImpl : application_manager::RPCProtectionMediator {
-  RPCProtectionMediatorImpl(policy::PolicyManager& policy_manager,
+class RPCProtectionMediatorImpl : public RPCProtectionMediator {
+ public:
+  RPCProtectionMediatorImpl(policy::PolicyHandlerInterface& policy_handler,
                             ApplicationManager& app_manager);
 
   ~RPCProtectionMediatorImpl() OVERRIDE {}
 
   bool DoesRPCNeedEncryption(const uint32_t function_id,
                              const uint32_t app_id) OVERRIDE;
-  void SendEncryptionNeededError(const uint32_t function_id) OVERRIDE;
+  void SendEncryptionNeededError(const uint32_t function_id,
+                                 const uint32_t conrrelation_id,
+                                 const uint32_t connection_key) OVERRIDE;
+
+  bool IsException(const uint32_t function_id) const OVERRIDE;
 
  private:
-  policy::PolicyManager& policy_manager_;
+  bool IsFunctionInGroup(const std::string& function,
+                         const std::string& group) const;
+
+  policy::PolicyHandlerInterface& policy_handler_;
   ApplicationManager& app_manager_;
 };
 }  // namespace policy

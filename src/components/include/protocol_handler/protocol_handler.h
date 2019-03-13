@@ -142,8 +142,7 @@ class ProtocolHandler {
       const SessionContext& context,
       std::vector<std::string>& rejected_params) = 0;
 
-  virtual application_manager::RPCProtectionMediator* rpc_protection_mediator()
-      const = 0;
+  virtual bool IsRPCServiceSecure(const uint32_t connection_key) const = 0;
 
  protected:
   /**

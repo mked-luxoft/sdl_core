@@ -87,7 +87,6 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     , start_session_frame_map_lock_()
     , start_session_frame_map_()
     , tcp_enabled_(false)
-    , rpc_protection_mediator_(nullptr)
 #ifdef TELEMETRY_MONITOR
     , metric_observer_(NULL)
 #endif  // TELEMETRY_MONITOR
@@ -1185,10 +1184,13 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
   }
 }
 
-application_manager::RPCProtectionMediator*
-ProtocolHandlerImpl::rpc_protection_mediator() const {
+bool ProtocolHandlerImpl::IsRPCServiceSecure(
+    const uint32_t connection_key) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return rpc_protection_mediator_;
+
+  security_manager::SSLContext* context =
+      session_observer_.GetSSLContext(connection_key, ServiceType::kRpc);
+  return (context && context->IsInitCompleted());
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
