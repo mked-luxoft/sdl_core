@@ -46,18 +46,14 @@ bool RPCProtectionMediatorImpl::DoesRPCNeedEncryption(
   const auto& app_rpc_groups =
       rpc_encryption_manager.GetGroupsForApp(policy_app_id);
 
-  for (auto it = app_rpc_groups.begin(); it != app_rpc_groups.end(); ++it) {
-    const bool is_fid_in_group = IsFunctionInGroup(policy_function_id, (*it));
+  bool encrypted_need = false;
+  for (const auto& group : app_rpc_groups) {
+    const bool is_fid_in_group = IsFunctionInGroup(policy_function_id, group);
     if (is_fid_in_group) {
-      const bool is_group_encrypted =
-          rpc_encryption_manager.GroupNeedEncryption(*it);
-      if (is_group_encrypted) {
-        return true;
-      }
+      encrypted_need |= rpc_encryption_manager.GroupNeedEncryption(group);
     }
   }
-
-  return false;
+  return encrypted_need;
 }
 
 bool RPCProtectionMediatorImpl::IsExceptionRPC(
