@@ -46,12 +46,12 @@ class RPCProtectionMediatorImpl : public RPCProtectionMediator {
   ~RPCProtectionMediatorImpl() OVERRIDE {}
 
   bool DoesRPCNeedEncryption(const uint32_t function_id,
-                             const uint32_t app_id) OVERRIDE;
+                             const uint32_t app_id) const OVERRIDE;
   void SendEncryptionNeededError(const uint32_t function_id,
                                  const uint32_t conrrelation_id,
                                  const uint32_t connection_key) OVERRIDE;
 
-  bool IsException(const uint32_t function_id) const OVERRIDE;
+  bool IsExceptionRPC(const uint32_t function_id) const OVERRIDE;
 
  private:
   bool IsFunctionInGroup(const std::string& function,

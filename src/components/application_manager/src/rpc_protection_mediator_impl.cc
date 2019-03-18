@@ -5,11 +5,11 @@ CREATE_LOGGERPTR_LOCAL(logger_, "RPCProtectionMediatorImpl");
 namespace application_manager {
 
 namespace rpc_encryption_exceptions {
-const char* kRegisterAppInterface = "RegisterAppInterface";
-const char* kSystemRequest = "SystemRequest";
-const char* kOnPermissionChange = "OnPermissionsChange";
-const char* kOnSystemRequest = "OnSystemRequest";
-const char* kPutFile = "PutFile";
+const std::string kRegisterAppInterface = "RegisterAppInterface";
+const std::string kSystemRequest = "SystemRequest";
+const std::string kOnPermissionChange = "OnPermissionsChange";
+const std::string kOnSystemRequest = "OnSystemRequest";
+const std::string kPutFile = "PutFile";
 }
 
 RPCProtectionMediatorImpl::RPCProtectionMediatorImpl(
@@ -23,7 +23,7 @@ bool RPCProtectionMediatorImpl::IsFunctionInGroup(
     const std::string& function, const std::string& group) const {
   const auto& rpc_encryption_manager = policy_handler_.RPCEncryptionManager();
 
-  const auto group_rpcs = rpc_encryption_manager->GetRPCsForGroup(group);
+  const auto group_rpcs = rpc_encryption_manager.GetRPCsForGroup(group);
 
   auto it = std::find(group_rpcs.begin(), group_rpcs.end(), function);
 
@@ -31,26 +31,26 @@ bool RPCProtectionMediatorImpl::IsFunctionInGroup(
 }
 
 bool RPCProtectionMediatorImpl::DoesRPCNeedEncryption(
-    const uint32_t function_id, const uint32_t app_id) {
+    const uint32_t function_id, const uint32_t app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const auto& rpc_encryption_manager = policy_handler_.RPCEncryptionManager();
   const auto policy_app_id = app_manager_.application(app_id)->policy_app_id();
   const auto policy_function_id =
-      rpc_encryption_manager->GetPolicyFunctionName(function_id);
+      rpc_encryption_manager.GetPolicyFunctionName(function_id);
 
-  if (!rpc_encryption_manager->AppNeedEncryption(policy_app_id)) {
+  if (!rpc_encryption_manager.AppNeedEncryption(policy_app_id)) {
     return false;
   }
 
   const auto& app_rpc_groups =
-      rpc_encryption_manager->GetGroupsForApp(policy_app_id);
+      rpc_encryption_manager.GetGroupsForApp(policy_app_id);
 
   for (auto it = app_rpc_groups.begin(); it != app_rpc_groups.end(); ++it) {
     const bool is_fid_in_group = IsFunctionInGroup(policy_function_id, (*it));
     if (is_fid_in_group) {
       const bool is_group_encrypted =
-          rpc_encryption_manager->GroupNeedEncryption(*it);
+          rpc_encryption_manager.GroupNeedEncryption(*it);
       if (is_group_encrypted) {
         return true;
       }
@@ -60,7 +60,8 @@ bool RPCProtectionMediatorImpl::DoesRPCNeedEncryption(
   return false;
 }
 
-bool RPCProtectionMediatorImpl::IsException(const uint32_t function_id) const {
+bool RPCProtectionMediatorImpl::IsExceptionRPC(
+    const uint32_t function_id) const {
   using namespace rpc_encryption_exceptions;
   const std::string policy_fucntion_id = policy_table::EnumToJsonString(
       static_cast<policy_table::FunctionID>(function_id));

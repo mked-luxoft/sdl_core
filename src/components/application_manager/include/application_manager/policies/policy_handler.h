@@ -77,7 +77,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   PolicyHandler(const policy::PolicySettings& get_settings,
                 application_manager::ApplicationManager& application_manager);
   virtual ~PolicyHandler();
-  RPCEncryptionManagerInterface* RPCEncryptionManager() const OVERRIDE;
+  RPCEncryptionManagerInterface& RPCEncryptionManager() const OVERRIDE;
   bool LoadPolicyLibrary() OVERRIDE;
   bool PolicyEnabled() const OVERRIDE;
   bool InitPolicyTable() OVERRIDE;

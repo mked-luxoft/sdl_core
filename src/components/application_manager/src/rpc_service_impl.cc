@@ -356,9 +356,8 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
       rpc_protection_mediator_->DoesRPCNeedEncryption(function_id, app_id);
 
   if (needs_encryption &&
-      !protocol_handler_->IsRPCServiceSecure(
-          connection_key &&
-          !rpc_protection_mediator_->IsException(function_id))) {
+      !protocol_handler_->IsRPCServiceSecure(connection_key) &&
+      !rpc_protection_mediator_->IsExceptionRPC(function_id)) {
     rpc_protection_mediator_->SendEncryptionNeededError(
         function_id, correlation_id, connection_key);
     return;

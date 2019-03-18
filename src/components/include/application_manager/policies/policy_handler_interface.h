@@ -59,7 +59,7 @@ class PolicyHandlerInterface {
  public:
   virtual ~PolicyHandlerInterface() {}
 
-  virtual RPCEncryptionManagerInterface* RPCEncryptionManager() const = 0;
+  virtual RPCEncryptionManagerInterface& RPCEncryptionManager() const = 0;
   virtual bool LoadPolicyLibrary() = 0;
   virtual bool PolicyEnabled() const = 0;
   virtual bool InitPolicyTable() = 0;
