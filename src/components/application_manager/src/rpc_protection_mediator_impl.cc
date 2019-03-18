@@ -35,7 +35,13 @@ bool RPCProtectionMediatorImpl::DoesRPCNeedEncryption(
   LOG4CXX_AUTO_TRACE(logger_);
 
   const auto& rpc_encryption_manager = policy_handler_.RPCEncryptionManager();
-  const auto policy_app_id = app_manager_.application(app_id)->policy_app_id();
+  const auto app = app_manager_.application(app_id);
+  LOG4CXX_DEBUG(logger_, "app for app_id: " << app_id << " is " << app.get());
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "No application found for app_id " << app_id);
+    return false;
+  }
+  const auto policy_app_id = app->policy_app_id();
   const auto policy_function_id =
       rpc_encryption_manager.GetPolicyFunctionName(function_id);
 
