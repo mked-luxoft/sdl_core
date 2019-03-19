@@ -323,6 +323,7 @@ void RPCServiceImpl::Handle(const impl::MessageToHmi message) {
 }
 
 void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!protocol_handler_) {
     LOG4CXX_WARN(logger_,
                  "Protocol Handler is not set; cannot send message to mobile.");
@@ -347,20 +348,56 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
     }
   }
 
+  LOG4CXX_DEBUG(logger_,
+                "===========================================================");
+
+  smart_objects::SmartObject& so = (smart_objects::SmartObject&)(*message);
+  MessageHelper::PrintSmartObject(so);
+
   const auto function_id = message->function_id();
-  const auto app_id = app_manager_.application_id(message->correlation_id());
   const auto connection_key = message->connection_key();
+  const auto app = app_manager_.application(connection_key);
   const auto correlation_id = message->correlation_id();
 
-  const bool needs_encryption =
+  if (!app) {
+    LOG4CXX_ERROR(logger_,
+                  "application for connection key: " << connection_key
+                                                     << "not found");
+    return;
+  }
+
+  const auto app_id = app->app_id();
+
+  LOG4CXX_DEBUG(logger_,
+                "app id for correlation_id " << message->correlation_id()
+                                             << " is: " << app_id);
+
+  bool needs_encryption =
       rpc_protection_mediator_->DoesRPCNeedEncryption(function_id, app_id);
 
-  if (needs_encryption &&
-      !protocol_handler_->IsRPCServiceSecure(connection_key) &&
-      !rpc_protection_mediator_->IsExceptionRPC(function_id)) {
-    rpc_protection_mediator_->SendEncryptionNeededError(
-        function_id, correlation_id, connection_key);
-    return;
+  const bool is_service_secure =
+      protocol_handler_->IsRPCServiceSecure(connection_key);
+
+  LOG4CXX_DEBUG(logger_,
+                "RPC with function id: "
+                    << function_id << " requires encryption: " << std::boolalpha
+                    << needs_encryption);
+
+  LOG4CXX_DEBUG(logger_,
+                "RPC service for connection key: "
+                    << connection_key << " is secure: " << std::boolalpha
+                    << is_service_secure);
+
+  if (needs_encryption && !is_service_secure) {
+    if (rpc_protection_mediator_->IsExceptionRPC(function_id)) {
+      LOG4CXX_DEBUG(logger_,
+                    "RPC with function id: " << function_id << " is exception");
+      needs_encryption = false;
+    } else {
+      rpc_protection_mediator_->SendEncryptionNeededError(
+          function_id, correlation_id, connection_key);
+      return;
+    }
   }
 
   protocol_handler_->SendMessageToMobileApp(

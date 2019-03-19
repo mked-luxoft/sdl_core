@@ -1456,7 +1456,7 @@ bool PolicyManagerImpl::AppNeedEncryption(
 
 const Strings& PolicyManagerImpl::GetGroupsForApp(
     const std::string& policy_app_id) const {
-  ASSERT(kDeviceId != policy_app_id);
+  DCHECK(kDeviceId != policy_app_id);
 
   return cache_->pt()
       ->policy_table.app_policies_section.apps[policy_app_id]
@@ -1470,7 +1470,7 @@ bool PolicyManagerImpl::FunctionNeedEncryption(
       cache_->pt()->policy_table.functional_groupings;
 
   const auto& group_itr = functional_groupings.find(policy_group);
-  ASSERT(group_itr != functional_groupings.end());
+  DCHECK(group_itr != functional_groupings.end());
   const auto& rpcs = (*group_itr).second.rpcs;
 
   if (rpcs.is_null()) {
@@ -1494,7 +1494,7 @@ bool PolicyManagerImpl::GroupNeedEncryption(
       cache_->pt()->policy_table.functional_groupings;
 
   const auto& grouping_itr = functional_groupings.find(policy_group);
-  ASSERT(grouping_itr != functional_groupings.end());
+  DCHECK(grouping_itr != functional_groupings.end());
   const auto& grouping = (*grouping_itr).second;
 
   return grouping.encryption_required.is_initialized()

@@ -10,6 +10,7 @@ const std::string kSystemRequest = "SystemRequest";
 const std::string kOnPermissionChange = "OnPermissionsChange";
 const std::string kOnSystemRequest = "OnSystemRequest";
 const std::string kPutFile = "PutFile";
+const std::string kOnHMIStatus = "OnHMIStatus";
 }
 
 RPCProtectionMediatorImpl::RPCProtectionMediatorImpl(
@@ -71,7 +72,7 @@ bool RPCProtectionMediatorImpl::IsExceptionRPC(
           policy_fucntion_id == kSystemRequest ||
           policy_fucntion_id == kOnSystemRequest ||
           policy_fucntion_id == kOnPermissionChange ||
-          policy_fucntion_id == kPutFile);
+          policy_fucntion_id == kPutFile || policy_fucntion_id == kOnHMIStatus);
 }
 
 void RPCProtectionMediatorImpl::SendEncryptionNeededError(

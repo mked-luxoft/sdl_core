@@ -2158,13 +2158,20 @@ void ApplicationManagerImpl::updateRequestTimeout(
 
 uint32_t ApplicationManagerImpl::application_id(const int32_t correlation_id) {
   // ykazakov: there is no erase for const iterator for QNX
+  LOG4CXX_AUTO_TRACE(logger_);
   std::map<const int32_t, const uint32_t>::iterator it =
       appID_list_.find(correlation_id);
   if (appID_list_.end() != it) {
     const uint32_t app_id = it->second;
-    appID_list_.erase(it);
+    // appID_list_.erase(it);
+    LOG4CXX_DEBUG(logger_,
+                  "found app id: " << app_id << " for correlation id: "
+                                   << correlation_id);
     return app_id;
   } else {
+    LOG4CXX_DEBUG(logger_,
+                  "app id for correlation id: " << correlation_id
+                                                << " not found");
     return 0;
   }
 }

@@ -452,7 +452,7 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   GetPolicyHandler().SetDeviceInfo(device_mac, device_info);
-
+application_manager_.set_application_id(correlation_id(), application->app_id());
   SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication);
   smart_objects::SmartObjectSPtr so =
       GetLockScreenIconUrlNotification(connection_key(), application);
