@@ -34,6 +34,18 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_PROTOCOL_HANDLER_RPC_PROTECTION_MEDIATOR_H_
 
 #include <cstdint>
+#include <memory>
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+class SmartObject;
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
+namespace smart_objects = ns_smart_device_link::ns_smart_objects;
+
+namespace application_manager {
+class Application;
+}  // namespace application_manager
 
 namespace application_manager {
 class RPCProtectionMediator {
@@ -41,12 +53,15 @@ class RPCProtectionMediator {
   virtual ~RPCProtectionMediator() {}
 
   virtual bool DoesRPCNeedEncryption(const uint32_t function_id,
-                                     const uint32_t app_id) const = 0;
-  virtual void SendEncryptionNeededError(const uint32_t function_id,
-                                         const uint32_t conrrelation_id,
-                                         const uint32_t connection_key) = 0;
-
-  virtual bool IsExceptionRPC(const uint32_t function_id) const = 0;
+                                     std::shared_ptr<Application> app,
+                                     const uint32_t conrrelation_id,
+                                     const bool is_rpc_service_secure) = 0;
+  virtual bool DoesRPCNeedEncryption(const uint32_t conrrelation_id) = 0;
+  virtual void EncryptByForce(const uint32_t conrrelation_id) = 0;
+  virtual std::shared_ptr<smart_objects::SmartObject> CreateNegativeResponse(
+      const uint32_t connection_key,
+      const uint32_t function_id,
+      const uint32_t conrrelation_id) = 0;
 };
 }  // namespace policy
 

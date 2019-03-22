@@ -2176,7 +2176,7 @@ bool PolicyManagerImpl::AppNeedEncryption(
            ? app_policies_section.device.encryption_required
            : app_policies_section.apps[policy_app_id].encryption_required);
 
-  return encryption_required.is_initialized() ? *encryption_required : false;
+  return encryption_required.is_initialized() ? *encryption_required : true;
 }
 
 const Strings& PolicyManagerImpl::GetGroupsForApp(
@@ -2223,7 +2223,6 @@ bool PolicyManagerImpl::GroupNeedEncryption(
   return grouping.encryption_required.is_initialized()
              ? *grouping.encryption_required
              : false;
-  return false;
 }
 
 }  //  namespace policy

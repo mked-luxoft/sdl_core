@@ -33,32 +33,37 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_PROTOCOL_HANDLER_RPC_PROTECTION_MEDIATOR_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_PROTOCOL_HANDLER_RPC_PROTECTION_MEDIATOR_IMPL_H_
 
+#include <set>
 #include "application_manager/rpc_protection_mediator.h"
 #include "application_manager/policies/policy_handler.h"
-#include "application_manager/application_manager.h"
 
 namespace application_manager {
 class RPCProtectionMediatorImpl : public RPCProtectionMediator {
  public:
-  RPCProtectionMediatorImpl(policy::PolicyHandlerInterface& policy_handler,
-                            ApplicationManager& app_manager);
+  RPCProtectionMediatorImpl(policy::PolicyHandlerInterface& policy_handler);
 
   ~RPCProtectionMediatorImpl() OVERRIDE {}
 
   bool DoesRPCNeedEncryption(const uint32_t function_id,
-                             const uint32_t app_id) const OVERRIDE;
-  void SendEncryptionNeededError(const uint32_t function_id,
-                                 const uint32_t conrrelation_id,
-                                 const uint32_t connection_key) OVERRIDE;
-
-  bool IsExceptionRPC(const uint32_t function_id) const OVERRIDE;
+                             std::shared_ptr<Application> app,
+                             const uint32_t conrrelation_id,
+                             const bool is_rpc_service_secure) OVERRIDE;
+  bool DoesRPCNeedEncryption(const uint32_t conrrelation_id) OVERRIDE;
+  void EncryptByForce(const uint32_t conrrelation_id) OVERRIDE;
+  smart_objects::SmartObjectSPtr CreateNegativeResponse(
+      const uint32_t connection_key,
+      const uint32_t function_id,
+      const uint32_t conrrelation_id) OVERRIDE;
 
  private:
+  bool IsExceptionRPC(const uint32_t function_id) const;
+  bool IsNegativeResponse(const uint32_t conrrelation_id);
   bool IsFunctionInGroup(const std::string& function,
                          const std::string& group) const;
 
   policy::PolicyHandlerInterface& policy_handler_;
-  ApplicationManager& app_manager_;
+  std::set<uint32_t> negative_responses_;
+  std::set<uint32_t> message_needed_encryption_;
 };
 }  // namespace policy
 

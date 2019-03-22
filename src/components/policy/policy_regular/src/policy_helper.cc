@@ -713,7 +713,9 @@ bool ProcessFunctionalGroup::operator()(const StringsValueType& group_name) {
     FillNotificationData filler(
         data_, GetGroupState(group_name_str), undefined_group_consent_);
     std::for_each(rpcs.begin(), rpcs.end(), filler);
-    FillEncryptionFlagForRpcs((*it).second.encryption_required);
+    FillEncryptionFlagForRpcs((*it).second.encryption_required.is_initialized()
+                                  ? *(*it).second.encryption_required
+                                  : false);
   }
   return true;
 }
@@ -721,7 +723,7 @@ bool ProcessFunctionalGroup::operator()(const StringsValueType& group_name) {
 void ProcessFunctionalGroup::FillEncryptionFlagForRpcs(
     bool encryption_required) {
   for (auto& item : data_) {
-    item.second.require_encryption = encryption_required;
+    item.second.require_encryption |= encryption_required;
   }
 }
 

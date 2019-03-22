@@ -70,6 +70,7 @@ class Message {
   std::string function_name() const;
   int32_t correlation_id() const;
   int32_t connection_key() const;
+  bool is_message_protected() const;
 
   MessageType type() const;
   protocol_handler::MajorProtocolVersion protocol_version() const;
@@ -94,6 +95,7 @@ class Message {
   void set_smart_object(const smart_objects::SmartObject& object);
   void set_data_size(size_t data_size);
   void set_payload_size(size_t payload_size);
+  void set_message_protection(bool protection);
 
   static bool is_sufficient_version(
       protocol_handler::MajorProtocolVersion minVersion,
@@ -122,6 +124,8 @@ class Message {
   size_t data_size_;
   size_t payload_size_;
   protocol_handler::MajorProtocolVersion version_;
+
+  bool is_message_protected_;
 };
 
 typedef std::shared_ptr<application_manager::Message> MobileMessage;
