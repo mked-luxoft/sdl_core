@@ -118,7 +118,14 @@ void OnSystemRequestNotification::Run() {
   params[strings::connection_key] = app->app_id();
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  policy_handler_.IncrementRetryIndex();
+  const auto request_type =
+      static_cast<rpc::policy_table_interface_base::RequestType>(
+          (*message_)[strings::msg_params][strings::request_type].asUInt());
+
+  if (rpc::policy_table_interface_base::RequestType::RT_PROPRIETARY ==
+      request_type) {
+    policy_handler_.IncrementRetryIndex();
+  }
 #endif
   SendNotificationToMobile(message_);
 }
