@@ -1413,8 +1413,11 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
     return;
   }
 
+  const auto require_encryption =
+      policy_manager_->GetAppEncryptionRequired(policy_app_id);
+
   MessageHelper::SendOnPermissionsChangeNotification(
-      app->app_id(), permissions, application_manager_);
+      app->app_id(), permissions, require_encryption, application_manager_);
 
   LOG4CXX_DEBUG(logger_,
                 "Notification sent for application_id: "
@@ -1519,7 +1522,6 @@ void PolicyHandler::CheckPermissions(
                "Checking permissions for  " << app->policy_app_id() << " in "
                                             << hmi_level << " on device "
                                             << device_id << " rpc " << rpc);
-
   policy_manager_->CheckPermissions(
       device_id, app->policy_app_id(), hmi_level, rpc, rpc_params, result);
 }
