@@ -2284,7 +2284,8 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 void MessageHelper::SendOnPermissionsChangeNotification(
     uint32_t connection_key,
     const policy::Permissions& permissions,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const bool require_encryption) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
 
@@ -2302,6 +2303,8 @@ void MessageHelper::SendOnPermissionsChangeNotification(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   // content[strings::msg_params][strings::app_id] = connection_key;
+
+  content[strings::msg_params][strings::requireEncryption] = require_encryption;
 
   content[strings::msg_params]["permissionItem"] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -2323,6 +2326,10 @@ void MessageHelper::SendOnPermissionsChangeNotification(
     // Filling the rpcName of PermissionItem
     permission_item["rpcName"] = (*it_permissions).first;
     const policy::RpcPermissions& rpc_permissions = (*it_permissions).second;
+
+    // Filling the requireEncryption of PermissionItem
+    permission_item[strings::requireEncryption] =
+        rpc_permissions.require_encryption;
 
     // Creating SO for hmiPermissions
     permission_item["hmiPermissions"] =

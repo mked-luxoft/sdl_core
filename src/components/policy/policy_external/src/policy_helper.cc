@@ -841,8 +841,18 @@ bool ProcessFunctionalGroup::operator()(const StringsValueType& group_name) {
                                 undefined_group_consent_,
                                 does_require_user_consent);
     std::for_each(rpcs.begin(), rpcs.end(), filler);
+    FillEncryptionFlagForRpcs((*it).second.encryption_required.is_initialized()
+                                  ? *(*it).second.encryption_required
+                                  : false);
   }
   return true;
+}
+
+void ProcessFunctionalGroup::FillEncryptionFlagForRpcs(
+    bool encryption_required) {
+  for (auto& item : data_) {
+    item.second.require_encryption |= encryption_required;
+  }
 }
 
 GroupConsent ProcessFunctionalGroup::GetGroupState(
