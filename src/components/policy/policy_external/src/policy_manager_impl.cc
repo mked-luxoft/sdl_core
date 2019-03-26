@@ -2179,6 +2179,16 @@ bool PolicyManagerImpl::AppNeedEncryption(
   return encryption_required.is_initialized() ? *encryption_required : true;
 }
 
+const rpc::Optional<rpc::Boolean>& PolicyManagerImpl::GetAppEncryptionRequired(
+    const std::string& policy_app_id) const {
+  const auto& app_policies_section =
+      cache_->pt()->policy_table.app_policies_section;
+
+  return kDeviceId == policy_app_id
+             ? app_policies_section.device.encryption_required
+             : app_policies_section.apps[policy_app_id].encryption_required;
+}
+
 const Strings& PolicyManagerImpl::GetGroupsForApp(
     const std::string& policy_app_id) const {
   return cache_->pt()
