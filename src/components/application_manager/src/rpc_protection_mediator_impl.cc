@@ -1,5 +1,7 @@
 #include "application_manager/rpc_protection_mediator_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/application.h"
+
 CREATE_LOGGERPTR_LOCAL(logger_, "RPCProtectionMediatorImpl");
 
 namespace application_manager {
@@ -14,9 +16,8 @@ const std::string kOnHMIStatus = "OnHMIStatus";
 }
 
 RPCProtectionMediatorImpl::RPCProtectionMediatorImpl(
-    policy::PolicyHandlerInterface& policy_handler,
-    ApplicationManager& app_manager)
-    : policy_handler_(policy_handler), app_manager_(app_manager) {
+    policy::PolicyHandlerInterface& policy_handler)
+    : policy_handler_(policy_handler) {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
@@ -32,20 +33,24 @@ bool RPCProtectionMediatorImpl::IsFunctionInGroup(
 }
 
 bool RPCProtectionMediatorImpl::DoesRPCNeedEncryption(
-    const uint32_t function_id, const uint32_t app_id) const {
+    const uint32_t function_id,
+    std::shared_ptr<Application> app,
+    const uint32_t conrrelation_id,
+    const bool is_rpc_service_secure) {
   LOG4CXX_AUTO_TRACE(logger_);
-
   const auto& rpc_encryption_manager = policy_handler_.RPCEncryptionManager();
-  const auto app = app_manager_.application(app_id);
-  LOG4CXX_DEBUG(logger_, "app for app_id: " << app_id << " is " << app.get());
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "No application found for app_id " << app_id);
+  const std::string function_name =
+      rpc_encryption_manager.GetPolicyFunctionName(function_id);
+  LOG4CXX_DEBUG(logger_,
+                "Function for check is " << function_name
+                                         << " conrrelation_id is "
+                                         << conrrelation_id);
+
+  if (!is_rpc_service_secure && IsExceptionRPC(function_id)) {
     return false;
   }
-  const auto policy_app_id = app->policy_app_id();
-  const auto policy_function_id =
-      rpc_encryption_manager.GetPolicyFunctionName(function_id);
 
+  const auto policy_app_id = app->policy_app_id();
   if (!rpc_encryption_manager.AppNeedEncryption(policy_app_id)) {
     return false;
   }
@@ -55,12 +60,32 @@ bool RPCProtectionMediatorImpl::DoesRPCNeedEncryption(
 
   bool encrypted_need = false;
   for (const auto& group : app_rpc_groups) {
-    const bool is_fid_in_group = IsFunctionInGroup(policy_function_id, group);
-    if (is_fid_in_group) {
+    const bool is_function_in_group = IsFunctionInGroup(function_name, group);
+    if (is_function_in_group) {
       encrypted_need |= rpc_encryption_manager.GroupNeedEncryption(group);
     }
   }
+
+  if (encrypted_need) {
+    LOG4CXX_DEBUG(
+        logger_, "Message need encryption. Function name is " << function_name);
+    message_needed_encryption_.insert(conrrelation_id);
+  }
+
   return encrypted_need;
+}
+
+bool RPCProtectionMediatorImpl::DoesRPCNeedEncryption(
+    const uint32_t conrrelation_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "conrrelation_id is " << conrrelation_id);
+
+  auto itr = message_needed_encryption_.find(conrrelation_id);
+  if (itr != message_needed_encryption_.end()) {
+    message_needed_encryption_.erase(itr);
+    return !IsNegativeResponse(conrrelation_id);
+  }
+  return false;
 }
 
 bool RPCProtectionMediatorImpl::IsExceptionRPC(
@@ -75,19 +100,32 @@ bool RPCProtectionMediatorImpl::IsExceptionRPC(
           policy_fucntion_id == kPutFile || policy_fucntion_id == kOnHMIStatus);
 }
 
-void RPCProtectionMediatorImpl::SendEncryptionNeededError(
-    const uint32_t function_id,
-    const uint32_t correlation_id,
-    const uint32_t connection_key) {
+bool RPCProtectionMediatorImpl::IsNegativeResponse(
+    const uint32_t conrrelation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  auto itr = negative_responses_.find(conrrelation_id);
+  if (itr != negative_responses_.end()) {
+    negative_responses_.erase(itr);
+    return true;
+  }
+  return false;
+}
 
-  const auto response = MessageHelper::CreateNegativeResponse(
+void RPCProtectionMediatorImpl::EncryptByForce(const uint32_t conrrelation_id) {
+  message_needed_encryption_.insert(conrrelation_id);
+};
+
+smart_objects::SmartObjectSPtr
+RPCProtectionMediatorImpl::CreateNegativeResponse(
+    const uint32_t connection_key,
+    const uint32_t function_id,
+    const uint32_t conrrelation_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  negative_responses_.insert(conrrelation_id);
+  return MessageHelper::CreateNegativeResponse(
       connection_key,
       function_id,
-      correlation_id,
+      conrrelation_id,
       static_cast<int32_t>(mobile_apis::Result::ENCRYPTION_NEEDED));
-
-  app_manager_.GetRPCService().ManageMobileCommand(
-      response, commands::Command::SOURCE_SDL);
 }
 }  // namespace protocol_handler

@@ -118,6 +118,27 @@ bool RPCServiceImpl::ManageMobileCommand(
       return false;
     }
 
+    bool needs_encryption = rpc_protection_mediator_->DoesRPCNeedEncryption(
+        function_id,
+        app,
+        correlation_id,
+        protocol_handler_->IsRPCServiceSecure(connection_key));
+    if (MessageType::kRequest ==
+        (*message)[strings::params][strings::message_type].asInt()) {
+      const bool message_protected =
+          (*message)[strings::params][strings::protection].asBool();
+
+      if (needs_encryption && !message_protected) {
+        const auto response = rpc_protection_mediator_->CreateNegativeResponse(
+            connection_key, function_id, correlation_id);
+        SendMessageToMobile(response);
+        return false;
+      }
+      if (message_protected && !needs_encryption) {
+        rpc_protection_mediator_->EncryptByForce(correlation_id);
+      }
+    }
+
     // Message for "CheckPermission" must be with attached schema
     mobile_so_factory().attachSchema(*message, false);
   }
@@ -348,57 +369,18 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
     }
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "===========================================================");
-
   smart_objects::SmartObject& so = (smart_objects::SmartObject&)(*message);
   MessageHelper::PrintSmartObject(so);
 
-  const auto function_id = message->function_id();
-  const auto connection_key = message->connection_key();
-  const auto app = app_manager_.application(connection_key);
   const auto correlation_id = message->correlation_id();
 
-  if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "application for connection key: " << connection_key
-                                                     << "not found");
+  const bool needs_encryption =
+      rpc_protection_mediator_->DoesRPCNeedEncryption(correlation_id);
+
+  if (needs_encryption &&
+      !protocol_handler_->IsRPCServiceSecure(message->connection_key())) {
     return;
-  }
-
-  const auto app_id = app->app_id();
-
-  LOG4CXX_DEBUG(logger_,
-                "app id for correlation_id " << message->correlation_id()
-                                             << " is: " << app_id);
-
-  bool needs_encryption =
-      rpc_protection_mediator_->DoesRPCNeedEncryption(function_id, app_id);
-
-  const bool is_service_secure =
-      protocol_handler_->IsRPCServiceSecure(connection_key);
-
-  LOG4CXX_DEBUG(logger_,
-                "RPC with function id: "
-                    << function_id << " requires encryption: " << std::boolalpha
-                    << needs_encryption);
-
-  LOG4CXX_DEBUG(logger_,
-                "RPC service for connection key: "
-                    << connection_key << " is secure: " << std::boolalpha
-                    << is_service_secure);
-
-  if (needs_encryption && !is_service_secure) {
-    if (rpc_protection_mediator_->IsExceptionRPC(function_id)) {
-      LOG4CXX_DEBUG(logger_,
-                    "RPC with function id: " << function_id << " is exception");
-      needs_encryption = false;
-    } else {
-      rpc_protection_mediator_->SendEncryptionNeededError(
-          function_id, correlation_id, connection_key);
-      return;
-    }
-  }
+  };
 
   protocol_handler_->SendMessageToMobileApp(
       rawMessage, needs_encryption, is_final);
@@ -503,6 +485,13 @@ void RPCServiceImpl::SendMessageToMobile(
                                  << ") not allowed by policy");
       return;
     }
+
+    rpc_protection_mediator_->DoesRPCNeedEncryption(
+        function_id,
+        app,
+        message_to_send->correlation_id(),
+        protocol_handler_->IsRPCServiceSecure(
+            message_to_send->connection_key()));
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
     if (function_id == mobile_apis::FunctionID::OnSystemRequestID) {

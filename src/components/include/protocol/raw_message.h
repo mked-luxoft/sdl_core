@@ -59,7 +59,8 @@ class RawMessage {
              const uint8_t* const data_param,
              uint32_t data_size,
              uint8_t type = ServiceType::kRpc,
-             uint32_t payload_size = 0);
+             uint32_t payload_size = 0,
+             bool protection = false);
   /**
    * \brief Destructor
    */
@@ -96,6 +97,8 @@ class RawMessage {
   ServiceType service_type() const {
     return service_type_;
   }
+
+  bool protection_flag() const;
   /**
    * \brief Specifies current state of message in queue.
    * if false message is "ready to be processed"
@@ -112,6 +115,7 @@ class RawMessage {
   ServiceType service_type_;
   size_t payload_size_;
   bool waiting_;
+  bool protection_;
   DISALLOW_COPY_AND_ASSIGN(RawMessage);
 };
 typedef std::shared_ptr<RawMessage> RawMessagePtr;

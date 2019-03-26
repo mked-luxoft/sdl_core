@@ -1398,7 +1398,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
                                                 packet->data(),
                                                 packet->total_data_bytes(),
                                                 packet->service_type(),
-                                                packet->payload_size()));
+                                                packet->payload_size(),
+                                                packet->protection_flag()));
   if (!rawMessage) {
     return RESULT_FAIL;
   }
@@ -1915,7 +1916,8 @@ void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
                                                   frame->data(),
                                                   frame->total_data_bytes(),
                                                   frame->service_type(),
-                                                  frame->payload_size()));
+                                                  frame->payload_size(),
+                                                  frame->protection_flag()));
     DCHECK(rawMessage);
 
 #ifdef TELEMETRY_MONITOR

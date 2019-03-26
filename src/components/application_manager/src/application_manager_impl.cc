@@ -196,7 +196,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(*this));
   commands_holder_.reset(new CommandHolderImpl(*this));
   std::unique_ptr<RPCProtectionMediator> rpc_protection_mediator(
-      new RPCProtectionMediatorImpl(*policy_handler_, *this));
+      new RPCProtectionMediatorImpl(*policy_handler_));
   rpc_service_.reset(
       new rpc_service::RPCServiceImpl(*this,
                                       request_ctrl_,

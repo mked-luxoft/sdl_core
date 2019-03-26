@@ -3,6 +3,7 @@ build/
 src/appMain/sdl_preloaded_pt.json
 CMakeCache.txt
 CMakeFiles/
+.vscode
 *.pyc
 .idea
 src/appMain/build_config.txt

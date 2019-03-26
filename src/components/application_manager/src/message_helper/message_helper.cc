@@ -2304,7 +2304,7 @@ void MessageHelper::SendOnPermissionsChangeNotification(
 
   // content[strings::msg_params][strings::app_id] = connection_key;
 
-  content[strings::msg_params]["requireEncryption"] = require_encryption;
+  content[strings::msg_params][strings::requireEncryption] = require_encryption;
 
   content[strings::msg_params]["permissionItem"] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -2328,10 +2328,8 @@ void MessageHelper::SendOnPermissionsChangeNotification(
     const policy::RpcPermissions& rpc_permissions = (*it_permissions).second;
 
     // Filling the requireEncryption of PermissionItem
-    if (rpc_permissions.require_encryption) {
-      permission_item["requireEncryption"] =
-          *rpc_permissions.require_encryption;
-    }
+    permission_item[strings::requireEncryption] =
+        rpc_permissions.require_encryption;
 
     // Creating SO for hmiPermissions
     permission_item["hmiPermissions"] =
