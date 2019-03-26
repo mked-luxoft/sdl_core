@@ -54,6 +54,9 @@ class RPCEncryptionManagerInterface {
    * \return true if the app need encryption
    */
   virtual bool AppNeedEncryption(const std::string& policy_app_id) const = 0;
+  virtual const rpc::Optional<rpc::Boolean>& GetAppEncryptionRequired(
+      const std::string& policy_app_id) const = 0;
+
   /*
    * \param policy_app_id policy app id
    * \return groups that exist for app
