@@ -41,14 +41,16 @@ RawMessage::RawMessage(uint32_t connection_key,
                        const uint8_t* const data_param,
                        uint32_t data_sz,
                        uint8_t type,
-                       uint32_t payload_size)
+                       uint32_t payload_size,
+                       bool protection)
     : connection_key_(connection_key)
     , data_(NULL)
     , data_size_(data_sz)
     , protocol_version_(protocol_version)
     , service_type_(ServiceTypeFromByte(type))
     , payload_size_(payload_size)
-    , waiting_(false) {
+    , waiting_(false)
+    , protection_(protection) {
   if (data_param && data_sz > 0) {
     data_ = new uint8_t[data_sz];
     memcpy(data_, data_param, sizeof(*data_) * data_sz);
@@ -85,6 +87,10 @@ uint32_t RawMessage::protocol_version() const {
 
 bool RawMessage::IsWaiting() const {
   return waiting_;
+}
+
+bool RawMessage::protection_flag() const {
+  return protection_;
 }
 
 void RawMessage::set_waiting(bool v) {
