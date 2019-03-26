@@ -53,6 +53,7 @@
 #include "application_manager/app_launch/app_launch_data_json.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
+#include "application_manager/rpc_protection_mediator_impl.h"
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_handler.h"
 #include "application_manager/command_holder_impl.h"
@@ -194,11 +195,15 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   timer_pool_.push_back(clearing_timer);
   rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(*this));
   commands_holder_.reset(new CommandHolderImpl(*this));
-  rpc_service_.reset(new rpc_service::RPCServiceImpl(*this,
-                                                     request_ctrl_,
-                                                     protocol_handler_,
-                                                     hmi_handler_,
-                                                     *commands_holder_));
+  std::unique_ptr<RPCProtectionMediator> rpc_protection_mediator(
+      new RPCProtectionMediatorImpl(*policy_handler_));
+  rpc_service_.reset(
+      new rpc_service::RPCServiceImpl(*this,
+                                      request_ctrl_,
+                                      protocol_handler_,
+                                      hmi_handler_,
+                                      *commands_holder_,
+                                      std::move(rpc_protection_mediator)));
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {

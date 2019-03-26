@@ -44,9 +44,9 @@ namespace policy {
 */
 class RPCEncryptionManagerInterface {
  public:
-   /*!
-   * \brief virtual destructor RPCEncryptionManagerInterface
-   */
+  /*!
+  * \brief virtual destructor RPCEncryptionManagerInterface
+  */
   virtual ~RPCEncryptionManagerInterface() {}
 
   /*

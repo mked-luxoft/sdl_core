@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/rpc_service_impl.h"
+#include "application_manager/rpc_protection_mediator_impl.h"
 
 namespace application_manager {
 namespace rpc_service {
@@ -44,11 +45,13 @@ RPCServiceImpl::RPCServiceImpl(
     request_controller::RequestController& request_ctrl,
     protocol_handler::ProtocolHandler* protocol_handler,
     hmi_message_handler::HMIMessageHandler* hmi_handler,
-    CommandHolder& commands_holder)
+    CommandHolder& commands_holder,
+    std::unique_ptr<RPCProtectionMediator> rpc_protection_mediator)
     : app_manager_(app_manager)
     , request_ctrl_(request_ctrl)
     , protocol_handler_(protocol_handler)
     , hmi_handler_(hmi_handler)
+    , rpc_protection_mediator_(std::move(rpc_protection_mediator))
     , commands_holder_(commands_holder)
     , messages_to_mobile_("AM ToMobile", this)
     , messages_to_hmi_("AM ToHMI", this)
@@ -113,6 +116,28 @@ bool RPCServiceImpl::ManageMobileCommand(
 
       SendMessageToMobile(response);
       return false;
+    }
+
+    const bool needs_encryption =
+        rpc_protection_mediator_->DoesRPCNeedEncryption(
+            function_id,
+            app,
+            correlation_id,
+            protocol_handler_->IsRPCServiceSecure(connection_key));
+    if (MessageType::kRequest ==
+        (*message)[strings::params][strings::message_type].asInt()) {
+      const bool message_protected =
+          (*message)[strings::params][strings::protection].asBool();
+
+      if (needs_encryption && !message_protected) {
+        const auto response = rpc_protection_mediator_->CreateNegativeResponse(
+            connection_key, function_id, correlation_id);
+        SendMessageToMobile(response);
+        return false;
+      }
+      if (message_protected && !needs_encryption) {
+        rpc_protection_mediator_->EncryptResponseByForce(correlation_id);
+      }
     }
 
     // Message for "CheckPermission" must be with attached schema
@@ -320,6 +345,7 @@ void RPCServiceImpl::Handle(const impl::MessageToHmi message) {
 }
 
 void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!protocol_handler_) {
     LOG4CXX_WARN(logger_,
                  "Protocol Handler is not set; cannot send message to mobile.");
@@ -344,7 +370,18 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
     }
   }
 
-  protocol_handler_->SendMessageToMobileApp(rawMessage, is_final);
+  const auto correlation_id = message->correlation_id();
+
+  const bool needs_encryption =
+      rpc_protection_mediator_->DoesRPCNeedEncryption(correlation_id);
+
+  if (needs_encryption &&
+      !protocol_handler_->IsRPCServiceSecure(message->connection_key())) {
+    return;
+  };
+
+  protocol_handler_->SendMessageToMobileApp(
+      rawMessage, needs_encryption, is_final);
   LOG4CXX_INFO(logger_, "Message for mobile given away");
 
   if (close_session) {
@@ -446,6 +483,13 @@ void RPCServiceImpl::SendMessageToMobile(
                                  << ") not allowed by policy");
       return;
     }
+
+    rpc_protection_mediator_->DoesRPCNeedEncryption(
+        function_id,
+        app,
+        message_to_send->correlation_id(),
+        protocol_handler_->IsRPCServiceSecure(
+            message_to_send->connection_key()));
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
     if (function_id == mobile_apis::FunctionID::OnSystemRequestID) {

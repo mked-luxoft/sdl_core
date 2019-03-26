@@ -138,6 +138,9 @@
         <element name="CORRUPTED_DATA" since="5.0">
             <description>The data sent failed to pass CRC check in receiver end</description>
         </element>
+        <element name="ENCRYPTION_NEEDED" since="5.1">
+        <description>SDL receives an un-encrypted PRC request that needs protection. </description>
+        </element>
     </enum>
     
     <enum name="ButtonPressMode" since="1.0">
