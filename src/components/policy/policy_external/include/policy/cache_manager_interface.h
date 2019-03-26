@@ -821,6 +821,14 @@ class CacheManagerInterface {
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
 
+  /**
+   * @brief pt allows to obtain std::shared_ptr to PT.
+   * Used ONLY in Unit tests
+   * @return std::shared_ptr to PT
+   *
+   */
+  virtual std::shared_ptr<policy_table::Table> pt() const = 0;
+
 #ifdef BUILD_TESTS
   /**
    * @brief GetPT allows to obtain std::shared_ptr to PT.

@@ -108,6 +108,7 @@ typedef std::vector<AppHMIType> AppHmiTypes;
 struct PolicyBase : CompositeType {
  public:
   Enum<Priority> priority;
+  Optional<Boolean> encryption_required;
 
  public:
   PolicyBase();
@@ -188,6 +189,7 @@ struct RpcParameters : CompositeType {
  public:
   HmiLevels hmi_levels;
   Optional<Parameters> parameters;
+  Optional<Boolean> encryption_required;
 
  public:
   RpcParameters();
@@ -209,6 +211,7 @@ struct Rpcs : CompositeType {
  public:
   Optional<String<1, 255> > user_consent_prompt;
   Nullable<Rpc> rpcs;
+  Optional<Boolean> encryption_required;
 
  public:
   Rpcs();

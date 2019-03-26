@@ -36,6 +36,7 @@
 #include <vector>
 #include <cstdint>
 
+#include "application_manager/policies/rpc_encryption_manager_interface.h"
 #include "utils/callable.h"
 #include "policy/policy_types.h"
 #include "policy/policy_table/types.h"
@@ -48,7 +49,8 @@ namespace policy {
 class PolicySettings;
 typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
-class PolicyManager : public usage_statistics::StatisticsManager {
+class PolicyManager : public usage_statistics::StatisticsManager,
+                      public RPCEncryptionManagerInterface {
  public:
   virtual ~PolicyManager() {}
 

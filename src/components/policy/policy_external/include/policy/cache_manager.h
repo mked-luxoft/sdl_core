@@ -780,6 +780,10 @@ class CacheManager : public CacheManagerInterface {
                                const std::string& policy_app_id,
                                policy::Permissions& permission);
 
+  std::shared_ptr<policy_table::Table> pt() const {
+    return pt_;
+  }
+
  private:
   std::shared_ptr<policy_table::Table> pt_;
   std::shared_ptr<policy_table::Table> snapshot_;

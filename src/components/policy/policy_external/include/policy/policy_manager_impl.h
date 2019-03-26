@@ -54,7 +54,43 @@ class PolicyManagerImpl : public PolicyManager {
  public:
   PolicyManagerImpl();
   explicit PolicyManagerImpl(bool in_memory);
+  /*
+   * \param policy_app_id policy app id
+   * \return true if the app need encryption
+   */
+  bool AppNeedEncryption(const std::string& policy_app_id) const OVERRIDE;
+  /*
+   * \param policy_app_id policy app id
+   * \return groups that exist for app
+   */
+  const Strings& GetGroupsForApp(
+      const std::string& policy_app_id) const OVERRIDE;
+  /*
+   * \param policy_group group
+   * \param policy_function_id policy function id
+   * \return true if the rpc need encryption
+   */
+  bool FunctionNeedEncryption(
+      const std::string& policy_group,
+      const std::string& policy_function_id) const OVERRIDE;
+  /*
+   * \param policy_group group
+   * \return true if the group need encryption
+   */
+  bool GroupNeedEncryption(const std::string& policy_group) const OVERRIDE;
 
+  /*
+   * \param policy_group group\
+   * \return RPCs that exists in group
+   */
+  const std::vector<std::string> GetRPCsForGroup(
+      const std::string& group) const OVERRIDE;
+  /*
+   * \param function_id function id
+   * \return policy function name
+   */
+  const std::string GetPolicyFunctionName(
+      const uint32_t function_id) const OVERRIDE;
   /**
    * @brief set_listener set new policy listener instance
    * @param listener new policy listener
