@@ -63,6 +63,13 @@ class PolicyManagerImpl : public PolicyManager {
    * \return true if the app need encryption
    */
   bool AppNeedEncryption(const std::string& policy_app_id) const OVERRIDE;
+
+  /*
+   * \param policy_app_id policy app id
+   * \return Optional app need encryption
+   */
+  const rpc::Optional<rpc::Boolean>& GetAppEncryptionRequired(
+      const std::string& policy_app_id) const OVERRIDE;
   /*
    * \param policy_app_id policy app id
    * \return groups that exist for app

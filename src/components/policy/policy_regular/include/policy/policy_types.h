@@ -43,6 +43,7 @@
 
 #include "utils/helpers.h"
 #include "transport_manager/common.h"
+#include "rpc_base/rpc_base.h"
 
 namespace policy {
 
@@ -77,6 +78,8 @@ enum PolicyTableStatus {
   StatusUnknown
 };
 
+typedef rpc::Optional<rpc::Boolean> EncryptionRequired;
+
 // Code generator uses String class name, so this typedef was renamed to PTSring
 typedef std::string PTString;
 typedef std::vector<uint8_t> BinaryMessage;
@@ -102,6 +105,7 @@ struct ParameterPermissions
 struct RpcPermissions {
   HMIPermissions hmi_permissions;
   ParameterPermissions parameter_permissions;
+  EncryptionRequired require_encryption;
 };
 
 typedef std::map<RpcName, RpcPermissions> Permissions;
