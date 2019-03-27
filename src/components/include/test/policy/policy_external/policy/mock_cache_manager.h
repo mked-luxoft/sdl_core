@@ -57,6 +57,7 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                     const PTString& hmi_level,
                     const PTString& rpc,
                     CheckPermissionResult& result));
+  MOCK_CONST_METHOD0(pt, std::shared_ptr<policy_table::Table>());
   MOCK_METHOD0(IsPTPreloaded, bool());
   MOCK_METHOD0(IgnitionCyclesBeforeExchange, int());
   MOCK_METHOD1(KilometersBeforeExchange, int(int current));

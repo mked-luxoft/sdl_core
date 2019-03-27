@@ -106,7 +106,7 @@ class RPCServiceImpl : public RPCService,
       protocol_handler::ProtocolHandler* protocol_handler,
       hmi_message_handler::HMIMessageHandler* hmi_handler,
       CommandHolder& commands_holder,
-      std::unique_ptr<RPCProtectionMediator> rpc_protection_mediator);
+      std::shared_ptr<RPCProtectionMediator> rpc_protection_mediator);
   ~RPCServiceImpl();
 
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
@@ -137,7 +137,7 @@ class RPCServiceImpl : public RPCService,
   request_controller::RequestController& request_ctrl_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   hmi_message_handler::HMIMessageHandler* hmi_handler_;
-  std::unique_ptr<RPCProtectionMediator> rpc_protection_mediator_;
+  std::shared_ptr<RPCProtectionMediator> rpc_protection_mediator_;
   CommandHolder& commands_holder_;
   // Thread that pumps messages being passed to mobile side.
   impl::ToMobileQueue messages_to_mobile_;

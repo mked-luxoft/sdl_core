@@ -244,8 +244,13 @@ class PolicyHandlerTest : public ::testing::Test {
 
     EXPECT_CALL(mock_message_helper_, StringToHMILevel(default_hmi_level))
         .WillOnce(Return(hmi_level));
+    ChangePolicyManagerToMock();
+    const bool require_encryption = false;
+    EXPECT_CALL(*mock_policy_manager_, AppNeedEncryption(kPolicyAppId_))
+        .WillOnce(Return(require_encryption));
     EXPECT_CALL(mock_message_helper_,
-                SendOnPermissionsChangeNotification(kAppId1_, _, _));
+                SendOnPermissionsChangeNotification(
+                    kAppId1_, _, _, require_encryption));
     EXPECT_CALL(app_manager_, state_controller()).Times(0);
 
     Permissions permissions;
@@ -433,11 +438,17 @@ TEST_F(PolicyHandlerTest, UnloadPolicyLibrary_method_ExpectLibraryUnloaded) {
 
 TEST_F(PolicyHandlerTest, OnPermissionsUpdated_method_With2Parameters) {
   // Check expectations
+  ChangePolicyManagerToMock();
+  const bool require_encryption = false;
+  EXPECT_CALL(*mock_policy_manager_, AppNeedEncryption(kPolicyAppId_))
+      .WillOnce(Return(require_encryption));
+
   EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId1_));
-  EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
+  EXPECT_CALL(
+      mock_message_helper_,
+      SendOnPermissionsChangeNotification(kAppId1_, _, _, require_encryption));
   // Act
   Permissions perms;
   policy_handler_.OnPermissionsUpdated(kPolicyAppId_, perms);
@@ -447,8 +458,12 @@ TEST_F(PolicyHandlerTest, OnPermissionsUpdated_TwoParams_InvalidApp_UNSUCCESS) {
   std::shared_ptr<application_manager_test::MockApplication> invalid_app;
   EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
       .WillOnce(Return(invalid_app));
+  ChangePolicyManagerToMock();
+  const bool require_encryption = false;
+  EXPECT_CALL(*mock_policy_manager_, AppNeedEncryption(kPolicyAppId_))
+      .WillOnce(Return(require_encryption));
   EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(_, _, _)).Times(0);
+              SendOnPermissionsChangeNotification(_, _, _, _)).Times(0);
 
   Permissions permissions;
   policy_handler_.OnPermissionsUpdated(kPolicyAppId_, permissions);
@@ -460,8 +475,13 @@ TEST_F(PolicyHandlerTest, OnPermissionsUpdated_InvalidApp_UNSUCCESS) {
       .WillOnce(Return(mock_app_))
       .WillOnce(Return(invalid_app));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId1_));
-  EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
+  ChangePolicyManagerToMock();
+  const bool require_encryption = false;
+  EXPECT_CALL(*mock_policy_manager_, AppNeedEncryption(kPolicyAppId_))
+      .WillOnce(Return(require_encryption));
+  EXPECT_CALL(
+      mock_message_helper_,
+      SendOnPermissionsChangeNotification(kAppId1_, _, _, require_encryption));
 
   Permissions permissions;
   policy_handler_.OnPermissionsUpdated(kPolicyAppId_, permissions, "HMI_FULL");
@@ -491,8 +511,13 @@ TEST_F(PolicyHandlerTest,
 
   EXPECT_CALL(*mock_app_, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
-  EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
+  ChangePolicyManagerToMock();
+  const bool require_encryption = false;
+  EXPECT_CALL(*mock_policy_manager_, AppNeedEncryption(kPolicyAppId_))
+      .WillOnce(Return(require_encryption));
+  EXPECT_CALL(
+      mock_message_helper_,
+      SendOnPermissionsChangeNotification(kAppId1_, _, _, require_encryption));
 
   EXPECT_CALL(app_manager_, state_controller())
       .WillRepeatedly(ReturnRef(mock_state_controller));
@@ -519,8 +544,13 @@ TEST_F(PolicyHandlerTest,
 
   EXPECT_CALL(*mock_app_, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
-  EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
+  ChangePolicyManagerToMock();
+  const bool require_encryption = false;
+  EXPECT_CALL(*mock_policy_manager_, AppNeedEncryption(kPolicyAppId_))
+      .WillOnce(Return(require_encryption));
+  EXPECT_CALL(
+      mock_message_helper_,
+      SendOnPermissionsChangeNotification(kAppId1_, _, _, require_encryption));
 
   EXPECT_CALL(app_manager_, state_controller())
       .WillRepeatedly(ReturnRef(mock_state_controller));
@@ -546,8 +576,13 @@ TEST_F(PolicyHandlerTest,
 
   EXPECT_CALL(*mock_app_, hmi_level())
       .WillOnce(Return(mobile_apis::HMILevel::HMI_LIMITED));
-  EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
+  ChangePolicyManagerToMock();
+  const bool require_encryption = false;
+  EXPECT_CALL(*mock_policy_manager_, AppNeedEncryption(kPolicyAppId_))
+      .WillOnce(Return(require_encryption));
+  EXPECT_CALL(
+      mock_message_helper_,
+      SendOnPermissionsChangeNotification(kAppId1_, _, _, require_encryption));
 
   EXPECT_CALL(app_manager_, state_controller()).Times(0);
   // Act
