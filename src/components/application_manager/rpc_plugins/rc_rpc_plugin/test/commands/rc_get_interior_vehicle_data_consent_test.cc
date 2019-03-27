@@ -55,6 +55,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "include/test/protocol_handler/mock_protocol_handler.h"
 #include "test/application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_rpc_protection_mediator.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -102,11 +103,14 @@ class RCGetInteriorVehicleDataConsentTest
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , command_holder(app_mngr_)
       , request_controller(mock_request_controler)
+      , rpc_protection_mediator_(
+            std::make_shared<application_manager::MockRPCProtectionMediator>())
       , rpc_service_(app_mngr_,
                      request_controller,
                      &mock_protocol_handler,
                      &mock_hmi_handler,
-                     command_holder)
+                     command_holder,
+                     rpc_protection_mediator_)
       , rc_app_extention_(std::make_shared<RCAppExtension>(kPluginID))
       , mock_rpc_plugin_manager(
             std::make_shared<NiceMock<MockRPCPluginManager> >())
@@ -145,6 +149,10 @@ class RCGetInteriorVehicleDataConsentTest
         .WillByDefault(Return(true));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
         .WillByDefault(Return(true));
+    ON_CALL(mock_protocol_handler, IsRPCServiceSecure(_))
+        .WillByDefault(Return(false));
+    ON_CALL(*rpc_protection_mediator_, DoesRPCNeedEncryption(_, _, _, _))
+        .WillByDefault(Return(false));
   }
 
   template <class Command>
@@ -188,6 +196,8 @@ class RCGetInteriorVehicleDataConsentTest
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
   am::request_controller::RequestController request_controller;
+  std::shared_ptr<application_manager::MockRPCProtectionMediator>
+      rpc_protection_mediator_;
   am::rpc_service::RPCServiceImpl rpc_service_;
   std::shared_ptr<RCAppExtension> rc_app_extention_;
   std::shared_ptr<am::plugin_manager::MockRPCPluginManager>
@@ -239,7 +249,6 @@ TEST_F(RCGetInteriorVehicleDataConsentTest,
   EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
       .WillOnce(Return(rc_consent_response));
   auto command = CreateRCCommand<commands::ButtonPressRequest>(mobile_message);
-
   // Act
   ASSERT_TRUE(command->Init());
   command->Run();
