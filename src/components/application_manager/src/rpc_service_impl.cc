@@ -46,12 +46,12 @@ RPCServiceImpl::RPCServiceImpl(
     protocol_handler::ProtocolHandler* protocol_handler,
     hmi_message_handler::HMIMessageHandler* hmi_handler,
     CommandHolder& commands_holder,
-    std::unique_ptr<RPCProtectionMediator> rpc_protection_mediator)
+    std::shared_ptr<RPCProtectionMediator> rpc_protection_mediator)
     : app_manager_(app_manager)
     , request_ctrl_(request_ctrl)
     , protocol_handler_(protocol_handler)
     , hmi_handler_(hmi_handler)
-    , rpc_protection_mediator_(std::move(rpc_protection_mediator))
+    , rpc_protection_mediator_(rpc_protection_mediator)
     , commands_holder_(commands_holder)
     , messages_to_mobile_("AM ToMobile", this)
     , messages_to_hmi_("AM ToHMI", this)

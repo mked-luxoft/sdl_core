@@ -195,15 +195,13 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   timer_pool_.push_back(clearing_timer);
   rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(*this));
   commands_holder_.reset(new CommandHolderImpl(*this));
-  std::unique_ptr<RPCProtectionMediator> rpc_protection_mediator(
-      new RPCProtectionMediatorImpl(*policy_handler_));
-  rpc_service_.reset(
-      new rpc_service::RPCServiceImpl(*this,
-                                      request_ctrl_,
-                                      protocol_handler_,
-                                      hmi_handler_,
-                                      *commands_holder_,
-                                      std::move(rpc_protection_mediator)));
+  rpc_service_.reset(new rpc_service::RPCServiceImpl(
+      *this,
+      request_ctrl_,
+      protocol_handler_,
+      hmi_handler_,
+      *commands_holder_,
+      std::make_shared<RPCProtectionMediatorImpl>(*policy_handler_)));
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
