@@ -1599,11 +1599,16 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   const uint32_t connection_key = session_observer_.KeyFromPair(
       packet->connection_id(), packet->session_id());
 
-  service_status_update_handler_->OnServiceUpdate(
-      connection_key, service_type, ServiceStatus::SERVICE_RECEIVED);
+  const auto& force_protected = get_settings().force_protected_service();
+
+  const bool is_force_protected =
+      (helpers::in_range(force_protected, service_type));
+
+  const bool can_start_unprotected = is_force_protected && protection;
 
   if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
-      (ServiceType::kAudio == service_type && !is_audio_allowed)) {
+      (ServiceType::kAudio == service_type && !is_audio_allowed) ||
+      (is_force_protected && !can_start_unprotected)) {
     LOG4CXX_DEBUG(logger_,
                   "Rejecting StartService for service:"
                       << service_type << ", over transport: " << transport
@@ -1612,6 +1617,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         connection_id, session_id, protocol_version, service_type);
     return RESULT_OK;
   }
+
+  service_status_update_handler_->OnServiceUpdate(
+      connection_key, service_type, ServiceStatus::SERVICE_RECEIVED);
 
   LOG4CXX_INFO(logger_,
                "StartSession ID " << static_cast<int>(session_id)
