@@ -178,8 +178,10 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Resets retry sequence
+   * @param send_event - if true corresponding event is sent to
+   * UpdateStatusManager
    */
-  void ResetRetrySequence();
+  void ResetRetrySequence(const bool send_event) OVERRIDE;
 
   /**
    * @brief Gets timeout to wait before next retry updating PT

@@ -42,6 +42,8 @@ namespace policy {
 
 namespace custom_str = utils::custom_string;
 
+class PTURetryHandler;
+
 class PolicyListener {
  public:
   virtual ~PolicyListener() {}
@@ -166,16 +168,7 @@ class PolicyListener {
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level) = 0;
 
-  /**
-   * @brief Increments PTU retry index for external flow
-   */
-  virtual void IncrementRetryIndex() = 0;
-
-  /**
-   * @brief Check whether allowed PTU retry count is exceeded for external flow
-   * @return true if retry count is exceeded, otherwise -false
-   */
-  virtual bool IsAllowedPTURetriesExceeded() const = 0;
+  virtual PTURetryHandler& ptu_retry_handler() const = 0;
 };
 }  // namespace policy
 #endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_POLICY_LISTENER_H_

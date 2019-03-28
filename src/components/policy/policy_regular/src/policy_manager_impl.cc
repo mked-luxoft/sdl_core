@@ -314,6 +314,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   FilterPolicyTable(pt_update->policy_table);
   if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
     wrong_ptu_update_received_ = true;
+    ResetRetrySequence(false);
     update_status_manager_.OnWrongUpdateReceived();
     return false;
   }
@@ -1008,6 +1009,7 @@ std::string PolicyManagerImpl::GetPolicyTableStatus() const {
 }
 
 uint32_t PolicyManagerImpl::NextRetryTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   LOG4CXX_DEBUG(logger_, "Index: " << retry_sequence_index_);
   uint32_t next = 0u;
@@ -1040,10 +1042,13 @@ void PolicyManagerImpl::RefreshRetrySequence() {
   cache_->SecondsBetweenRetries(retry_sequence_seconds_);
 }
 
-void PolicyManagerImpl::ResetRetrySequence() {
+void PolicyManagerImpl::ResetRetrySequence(const bool send_event) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   retry_sequence_index_ = 0;
-  update_status_manager_.OnResetRetrySequence();
+  if (send_event) {
+    update_status_manager_.OnResetRetrySequence();
+  }
 }
 
 uint32_t PolicyManagerImpl::TimeoutExchangeMSec() {
@@ -1305,6 +1310,11 @@ uint32_t PolicyManagerImpl::HeartBeatTimeout(const std::string& app_id) const {
 }
 
 void PolicyManagerImpl::SaveUpdateStatusRequired(bool is_update_needed) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!is_update_needed) {
+    ResetRetrySequence(false);
+  }
   cache_->SaveUpdateRequired(is_update_needed);
 }
 
@@ -1322,6 +1332,11 @@ void PolicyManagerImpl::StartRetrySequence() {
   if (is_exceeded_retries_count) {
     LOG4CXX_WARN(logger_, "Exceeded allowed PTU retry count");
     listener_->OnPTUTimeOut();
+    ResetRetrySequence(true);
+    if (timer_retry_sequence_.is_running()) {
+      timer_retry_sequence_.Stop();
+    }
+    return;
   }
 
   update_status_manager_.OnUpdateTimeoutOccurs();

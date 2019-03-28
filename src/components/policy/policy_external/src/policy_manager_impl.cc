@@ -52,6 +52,8 @@
 
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
+#include "policy/ptu_retry_handler.h"
+#include "utils/timer_task_impl.h"
 
 policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
@@ -218,7 +220,8 @@ PolicyManagerImpl::PolicyManagerImpl()
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
     , ignition_check(true)
-    , retry_sequence_url_(0, 0, "") {}
+    , retry_sequence_url_(0, 0, "")
+    , is_ptu_in_progress_(false) {}
 
 PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
     : PolicyManager()
@@ -232,7 +235,8 @@ PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
     , retry_sequence_url_(0, 0, "")
     , wrong_ptu_update_received_(false)
     , send_on_update_sent_out_(false)
-    , trigger_ptu_(false) {}
+    , trigger_ptu_(false)
+    , is_ptu_in_progress_(false) {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
@@ -1182,6 +1186,36 @@ void PolicyManagerImpl::SetUserConsentForApp(
                            updated_app_group_permissons);
 }
 
+bool PolicyManagerImpl::IsAllowedRetryCountExceeded() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return retry_sequence_index_ > retry_sequence_seconds_.size();
+}
+
+void PolicyManagerImpl::IncrementRetryIndex() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ++retry_sequence_index_;
+  LOG4CXX_DEBUG(logger_,
+                "current retry_sequence_index_ is: " << retry_sequence_index_);
+}
+
+void PolicyManagerImpl::RetrySequenceFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  listener_->OnPTUFinished(false);
+  ResetRetrySequence(true);
+}
+
+void PolicyManagerImpl::OnSystemRequestReceived() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (is_ptu_in_progress_) {
+    IncrementRetryIndex();
+  } else {
+    is_ptu_in_progress_ = true;
+  }
+}
+
 bool PolicyManagerImpl::GetDefaultHmi(const std::string& policy_app_id,
                                       std::string* default_hmi) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1681,23 +1715,15 @@ int PolicyManagerImpl::NextRetryTimeout() {
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   LOG4CXX_DEBUG(logger_, "Index: " << retry_sequence_index_);
   int next = 0;
+  for (const auto& element : retry_sequence_seconds_) {
+    LOG4CXX_DEBUG(logger_, "Retry interval: " << element);
+  }
   if (!retry_sequence_seconds_.empty() &&
       retry_sequence_index_ < retry_sequence_seconds_.size()) {
-    next = retry_sequence_seconds_[retry_sequence_index_];
-    ++retry_sequence_index_;
+    next = retry_sequence_seconds_[retry_sequence_index_] *
+           date_time::MILLISECONDS_IN_SECOND;
   }
   return next;
-}
-
-void PolicyManagerImpl::IncrementPTURetryIndex() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ++retry_sequence_index_;
-  LOG4CXX_DEBUG(logger_, "retry_sequence_index_ is: " << retry_sequence_index_);
-}
-
-bool PolicyManagerImpl::IsAllowedPTURetryCountExceeded() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return retry_sequence_index_ > retry_sequence_seconds_.size();
 }
 
 void PolicyManagerImpl::RefreshRetrySequence() {
@@ -1707,10 +1733,14 @@ void PolicyManagerImpl::RefreshRetrySequence() {
   cache_->SecondsBetweenRetries(retry_sequence_seconds_);
 }
 
-void PolicyManagerImpl::ResetRetrySequence() {
+void PolicyManagerImpl::ResetRetrySequence(const bool send_event) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   retry_sequence_index_ = 0;
-  update_status_manager_.OnResetRetrySequence();
+  is_ptu_in_progress_ = false;
+  if (send_event) {
+    update_status_manager_.OnResetRetrySequence();
+  }
 }
 
 uint32_t PolicyManagerImpl::TimeoutExchangeMSec() {
@@ -1723,6 +1753,8 @@ const std::vector<int> PolicyManagerImpl::RetrySequenceDelaysSeconds() {
 }
 
 void PolicyManagerImpl::OnExceededTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
   update_status_manager_.OnUpdateTimeoutOccurs();
 }
 
@@ -2053,6 +2085,11 @@ uint32_t PolicyManagerImpl::HeartBeatTimeout(const std::string& app_id) const {
 }
 
 void PolicyManagerImpl::SaveUpdateStatusRequired(bool is_update_needed) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!is_update_needed) {
+    ResetRetrySequence(false);
+  }
   cache_->SaveUpdateRequired(is_update_needed);
 }
 

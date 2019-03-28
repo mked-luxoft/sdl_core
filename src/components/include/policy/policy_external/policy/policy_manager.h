@@ -43,12 +43,14 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "policy/cache_manager_interface.h"
 #include "policy/access_remote.h"
+#include "policy/ptu_retry_handler.h"
 
 namespace policy {
 class PolicySettings;
 typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
-class PolicyManager : public usage_statistics::StatisticsManager {
+class PolicyManager : public usage_statistics::StatisticsManager,
+                      public PTURetryHandler {
  public:
   /**
    * @brief The NotificationMode enum defines whether application will be
@@ -56,17 +58,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   enum NotificationMode { kSilentMode, kNotifyApplicationMode };
   virtual ~PolicyManager() {}
-
-  /**
-   * @brief Increments PTU retry index for external flow
-   */
-  virtual void IncrementPTURetryIndex() = 0;
-
-  /**
-   * @brief Check whether allowed PTU retry count is exceeded for external flow
-   * @return true if retry count is exceeded, otherwise -false
-   */
-  virtual bool IsAllowedPTURetryCountExceeded() const = 0;
 
   /**
    * @brief set_listener set new policy listener instance
@@ -185,8 +176,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Resets retry sequence
+   * @param send_event - if true corresponding event is sent to
+   * UpdateStatusManager
    */
-  virtual void ResetRetrySequence() = 0;
+  virtual void ResetRetrySequence(const bool send_event) = 0;
 
   /**
    * @brief Gets timeout to wait before next retry updating PT

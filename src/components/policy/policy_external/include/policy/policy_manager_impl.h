@@ -44,6 +44,7 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
+#include "utils/timer.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -173,8 +174,10 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Resets retry sequence
+   * @param send_event - if true corresponding event is sent to
+   * UpdateStatusManager
    */
-  void ResetRetrySequence() OVERRIDE;
+  void ResetRetrySequence(const bool send_event) OVERRIDE;
 
   /**
    * @brief Gets timeout to wait before next retry updating PT
@@ -710,17 +713,23 @@ class PolicyManagerImpl : public PolicyManager {
            usage_statistics::AppStopwatchId type,
            int32_t timespan_seconds) OVERRIDE;
 
-  /**
-   * @brief Increments PTU retry index for external flow
-   */
-  void IncrementPTURetryIndex();
+  // Interface StatisticsManager (end)
 
   /**
-   * @brief Check whether allowed PTU retry count is exceeded for external flow
-   * @return true if retry count is exceeded, otherwise -false
+   * @brief Check whether allowed retry sequence count is exceeded
+   * @return bool value - true is allowed count is exceeded, otherwise - false
    */
-  bool IsAllowedPTURetryCountExceeded() const;
-  // Interface StatisticsManager (end)
+  bool IsAllowedRetryCountExceeded() const OVERRIDE;
+
+  /**
+   * @brief Finish PTU retry requence
+   */
+  void RetrySequenceFailed() OVERRIDE;
+
+  /**
+   * @brief Begins new retry sequence
+   */
+  void OnSystemRequestReceived() OVERRIDE;
 
  protected:
   /**
@@ -732,6 +741,11 @@ class PolicyManagerImpl : public PolicyManager {
       const BinaryMessage& pt_content);
 
  private:
+  /**
+   * @brief Increments PTU retry index for external flow
+   */
+  void IncrementRetryIndex();
+
   /**
    * @brief Checks if PT update should be started and schedules it if needed
    */
@@ -1106,6 +1120,12 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Flag for notifying that invalid PTU should be triggered
    */
   bool trigger_ptu_;
+
+  /**
+   * @brief Flag that indicates whether a PTU sequence (including retries) is in
+   * progress
+   */
+  bool is_ptu_in_progress_;
 };
 
 }  // namespace policy

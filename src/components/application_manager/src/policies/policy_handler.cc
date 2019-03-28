@@ -57,6 +57,9 @@
 
 #include "utils/helpers.h"
 #include "policy/policy_manager.h"
+#ifdef EXTERNAL_PROPRIETARY_MODE
+#include "policy/ptu_retry_handler.h"
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
 namespace policy {
 
@@ -455,6 +458,11 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
 }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
+PTURetryHandler& PolicyHandler::ptu_retry_handler() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return *policy_manager_;
+}
+
 void PolicyHandler::OnAppPermissionConsent(
     const uint32_t connection_key,
     const PermissionConsent& permissions,
@@ -1596,6 +1604,7 @@ uint32_t PolicyHandler::TimeoutExchangeMSec() const {
 }
 
 void PolicyHandler::OnExceededTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
 
   std::for_each(listeners_.begin(),
@@ -1781,15 +1790,6 @@ void PolicyHandler::ProcessCertDecryptFailed() {
                    false));
 }
 
-void PolicyHandler::IncrementRetryIndex() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  policy_manager_->IncrementPTURetryIndex();
-}
-
-bool PolicyHandler::IsAllowedPTURetriesExceeded() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return policy_manager_->IsAllowedPTURetryCountExceeded();
-}
 #else   // EXTERNAL_PROPRIETARY_MODE
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   LOG4CXX_AUTO_TRACE(logger_);

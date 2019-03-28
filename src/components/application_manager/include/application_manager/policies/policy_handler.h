@@ -99,16 +99,7 @@ class PolicyHandler : public PolicyHandlerInterface,
                          const std::vector<int>& retry_delay_seconds,
                          uint32_t timeout_exchange) OVERRIDE;
 
-  /**
-   * @brief Increments PTU retry index for external flow
-   */
-  void IncrementRetryIndex() OVERRIDE;
-
-  /**
-   * @brief Check whether allowed PTU retry count is exceeded for external flow
-   * @return true if retry count is exceeded, otherwise -false
-   */
-  bool IsAllowedPTURetriesExceeded() const OVERRIDE;
+  PTURetryHandler& ptu_retry_handler() const OVERRIDE;
 #else   // EXTERNAL_PROPRIETARY_MODE
   void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
