@@ -33,7 +33,6 @@
 #include <algorithm>
 #include <sstream>
 #include <string.h>
-#include <functional>
 #include "utils/logger.h"
 #include "utils/custom_string.h"
 #include "policy/policy_helper.h"
