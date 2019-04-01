@@ -1415,8 +1415,8 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
   ApplicationSharedPtr app =
       application_manager_.application_by_policy_id(policy_app_id);
 
-  const bool require_encryption =
-      policy_manager_->AppNeedEncryption(policy_app_id);
+  const auto require_encryption =
+      policy_manager_->GetAppEncryptionRequired(policy_app_id);
   if (app.use_count() == 0) {
     LOG4CXX_WARN(
         logger_,

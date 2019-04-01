@@ -33,6 +33,7 @@
 #include <algorithm>
 #include <sstream>
 #include <string.h>
+#include <functional>
 #include "utils/logger.h"
 #include "utils/custom_string.h"
 #include "policy/policy_helper.h"
@@ -713,17 +714,24 @@ bool ProcessFunctionalGroup::operator()(const StringsValueType& group_name) {
     FillNotificationData filler(
         data_, GetGroupState(group_name_str), undefined_group_consent_);
     std::for_each(rpcs.begin(), rpcs.end(), filler);
-    FillEncryptionFlagForRpcs((*it).second.encryption_required.is_initialized()
-                                  ? *(*it).second.encryption_required
-                                  : false);
+    FillEncryptionFlagForRpcs((*it).second.encryption_required);
   }
   return true;
 }
 
 void ProcessFunctionalGroup::FillEncryptionFlagForRpcs(
-    bool encryption_required) {
+    const EncryptionRequired encryption_required) {
+  auto update_encryption_required = [](EncryptionRequired& current,
+                                       const EncryptionRequired& incoming) {
+    if ((current.is_initialized() && *current) || !incoming.is_initialized()) {
+      return;
+    }
+    current = incoming;
+  };
+
   for (auto& item : data_) {
-    item.second.require_encryption |= encryption_required;
+    update_encryption_required(item.second.require_encryption,
+                               encryption_required);
   }
 }
 

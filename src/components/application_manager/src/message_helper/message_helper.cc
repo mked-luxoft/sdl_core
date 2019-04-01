@@ -2285,7 +2285,7 @@ void MessageHelper::SendOnPermissionsChangeNotification(
     uint32_t connection_key,
     const policy::Permissions& permissions,
     ApplicationManager& app_mngr,
-    const bool require_encryption) {
+    const policy::EncryptionRequired require_encryption) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
 
@@ -2304,8 +2304,19 @@ void MessageHelper::SendOnPermissionsChangeNotification(
 
   // content[strings::msg_params][strings::app_id] = connection_key;
 
-  content[strings::msg_params][strings::requireEncryption] = require_encryption;
+  if (require_encryption.is_initialized()) {
+    LOG4CXX_DEBUG(logger_,
+                  "require_encryption is " << std::boolalpha
+                                           << *require_encryption);
+  } else {
+    LOG4CXX_DEBUG(logger_, "require_encryption for is missed");
+  }
 
+  if (require_encryption.is_initialized()) {
+    const bool require_encryption_bool = *require_encryption;
+    content[strings::msg_params][strings::requireEncryption] =
+        require_encryption_bool;
+  }
   content[strings::msg_params]["permissionItem"] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
@@ -2328,8 +2339,10 @@ void MessageHelper::SendOnPermissionsChangeNotification(
     const policy::RpcPermissions& rpc_permissions = (*it_permissions).second;
 
     // Filling the requireEncryption of PermissionItem
-    permission_item[strings::requireEncryption] =
-        rpc_permissions.require_encryption;
+    if (rpc_permissions.require_encryption.is_initialized()) {
+      const bool require_encryption = *rpc_permissions.require_encryption;
+      permission_item[strings::requireEncryption] = require_encryption;
+    }
 
     // Creating SO for hmiPermissions
     permission_item["hmiPermissions"] =
