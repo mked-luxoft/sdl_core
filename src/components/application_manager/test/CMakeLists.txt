@@ -37,7 +37,6 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/include/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/resumption/include/
-  ${COMPONENTS_DIR}/utils/include/
   ${POLICY_PATH}/include/
   ${COMPONENTS_DIR}/policy/policy_regular/test/include
   ${POLICY_PATH}/policy/test/include/
@@ -46,6 +45,7 @@ include_directories(
   ${COMPONENTS_DIR}/security_manager/include/
   ${COMPONENTS_DIR}/application_manager/test/include/
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/sdl_rpc_plugin/include/
+  ${COMPONENTS_DIR}/rpc_base/include/
   ${BSON_INCLUDE_DIRECTORY}
 )
 
@@ -66,6 +66,7 @@ set(testSources
   ${AM_TEST_DIR}/application_manager_impl_test.cc
   ${AM_TEST_DIR}/application_helper_test.cc
   ${AM_TEST_DIR}/command_holder_test.cc
+  ${AM_TEST_DIR}/rpc_message_protection/rpc_protection_mediator_impl_test.cc
 )
 
 set(testSourcesMockHmi
@@ -133,6 +134,7 @@ add_custom_command(
 set(CMAKE_EXE_LINKER_FLAGS
   "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}"
 )
+
 create_test("application_manager_test" "${testSources}" "${LIBRARIES}")
 create_test("application_manager_mock_hmi_test" "${testSourcesMockHmi}" "${LIBRARIES}")
 
