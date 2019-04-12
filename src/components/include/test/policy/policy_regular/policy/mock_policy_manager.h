@@ -58,9 +58,6 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD1(AppNeedEncryption, bool(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(GetGroupsForApp,
                      const Strings&(const std::string& policy_app_id));
-  MOCK_CONST_METHOD2(FunctionNeedEncryption,
-                     bool(const std::string& policy_group,
-                          const std::string& policy_function_id));
   MOCK_CONST_METHOD1(GroupNeedEncryption,
                      bool(const std::string& policy_group));
   MOCK_CONST_METHOD1(
