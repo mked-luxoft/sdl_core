@@ -40,53 +40,52 @@ using rpc::policy_table_interface_base::Strings;
 
 namespace policy {
 /*
-* \brief RPCEncryptionManagerInterface interface
+* @brief RPCEncryptionManagerInterface interface
 */
 class RPCEncryptionManagerInterface {
  public:
   /*!
-  * \brief virtual destructor RPCEncryptionManagerInterface
+  * @brief virtual destructor RPCEncryptionManagerInterface
   */
   virtual ~RPCEncryptionManagerInterface() {}
 
   /*
-   * \param policy_app_id policy app id
-   * \return true if the app need encryption
+   * @param policy_app_id policy app id
+   * @return true if the app need encryption
    */
   virtual bool AppNeedEncryption(const std::string& policy_app_id) const = 0;
+
+  /*
+   * @brief Retrieves encryption required flag on the application level
+   * @param policy_app_id policy app id
+   * @return true if the app need encryption
+   */
   virtual const rpc::Optional<rpc::Boolean>& GetAppEncryptionRequired(
       const std::string& policy_app_id) const = 0;
 
   /*
-   * \param policy_app_id policy app id
-   * \return groups that exist for app
+   * @param policy_app_id policy app id
+   * @return groups that exist for app
    */
   virtual const Strings& GetGroupsForApp(
       const std::string& policy_app_id) const = 0;
+
   /*
-   * \param policy_group group
-   * \param policy_function_id policy function id
-   * \return true if the rpc need encryption
-   */
-  virtual bool FunctionNeedEncryption(
-      const std::string& policy_group,
-      const std::string& policy_function_id) const = 0;
-  /*
-   * \param policy_group group
-   * \return true if the group need encryption
+   * @param policy_group group
+   * @return true if the group need encryption
    */
   virtual bool GroupNeedEncryption(const std::string& policy_group) const = 0;
 
   /*
-   * \param policy_group group
-   * \return RPCs that exists in group
+   * @param policy_group group
+   * @return RPCs that exists in group
    */
   virtual const std::vector<std::string> GetRPCsForGroup(
       const std::string& group) const = 0;
 
   /*
-   * \param function_id function id
-   * \return policy function name
+   * @param function_id function id
+   * @return policy function name
    */
   virtual const std::string GetPolicyFunctionName(
       const uint32_t function_id) const = 0;

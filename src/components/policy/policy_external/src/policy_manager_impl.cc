@@ -2196,31 +2196,6 @@ const Strings& PolicyManagerImpl::GetGroupsForApp(
       .groups;
 }
 
-bool PolicyManagerImpl::FunctionNeedEncryption(
-    const std::string& policy_group,
-    const std::string& policy_function_id) const {
-  const auto& functional_groupings =
-      cache_->pt()->policy_table.functional_groupings;
-
-  const auto& group_itr = functional_groupings.find(policy_group);
-  ASSERT(group_itr != functional_groupings.end());
-  const auto& rpcs = (*group_itr).second.rpcs;
-
-  if (rpcs.is_null()) {
-    return false;
-  }
-
-  const auto& function_itr = rpcs.find(policy_function_id);
-  if (function_itr == rpcs.end()) {
-    return false;
-  }
-
-  const auto& function = (*function_itr).second;
-  return (function.encryption_required.is_initialized()
-              ? *function.encryption_required
-              : false);
-}
-
 bool PolicyManagerImpl::GroupNeedEncryption(
     const std::string& policy_group) const {
   const auto& functional_groupings =

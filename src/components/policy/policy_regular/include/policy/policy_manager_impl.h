@@ -78,14 +78,6 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& policy_app_id) const OVERRIDE;
   /*
    * \param policy_group group
-   * \param policy_function_id policy function id
-   * \return true if the rpc need encryption
-   */
-  bool FunctionNeedEncryption(
-      const std::string& policy_group,
-      const std::string& policy_function_id) const OVERRIDE;
-  /*
-   * \param policy_group group
    * \return true if the group need encryption
    */
   bool GroupNeedEncryption(const std::string& policy_group) const OVERRIDE;
