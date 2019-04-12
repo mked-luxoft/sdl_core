@@ -247,7 +247,7 @@ class PolicyHandlerTest : public ::testing::Test {
     ChangePolicyManagerToMock();
     const policy::EncryptionRequired require_encryption;
     EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
-        .WillOnce(ReturnRef(require_encryption));
+        .WillOnce(Return(require_encryption));
     EXPECT_CALL(mock_message_helper_,
                 SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
     EXPECT_CALL(app_manager_, state_controller()).Times(0);
@@ -440,7 +440,7 @@ TEST_F(PolicyHandlerTest, OnPermissionsUpdated_method_With2Parameters) {
   ChangePolicyManagerToMock();
   const policy::EncryptionRequired require_encryption;
   EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
-      .WillOnce(ReturnRef(require_encryption));
+      .WillOnce(Return(require_encryption));
 
   EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
       .WillOnce(Return(mock_app_));
@@ -476,7 +476,7 @@ TEST_F(PolicyHandlerTest, OnPermissionsUpdated_InvalidApp_UNSUCCESS) {
   ChangePolicyManagerToMock();
   const policy::EncryptionRequired require_encryption;
   EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
-      .WillOnce(ReturnRef(require_encryption));
+      .WillOnce(Return(require_encryption));
   EXPECT_CALL(mock_message_helper_,
               SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
 
@@ -511,7 +511,7 @@ TEST_F(PolicyHandlerTest,
   ChangePolicyManagerToMock();
   const policy::EncryptionRequired require_encryption;
   EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
-      .WillOnce(ReturnRef(require_encryption));
+      .WillOnce(Return(require_encryption));
   EXPECT_CALL(mock_message_helper_,
               SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
 
@@ -543,7 +543,7 @@ TEST_F(PolicyHandlerTest,
   ChangePolicyManagerToMock();
   const policy::EncryptionRequired require_encryption;
   EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
-      .WillOnce(ReturnRef(require_encryption));
+      .WillOnce(Return(require_encryption));
   EXPECT_CALL(mock_message_helper_,
               SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
 
@@ -574,7 +574,7 @@ TEST_F(PolicyHandlerTest,
   ChangePolicyManagerToMock();
   const policy::EncryptionRequired require_encryption;
   EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
-      .WillOnce(ReturnRef(require_encryption));
+      .WillOnce(Return(require_encryption));
   EXPECT_CALL(mock_message_helper_,
               SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
 

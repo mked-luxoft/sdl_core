@@ -55,7 +55,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "include/test/protocol_handler/mock_protocol_handler.h"
 #include "test/application_manager/mock_application_manager_settings.h"
-#include "application_manager/mock_rpc_protection_mediator.h"
+#include "application_manager/mock_rpc_protection_manager.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -103,14 +103,14 @@ class RCGetInteriorVehicleDataConsentTest
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , command_holder(app_mngr_)
       , request_controller(mock_request_controler)
-      , rpc_protection_mediator_(
-            std::make_shared<application_manager::MockRPCProtectionMediator>())
+      , rpc_protection_manager_(
+            std::make_shared<application_manager::MockRPCProtectionManager>())
       , rpc_service_(app_mngr_,
                      request_controller,
                      &mock_protocol_handler,
                      &mock_hmi_handler,
                      command_holder,
-                     rpc_protection_mediator_)
+                     rpc_protection_manager_)
       , rc_app_extention_(std::make_shared<RCAppExtension>(kPluginID))
       , mock_rpc_plugin_manager(
             std::make_shared<NiceMock<MockRPCPluginManager> >())
@@ -151,7 +151,7 @@ class RCGetInteriorVehicleDataConsentTest
         .WillByDefault(Return(true));
     ON_CALL(mock_protocol_handler, IsRPCServiceSecure(_))
         .WillByDefault(Return(false));
-    ON_CALL(*rpc_protection_mediator_, DoesRPCNeedEncryption(_, _, _, _))
+    ON_CALL(*rpc_protection_manager_, CheckPolicyEncryptionFlag(_, _, _, _))
         .WillByDefault(Return(false));
   }
 
@@ -196,8 +196,8 @@ class RCGetInteriorVehicleDataConsentTest
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
   am::request_controller::RequestController request_controller;
-  std::shared_ptr<application_manager::MockRPCProtectionMediator>
-      rpc_protection_mediator_;
+  std::shared_ptr<application_manager::MockRPCProtectionManager>
+      rpc_protection_manager_;
   am::rpc_service::RPCServiceImpl rpc_service_;
   std::shared_ptr<RCAppExtension> rc_app_extention_;
   std::shared_ptr<am::plugin_manager::MockRPCPluginManager>

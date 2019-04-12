@@ -37,7 +37,7 @@
 
 #include "utils/callable.h"
 
-#include "application_manager/policies/rpc_encryption_manager_interface.h"
+#include "application_manager/policies/rpc_encryption_data_accessor_interface.h"
 #include "policy/policy_types.h"
 #include "policy/policy_table/types.h"
 #include "policy/policy_listener.h"
@@ -50,7 +50,7 @@ class PolicySettings;
 typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
 class PolicyManager : public usage_statistics::StatisticsManager,
-                      public RPCEncryptionManagerInterface {
+                      public RPCEncryptionDataAccessorInterface {
  public:
   /**
    * @brief The NotificationMode enum defines whether application will be

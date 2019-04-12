@@ -70,6 +70,11 @@ class Message {
   std::string function_name() const;
   int32_t correlation_id() const;
   int32_t connection_key() const;
+
+  /**
+   * @brief retreives message's protection flag
+   * @return bool value, if message is encrypted - true, otherwise - false
+   */
   bool is_message_protected() const;
 
   MessageType type() const;

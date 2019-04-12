@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/rpc_service_impl.h"
-#include "application_manager/rpc_protection_mediator_impl.h"
+#include "application_manager/rpc_protection_manager_impl.h"
 
 namespace application_manager {
 namespace rpc_service {
@@ -46,12 +46,12 @@ RPCServiceImpl::RPCServiceImpl(
     protocol_handler::ProtocolHandler* protocol_handler,
     hmi_message_handler::HMIMessageHandler* hmi_handler,
     CommandHolder& commands_holder,
-    std::shared_ptr<RPCProtectionMediator> rpc_protection_mediator)
+    std::shared_ptr<RPCProtectionManager> rpc_protection_manager)
     : app_manager_(app_manager)
     , request_ctrl_(request_ctrl)
     , protocol_handler_(protocol_handler)
     , hmi_handler_(hmi_handler)
-    , rpc_protection_mediator_(rpc_protection_mediator)
+    , rpc_protection_manager_(rpc_protection_manager)
     , commands_holder_(commands_holder)
     , messages_to_mobile_("AM ToMobile", this)
     , messages_to_hmi_("AM ToHMI", this)
@@ -59,6 +59,38 @@ RPCServiceImpl::RPCServiceImpl(
     , mobile_so_factory_(mobile_apis::MOBILE_API()) {}
 
 RPCServiceImpl::~RPCServiceImpl() {}
+
+EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
+    const smart_objects::SmartObject& message,
+    std::shared_ptr<Application> app,
+    const bool is_rpc_service_secure) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto function_id =
+      message[strings::params][strings::function_id].asUInt();
+  const auto correlation_id =
+      message[strings::params][strings::correlation_id].asUInt();
+  const auto connection_key =
+      message[strings::params][strings::connection_key].asUInt();
+  const bool needs_encryption =
+      rpc_protection_manager_->CheckPolicyEncryptionFlag(
+          function_id, app, correlation_id, is_rpc_service_secure);
+  if (MessageType::kRequest ==
+      message[strings::params][strings::message_type].asInt()) {
+    const bool message_protected =
+        message[strings::params][strings::protection].asBool();
+
+    if (needs_encryption && message_protected) {
+      return EncryptionFlagCheckResult::kSuccess_Protected;
+    } else if (needs_encryption && !message_protected) {
+      return EncryptionFlagCheckResult::kError_EncryptionNeeded;
+    } else if (message_protected && !needs_encryption) {
+      rpc_protection_manager_->EncryptResponseByForce(connection_key,
+                                                      correlation_id);
+      return EncryptionFlagCheckResult::kSuccess_Protected;
+    }
+  }
+  return EncryptionFlagCheckResult::kSuccess_NotProtected;
+}
 
 bool RPCServiceImpl::ManageMobileCommand(
     const commands::MessageSharedPtr message,
@@ -117,29 +149,17 @@ bool RPCServiceImpl::ManageMobileCommand(
       SendMessageToMobile(response);
       return false;
     }
-
-    const bool needs_encryption =
-        rpc_protection_mediator_->DoesRPCNeedEncryption(
-            function_id,
+    if (EncryptionFlagCheckResult::kError_EncryptionNeeded ==
+        IsEncryptionRequired(
+            *message,
             app,
-            correlation_id,
-            protocol_handler_->IsRPCServiceSecure(connection_key));
-    if (MessageType::kRequest ==
-        (*message)[strings::params][strings::message_type].asInt()) {
-      const bool message_protected =
-          (*message)[strings::params][strings::protection].asBool();
-
-      if (needs_encryption && !message_protected) {
-        const auto response = rpc_protection_mediator_->CreateNegativeResponse(
-            connection_key, function_id, correlation_id);
-        SendMessageToMobile(response);
-        return false;
-      }
-      if (message_protected && !needs_encryption) {
-        rpc_protection_mediator_->EncryptResponseByForce(correlation_id);
-      }
+            protocol_handler_->IsRPCServiceSecure(connection_key))) {
+      const auto response =
+          rpc_protection_manager_->CreateEncryptionNeededResponse(
+              connection_key, function_id, correlation_id);
+      SendMessageToMobile(response);
+      return false;
     }
-
     // Message for "CheckPermission" must be with attached schema
     mobile_so_factory().attachSchema(*message, false);
   }
@@ -371,9 +391,10 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
   }
 
   const auto correlation_id = message->correlation_id();
+  const auto app_id = message->connection_key();
 
   const bool needs_encryption =
-      rpc_protection_mediator_->DoesRPCNeedEncryption(correlation_id);
+      rpc_protection_manager_->DoesRPCNeedEncryption(app_id, correlation_id);
 
   if (needs_encryption &&
       !protocol_handler_->IsRPCServiceSecure(message->connection_key())) {
@@ -484,7 +505,7 @@ void RPCServiceImpl::SendMessageToMobile(
       return;
     }
 
-    rpc_protection_mediator_->DoesRPCNeedEncryption(
+    rpc_protection_manager_->CheckPolicyEncryptionFlag(
         function_id,
         app,
         message_to_send->correlation_id(),

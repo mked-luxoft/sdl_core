@@ -48,7 +48,7 @@
 #include "utils/timer.h"
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
-#include "application_manager/policies/rpc_encryption_manager_interface.h"
+#include "application_manager/policies/rpc_encryption_data_accessor_interface.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 

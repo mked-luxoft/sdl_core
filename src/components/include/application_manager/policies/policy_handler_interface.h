@@ -49,7 +49,7 @@
 #include "policy/policy_types.h"
 #include "policy/policy_table/types.h"
 #include "policy/cache_manager_interface.h"
-#include "application_manager/policies/rpc_encryption_manager_interface.h"
+#include "application_manager/policies/rpc_encryption_data_accessor_interface.h"
 
 using namespace ::rpc::policy_table_interface_base;
 namespace policy {
@@ -60,7 +60,8 @@ class PolicyHandlerInterface {
   virtual ~PolicyHandlerInterface() {}
 
   virtual bool LoadPolicyLibrary() = 0;
-  virtual RPCEncryptionManagerInterface& RPCEncryptionManager() const = 0;
+  virtual RPCEncryptionDataAccessorInterface& RPCEncryptionDataAccessor()
+      const = 0;
   virtual bool PolicyEnabled() const = 0;
   virtual bool InitPolicyTable() = 0;
   virtual bool ResetPolicyTable() = 0;
