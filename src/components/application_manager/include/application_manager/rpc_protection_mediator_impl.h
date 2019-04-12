@@ -39,80 +39,87 @@
 
 namespace application_manager {
 /*
-* \brief RPCProtectionMediator implementation
+* @brief RPCProtectionMediator implementation
 */
 class RPCProtectionMediatorImpl : public RPCProtectionMediator {
  public:
   /*!
-   * \brief constructor RPCProtectionMediatorImpl
-   * \param policy_handler policy handler interface
+   * @brief constructor RPCProtectionMediatorImpl
+   * @param policy_handler policy handler interface
    */
   RPCProtectionMediatorImpl(policy::PolicyHandlerInterface& policy_handler);
 
   /*!
-   * \brief destructor RPCProtectionMediatorImpl
+   * @brief destructor RPCProtectionMediatorImpl
    */
   ~RPCProtectionMediatorImpl() OVERRIDE {}
 
   /*
-   * \param function_id function id
-   * \param app smart pointer to Application
-   * \param conrrelation_id conrrelation id
-   * \param is_rpc_service_secure the flag the secure service started
-   * \return true if function need encryption for current app,  else false
+   * @param function_id function id
+   * @param app smart pointer to Application
+   * @param conrrelation_id conrrelation id
+   * @param is_rpc_service_secure the flag the secure service started
+   * @return true if function need encryption for current app,  else false
    */
-  bool DoesRPCNeedEncryption(const uint32_t function_id,
-                             std::shared_ptr<Application> app,
-                             const uint32_t conrrelation_id,
-                             const bool is_rpc_service_secure) OVERRIDE;
+  bool CheckPolicyEncryptionFlag(const uint32_t function_id,
+                                 std::shared_ptr<Application> app,
+                                 const uint32_t conrrelation_id,
+                                 const bool is_rpc_service_secure) OVERRIDE;
   /*
-   * \param conrrelation_id conrrelation id
-   * \return true if the message with correlation id correlation_id needed e
+   * @param conrrelation_id conrrelation id
+   * @return true if the message with correlation id correlation_id needed e
    * ncryption else false
    */
-  bool DoesRPCNeedEncryption(const uint32_t conrrelation_id) OVERRIDE;
+  bool DoesRPCNeedEncryption(const uint32_t app_id,
+                             const uint32_t conrrelation_id) OVERRIDE;
   /*
-   * \brief massage will be encrypted by force
+   * @brief massage will be encrypted by force
    * If request encrypted but not needed by policy, sdl must encrypted response
    * too
-   * \param conrrelation_id conrrelation id
+   * @param conrrelation_id conrrelation id
    */
-  void EncryptResponseByForce(const uint32_t conrrelation_id) OVERRIDE;
+  void EncryptResponseByForce(const uint32_t app_id,
+                              const uint32_t conrrelation_id) OVERRIDE;
   /*
-   * \param connection_key connection key
-   * \param function_id function id
-   * \param conrrelation_id conrrelation id
-   * \return response with error code ENCRYPTION_NEEDED
+   * @param connection_key connection key
+   * @param function_id function id
+   * @param conrrelation_id conrrelation id
+   * @return response with error code ENCRYPTION_NEEDED
    */
-  smart_objects::SmartObjectSPtr CreateNegativeResponse(
+  smart_objects::SmartObjectSPtr CreateEncryptionNeededResponse(
       const uint32_t connection_key,
       const uint32_t function_id,
       const uint32_t conrrelation_id) OVERRIDE;
 
  private:
   /*
-   * \param function_id function id
-   * \return true if function_id is RegisterAppInterface, SystemRequest,
-   * OnSystemRequest, OnPermissionChange, PutFile or OnHMIStatus
+   * @param function_id function id
+   * @return true if function_id is an exception (rpc that can be sent before
+   * app is registered, hence before secure rpc service is established)
    */
   bool IsExceptionRPC(const uint32_t function_id) const;
   /*
-   * \param conrrelation_id conrrelation id
-   * \return true if the message with correlation id is a negative response with
+   * @param app_id application id
+   * @param conrrelation_id conrrelation id
+   * @return true if the message with correlation id is a negative response with
    * result code ENCRYPTION_NEEDED
    */
-  bool IsNegativeResponse(const uint32_t conrrelation_id);
+  // bool CheckNegativeResponse(const uint32_t app_id,
+  //                            const uint32_t conrrelation_id);
   /*
-   * \param function function name
-   * \param group group name
-   * \return true if the function exists in group else return false
+   * @param function function name
+   * @param group group name
+   * @return true if the function exists in group else return false
    */
   bool IsFunctionInGroup(const std::string& function,
                          const std::string& group) const;
 
   policy::PolicyHandlerInterface& policy_handler_;
-  std::set<uint32_t> negative_responses_;
-  std::set<uint32_t> message_needed_encryption_;
+
+  typedef std::pair<uint32_t, uint32_t> AppIdCorrIdPair;
+
+  std::set<AppIdCorrIdPair> negative_responses_;
+  std::set<AppIdCorrIdPair> message_needed_encryption_;
 };
 }  // namespace policy
 

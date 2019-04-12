@@ -414,7 +414,7 @@ std::shared_ptr<Message> RPCHandlerImpl::ConvertRawMsgToMessage(
   } else {
     LOG4CXX_ERROR(logger_, "Received invalid message");
   }
-  outgoing_message->set_message_protection(message->protection_flag());
+
   return outgoing_message;
 }
 

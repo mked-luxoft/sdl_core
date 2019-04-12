@@ -88,6 +88,12 @@ typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> >
     ToHmiQueue;
 }
 
+enum class EncryptionFlagCheckResult {
+  kSuccess_Protected,
+  kSuccess_NotProtected,
+  kError_EncryptionNeeded
+};
+
 class RPCServiceImpl : public RPCService,
                        public impl::ToMobileQueue::Handler,
                        public impl::ToHmiQueue::Handler {
@@ -130,6 +136,11 @@ class RPCServiceImpl : public RPCService,
  private:
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output);
+
+  EncryptionFlagCheckResult IsEncryptionRequired(
+      const smart_objects::SmartObject& message,
+      std::shared_ptr<Application> app,
+      const bool is_rpc_service_secure) const;
   hmi_apis::HMI_API& hmi_so_factory();
   mobile_apis::MOBILE_API& mobile_so_factory();
 

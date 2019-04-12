@@ -48,50 +48,60 @@ class Application;
 }  // namespace application_manager
 
 namespace application_manager {
-/*
-* \brief RPCProtectionMediator interface
-*/
+/**
+  * @brief RPCProtectionMediator interface
+  * This entity exists to get info from policy table regarding encryption on
+  * application and function group level, as well as make decisions whether
+  * certain RPC should be encrypted or not.
+  * It mediates communication between PRCService and
+  * RPCEncryptionManagerInterface which is implemented by PolicyManager,
+  * providing adequate level of abstraction.
+  */
 class RPCProtectionMediator {
  public:
   /*!
-   * \brief virtual destructor RPCProtectionMediator
+   * @brief virtual destructor RPCProtectionMediator
    */
   virtual ~RPCProtectionMediator() {}
 
   /*
-   * \param function_id function id
-   * \param app smart pointer to Application
-   * \param conrrelation_id conrrelation id
-   * \param is_rpc_service_secure the flag the secure service started
-   * \return true if function need encryption for current app,  else false
+   * @param function_id function id
+   * @param app smart pointer to Application
+   * @param conrrelation_id conrrelation id
+   * @param is_rpc_service_secure the flag the secure service started
+   * @return true if function need encryption for current app,  else false
    */
-  virtual bool DoesRPCNeedEncryption(const uint32_t function_id,
-                                     std::shared_ptr<Application> app,
-                                     const uint32_t conrrelation_id,
-                                     const bool is_rpc_service_secure) = 0;
+  virtual bool CheckPolicyEncryptionFlag(const uint32_t function_id,
+                                         std::shared_ptr<Application> app,
+                                         const uint32_t conrrelation_id,
+                                         const bool is_rpc_service_secure) = 0;
   /*
-   * \param conrrelation_id conrrelation id
-   * \return true if the message with correlation id correlation_id needed e
+   * @param app_id application id
+   * @param correlation_id conrrelation id
+   * @return true if the message with correlation id correlation_id needed e
    * ncryption else false
    */
-  virtual bool DoesRPCNeedEncryption(const uint32_t conrrelation_id) = 0;
+  virtual bool DoesRPCNeedEncryption(const uint32_t app_id,
+                                     const uint32_t conrrelation_id) = 0;
   /*
-  * \brief massage will be encrypted by force
+  * @brief massage will be encrypted by force
   * If request encrypted but not needed by policy, sdl must encrypted response
   * too
-  * \param conrrelation_id conrrelation id
+  * @param app_id application id
+  * @param conrrelation_id conrrelation id
   */
-  virtual void EncryptResponseByForce(const uint32_t conrrelation_id) = 0;
+  virtual void EncryptResponseByForce(const uint32_t app_id,
+                                      const uint32_t conrrelation_id) = 0;
   /*
-   * \param connection_key connection key
-   * \param function_id function id
-   * \param conrrelation_id conrrelation id
-   * \return response with error code ENCRYPTION_NEEDED
+   * @param connection_key connection key
+   * @param function_id function id
+   * @param conrrelation_id conrrelation id
+   * @return response with error code ENCRYPTION_NEEDED
    */
-  virtual std::shared_ptr<smart_objects::SmartObject> CreateNegativeResponse(
-      const uint32_t connection_key,
-      const uint32_t function_id,
-      const uint32_t conrrelation_id) = 0;
+  virtual std::shared_ptr<smart_objects::SmartObject>
+  CreateEncryptionNeededResponse(const uint32_t connection_key,
+                                 const uint32_t function_id,
+                                 const uint32_t conrrelation_id) = 0;
 };
 }  // namespace policy
 

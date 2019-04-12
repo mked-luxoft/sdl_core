@@ -582,6 +582,7 @@ void SecurityManagerImpl::SendQuery(const SecurityQuery& query,
                                          protocol_version,
                                          &data_sending[0],
                                          data_sending.size(),
+                                         false,
                                          protocol_handler::kControl));
     DCHECK(protocol_handler_);
     // Add RawMessage to ProtocolHandler message query
