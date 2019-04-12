@@ -156,8 +156,8 @@ class MockMessageHelper {
   MOCK_METHOD4(SendOnPermissionsChangeNotification,
                void(uint32_t connection_key,
                     const policy::Permissions& permissions,
-                    ApplicationManager& app_mngr,
-                    const bool require_encryption));
+                    const bool require_encryption,
+                    ApplicationManager& app_mngr));
   MOCK_METHOD4(SendPolicySnapshotNotification,
                void(uint32_t connection_key,
                     const std::vector<uint8_t>& policy_data,
