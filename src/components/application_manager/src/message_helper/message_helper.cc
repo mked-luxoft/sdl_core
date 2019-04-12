@@ -2284,8 +2284,8 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 void MessageHelper::SendOnPermissionsChangeNotification(
     uint32_t connection_key,
     const policy::Permissions& permissions,
-    ApplicationManager& app_mngr,
-    const policy::EncryptionRequired require_encryption) {
+    const policy::EncryptionRequired require_encryption,
+    ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
 
@@ -2301,16 +2301,6 @@ void MessageHelper::SendOnPermissionsChangeNotification(
 
   content[strings::msg_params] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-  // content[strings::msg_params][strings::app_id] = connection_key;
-
-  if (require_encryption.is_initialized()) {
-    LOG4CXX_DEBUG(logger_,
-                  "require_encryption is " << std::boolalpha
-                                           << *require_encryption);
-  } else {
-    LOG4CXX_DEBUG(logger_, "require_encryption for is missed");
-  }
 
   if (require_encryption.is_initialized()) {
     const bool require_encryption_bool = *require_encryption;
