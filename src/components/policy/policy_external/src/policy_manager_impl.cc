@@ -2171,7 +2171,7 @@ bool PolicyManagerImpl::AppNeedEncryption(
   const auto& app_policies_section =
       cache_->pt()->policy_table.app_policies_section;
 
-  const auto& encryption_required =
+  const auto encryption_required =
       (kDeviceId == policy_app_id
            ? app_policies_section.device.encryption_required
            : app_policies_section.apps[policy_app_id].encryption_required);
@@ -2179,7 +2179,7 @@ bool PolicyManagerImpl::AppNeedEncryption(
   return encryption_required.is_initialized() ? *encryption_required : true;
 }
 
-const rpc::Optional<rpc::Boolean>& PolicyManagerImpl::GetAppEncryptionRequired(
+const rpc::Optional<rpc::Boolean> PolicyManagerImpl::GetAppEncryptionRequired(
     const std::string& policy_app_id) const {
   const auto& app_policies_section =
       cache_->pt()->policy_table.app_policies_section;
@@ -2189,36 +2189,11 @@ const rpc::Optional<rpc::Boolean>& PolicyManagerImpl::GetAppEncryptionRequired(
              : app_policies_section.apps[policy_app_id].encryption_required;
 }
 
-const Strings& PolicyManagerImpl::GetGroupsForApp(
+const Strings PolicyManagerImpl::GetGroupsForApp(
     const std::string& policy_app_id) const {
   return cache_->pt()
       ->policy_table.app_policies_section.apps[policy_app_id]
       .groups;
-}
-
-bool PolicyManagerImpl::FunctionNeedEncryption(
-    const std::string& policy_group,
-    const std::string& policy_function_id) const {
-  const auto& functional_groupings =
-      cache_->pt()->policy_table.functional_groupings;
-
-  const auto& group_itr = functional_groupings.find(policy_group);
-  ASSERT(group_itr != functional_groupings.end());
-  const auto& rpcs = (*group_itr).second.rpcs;
-
-  if (rpcs.is_null()) {
-    return false;
-  }
-
-  const auto& function_itr = rpcs.find(policy_function_id);
-  if (function_itr == rpcs.end()) {
-    return false;
-  }
-
-  const auto& function = (*function_itr).second;
-  return (function.encryption_required.is_initialized()
-              ? *function.encryption_required
-              : false);
 }
 
 bool PolicyManagerImpl::GroupNeedEncryption(

@@ -56,7 +56,7 @@ class MockPolicyManager : public PolicyManager {
  public:
   MOCK_CONST_METHOD1(AppNeedEncryption, bool(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(GetGroupsForApp,
-                     const Strings&(const std::string& policy_app_id));
+                     const Strings(const std::string& policy_app_id));
   MOCK_CONST_METHOD2(FunctionNeedEncryption,
                      bool(const std::string& policy_group,
                           const std::string& policy_function_id));
@@ -64,7 +64,7 @@ class MockPolicyManager : public PolicyManager {
                      bool(const std::string& policy_group));
   MOCK_CONST_METHOD1(
       GetAppEncryptionRequired,
-      const rpc::Optional<rpc::Boolean>&(const std::string& policy_app_id));
+      const rpc::Optional<rpc::Boolean>(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(GetRPCsForGroup,
                      const std::vector<std::string>(const std::string& group));
   MOCK_CONST_METHOD1(GetPolicyFunctionName,
