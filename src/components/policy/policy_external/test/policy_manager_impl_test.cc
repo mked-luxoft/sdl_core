@@ -199,7 +199,7 @@ TEST_F(PolicyManagerImplTest2, OnSystemReady) {
 TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
-  policy_manager_->ResetRetrySequence();
+  policy_manager_->ResetRetrySequence(true);
   EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
   policy_manager_->SetSendOnUpdateFlags(false, false);
   policy_manager_->OnUpdateStarted();
