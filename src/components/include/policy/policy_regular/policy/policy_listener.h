@@ -79,7 +79,8 @@ class PolicyListener {
    *
    * @param timeout_exceed timeout.
    */
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const bool is_retry) = 0;
 
   /**
    * @brief Make appropriate changes for related applications permissions and

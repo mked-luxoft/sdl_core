@@ -606,4 +606,11 @@ MessageHelper::ServiceStatusUpdateNotificationBuilder::notification() const {
   return MockMessageHelper::on_service_update_builder_mock()->notification();
 }
 
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnSystemRequestNotificationToMobile(
+    const std::vector<uint8_t>& lolkek, const uint32_t kekel) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnSystemRequestNotificationToMobile(lolkek, kekel);
+}
+
 }  // namespace application_manager

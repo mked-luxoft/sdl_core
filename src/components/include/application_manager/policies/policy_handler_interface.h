@@ -84,7 +84,8 @@ class PolicyHandlerInterface {
 
   virtual PTURetryHandler& ptu_retry_handler() const = 0;
 #else   // EXTERNAL_PROPRIETARY_MODE
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const bool is_retry) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   virtual bool GetPriority(const std::string& policy_app_id,

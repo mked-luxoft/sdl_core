@@ -1657,8 +1657,8 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
   EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls("0x07", _))
       .WillRepeatedly(SetArgReferee<1>(test_data));
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
-#else   // EXTERNAL_PROPRIETARY_MODE
-  policy_handler_.OnSnapshotCreated(msg);
+#else  // EXTERNAL_PROPRIETARY_MODE
+  policy_handler_.OnSnapshotCreated(msg, false);
 #endif  // EXTERNAL_PROPRIETARY_MODE
 }
 
@@ -1736,7 +1736,7 @@ TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
 #endif  // PROPRIETARY_MODE
 
   EXPECT_CALL(*mock_policy_manager_, OnUpdateStarted());
-  policy_handler_.OnSnapshotCreated(msg);
+  policy_handler_.OnSnapshotCreated(msg, false);
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 

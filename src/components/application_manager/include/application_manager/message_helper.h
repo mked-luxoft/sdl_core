@@ -88,6 +88,11 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateHMINotification(
       hmi_apis::FunctionID::eType function_id);
 
+  static smart_objects::SmartObjectSPtr
+  CreateOnSystemRequestNotificationToMobile(const std::vector<uint8_t>& lolkek,
+                                            const uint32_t kekel);
+
+
   /**
     * @brief ServiceStatusUpdateNotificationBuilder small utility class used for
     * more flexible construction of OnServiceUpdateNotification

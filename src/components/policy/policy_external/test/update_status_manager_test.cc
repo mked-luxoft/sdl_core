@@ -34,6 +34,8 @@
 #include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
 #include "policy/update_status_manager.h"
+#include "policy/mock_ptu_retry_handler.h"
+#include "policy/ptu_retry_handler.h"
 
 #include "utils/conditional_variable.h"
 
@@ -52,6 +54,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
   PolicyTableStatus status_;
   const uint32_t k_timeout_;
   NiceMock<MockPolicyListener> listener_;
+  NiceMock<MockPTURetryHandler> mock_ptu_retry_handler_;
   const std::string up_to_date_status_;
   const std::string update_needed_status_;
   const std::string updating_status_;
@@ -61,6 +64,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
       : manager_(std::make_shared<UpdateStatusManager>())
       , k_timeout_(1000)
       , listener_()
+      , mock_ptu_retry_handler_()
       , up_to_date_status_("UP_TO_DATE")
       , update_needed_status_("UPDATE_NEEDED")
       , updating_status_("UPDATING") {}
@@ -68,6 +72,8 @@ class UpdateStatusManagerTest : public ::testing::Test {
   void SetUp() OVERRIDE {
     manager_->set_listener(&listener_);
     ON_CALL(listener_, OnUpdateStatusChanged(_)).WillByDefault(Return());
+    ON_CALL(listener_, ptu_retry_handler())
+        .WillByDefault(ReturnRef(mock_ptu_retry_handler_));
   }
 
   void TearDown() OVERRIDE {}
@@ -108,7 +114,14 @@ class WaitAsync {
 }
 
 ACTION_P(NotifyAsync, waiter) {
+  std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>LOLKEK" << std::endl;
   waiter->Notify();
+}
+
+ACTION_P2(RetryFailed, manager, listener) {
+  std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>KEKEL" << std::endl;
+  manager->OnResetRetrySequence();
+  listener->OnPTUFinished(false);
 }
 
 TEST_F(UpdateStatusManagerTest,
@@ -121,8 +134,6 @@ TEST_F(UpdateStatusManagerTest,
   WaitAsync waiter(count, timeout);
   EXPECT_CALL(listener_, OnUpdateStatusChanged(_))
       .WillRepeatedly(NotifyAsync(&waiter));
-  EXPECT_CALL(listener_, IsAllowedPTURetriesExceeded())
-      .WillRepeatedly(Return(false));
   manager_->ScheduleUpdate();
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
@@ -143,16 +154,18 @@ TEST_F(
   WaitAsync waiter(count, timeout);
   EXPECT_CALL(listener_, OnUpdateStatusChanged(_))
       .WillRepeatedly(NotifyAsync(&waiter));
+  EXPECT_CALL(mock_ptu_retry_handler_, RetrySequenceFailed())
+      .WillOnce(RetryFailed(manager_, &listener_));
   manager_->ScheduleUpdate();
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
   {
     ::testing::InSequence s;
-    EXPECT_CALL(listener_, IsAllowedPTURetriesExceeded())
+    EXPECT_CALL(mock_ptu_retry_handler_, IsAllowedRetryCountExceeded())
         .WillRepeatedly(Return(false));
-    EXPECT_CALL(listener_, IsAllowedPTURetriesExceeded())
+    EXPECT_CALL(mock_ptu_retry_handler_, IsAllowedRetryCountExceeded())
         .WillRepeatedly(Return(false));
-    EXPECT_CALL(listener_, IsAllowedPTURetriesExceeded())
+    EXPECT_CALL(mock_ptu_retry_handler_, IsAllowedRetryCountExceeded())
         .WillRepeatedly(Return(true));
     EXPECT_CALL(listener_, OnPTUFinished(false));
   }
@@ -277,7 +290,7 @@ TEST_F(UpdateStatusManagerTest, OnResetRetrySequence_ExpectStatusUpToDate) {
   manager_->OnResetRetrySequence();
   status_ = manager_->GetLastUpdateStatus();
   // Check
-  EXPECT_EQ(StatusUpdatePending, status_);
+  EXPECT_EQ(StatusUpdateRequired, status_);
 }
 
 TEST_F(UpdateStatusManagerTest,

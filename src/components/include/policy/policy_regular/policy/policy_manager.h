@@ -105,7 +105,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
    */
-  virtual bool RequestPTUpdate() = 0;
+  virtual bool RequestPTUpdate(const bool is_retry) = 0;
 
   /**
    * @brief Check if specified RPC for specified application

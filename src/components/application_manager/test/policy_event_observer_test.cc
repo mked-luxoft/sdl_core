@@ -37,7 +37,10 @@
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/mock_event_dispatcher.h"
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
 #include "policy/ptu_retry_handler.h"
+#endif
 
 namespace test {
 namespace components {

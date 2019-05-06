@@ -43,6 +43,7 @@
 #include "policy/mock_update_status_manager.h"
 #include "policy/mock_policy_listener.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/mock_ptu_retry_handler.h"
 
 namespace test {
 namespace components {
@@ -115,6 +116,7 @@ class PolicyManagerImplTest : public ::testing::Test {
   MockCacheManagerInterface* cache_manager_;
   MockUpdateStatusManager update_manager_;
   NiceMock<MockPolicyListener> listener_;
+  NiceMock<MockPTURetryHandler> ptu_retry_handler_;
 
   void SetUp() OVERRIDE;
 
@@ -140,6 +142,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
 
   PolicyManagerImpl* policy_manager_;
   NiceMock<MockPolicyListener> listener_;
+  NiceMock<MockPTURetryHandler> ptu_retry_handler_;
   ::policy::StringArray hmi_level_;
   ::policy::StringArray pt_request_types_;
   size_t ptu_request_types_size_;

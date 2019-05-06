@@ -417,7 +417,7 @@ void PolicyManagerImpl::GetUpdateUrls(const uint32_t service_type,
   cache_->GetUpdateUrls(service_type, out_end_points);
 }
 
-bool PolicyManagerImpl::RequestPTUpdate() {
+bool PolicyManagerImpl::RequestPTUpdate(const bool is_retry) {
   LOG4CXX_AUTO_TRACE(logger_);
   std::shared_ptr<policy_table::Table> policy_table_snapshot =
       cache_->GenerateSnapshot();
@@ -436,7 +436,7 @@ bool PolicyManagerImpl::RequestPTUpdate() {
 
   BinaryMessage update(message_string.begin(), message_string.end());
 
-  listener_->OnSnapshotCreated(update);
+  listener_->OnSnapshotCreated(update, is_retry);
   return true;
 }
 
@@ -473,7 +473,7 @@ void PolicyManagerImpl::StartPTExchange() {
     }
 
     if (update_status_manager_.IsUpdateRequired()) {
-      if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
+      if (RequestPTUpdate(false) && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
         const uint32_t timeout_msec = NextRetryTimeout();
 
@@ -1350,7 +1350,7 @@ void PolicyManagerImpl::StartRetrySequence() {
     return;
   }
 
-  RequestPTUpdate();
+  RequestPTUpdate(true);
   timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
 }
 

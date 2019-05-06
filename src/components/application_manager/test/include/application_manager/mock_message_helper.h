@@ -139,6 +139,9 @@ class MockMessageHelper {
   MOCK_METHOD2(SendDecryptCertificateToHMI,
                void(const std::string& file_name,
                     ApplicationManager& app_mngr));
+  MOCK_METHOD2(CreateOnSystemRequestNotificationToMobile,
+               smart_objects::SmartObjectSPtr(
+                   const std::vector<uint8_t>& lolkek, const uint32_t kekel));
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD4(
       SendGetListOfPermissionsResponse,

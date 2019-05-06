@@ -1474,7 +1474,8 @@ void PolicyHandler::OnSnapshotCreated(
   }
 }
 #else  // EXTERNAL_PROPRIETARY_MODE
-void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
+void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
+                                      const bool is_retry) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
 #ifdef PROPRIETARY_MODE
@@ -1483,10 +1484,21 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
     return;
   }
-  MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
-                                  TimeoutExchangeSec(),
-                                  policy_manager_->RetrySequenceDelaysSeconds(),
-                                  application_manager_);
+
+  if (is_retry) {
+    LOG4CXX_DEBUG(logger_, "Current PTU iteration IS a retry");
+    auto on_system_request_notification =
+        MessageHelper::CreateOnSystemRequestNotificationToMobile(
+            pt_string, GetAppIdForSending());
+    application_manager_.GetRPCService().ManageMobileCommand(
+        on_system_request_notification, commands::Command::SOURCE_SDL);
+  } else {
+    MessageHelper::SendPolicyUpdate(
+        policy_snapshot_full_path,
+        TimeoutExchangeSec(),
+        policy_manager_->RetrySequenceDelaysSeconds(),
+        application_manager_);
+  }
 #else   // PROPRIETARY_MODE
   LOG4CXX_ERROR(logger_, "HTTP policy");
   EndpointUrls urls;

@@ -71,7 +71,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                     const std::vector<int>& retry_delay_seconds,
                     uint32_t timeout_exchange));
 #else   // EXTERNAL_PROPRIETARY_MODE
-  MOCK_METHOD1(OnSnapshotCreated, void(const policy::BinaryMessage& pt_string));
+  MOCK_METHOD2(OnSnapshotCreated,
+               void(const policy::BinaryMessage& pt_string,
+                    const bool is_retry));
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   MOCK_CONST_METHOD2(GetPriority,
