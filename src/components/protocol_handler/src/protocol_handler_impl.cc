@@ -1397,8 +1397,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
                                                 packet->protocol_version(),
                                                 packet->data(),
                                                 packet->total_data_bytes(),
-                                                packet->service_type(),
                                                 packet->protection_flag(),
+                                                packet->service_type(),
                                                 packet->payload_size()));
   if (!rawMessage) {
     return RESULT_FAIL;
@@ -1915,8 +1915,8 @@ void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
                                                   frame->protocol_version(),
                                                   frame->data(),
                                                   frame->total_data_bytes(),
-                                                  frame->service_type(),
                                                   frame->protection_flag(),
+                                                  frame->service_type(),
                                                   frame->payload_size()));
     DCHECK(rawMessage);
 

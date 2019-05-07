@@ -73,21 +73,23 @@ EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
       message[strings::params][strings::connection_key].asUInt();
   const bool needs_encryption =
       rpc_protection_manager_->CheckPolicyEncryptionFlag(
-          function_id, app, correlation_id, is_rpc_service_secure);
+          function_id, *app, correlation_id, is_rpc_service_secure);
   if (MessageType::kRequest ==
       message[strings::params][strings::message_type].asInt()) {
     const bool message_protected =
         message[strings::params][strings::protection].asBool();
 
-    if (needs_encryption && message_protected) {
-      return EncryptionFlagCheckResult::kSuccess_Protected;
-    } else if (needs_encryption && !message_protected) {
-      return EncryptionFlagCheckResult::kError_EncryptionNeeded;
-    } else if (message_protected && !needs_encryption) {
-      rpc_protection_manager_->EncryptResponseByForce(connection_key,
-                                                      correlation_id);
-      return EncryptionFlagCheckResult::kSuccess_Protected;
+    if (!message_protected) {
+      return needs_encryption
+                 ? EncryptionFlagCheckResult::kError_EncryptionNeeded
+                 : EncryptionFlagCheckResult::kSuccess_NotProtected;
     }
+
+    if (!needs_encryption) {
+      rpc_protection_manager_->ForceEncryptResponse(connection_key,
+                                                    correlation_id);
+    }
+    return EncryptionFlagCheckResult::kSuccess_Protected;
   }
   return EncryptionFlagCheckResult::kSuccess_NotProtected;
 }
@@ -507,7 +509,7 @@ void RPCServiceImpl::SendMessageToMobile(
 
     rpc_protection_manager_->CheckPolicyEncryptionFlag(
         function_id,
-        app,
+        *app,
         message_to_send->correlation_id(),
         protocol_handler_->IsRPCServiceSecure(
             message_to_send->connection_key()));

@@ -62,7 +62,7 @@ class RPCProtectionManagerImpl : public RPCProtectionManager {
    * @return true if function need encryption for current app,  else false
    */
   bool CheckPolicyEncryptionFlag(const uint32_t function_id,
-                                 std::shared_ptr<Application> app,
+                                 const Application& app,
                                  const uint32_t conrrelation_id,
                                  const bool is_rpc_service_secure) OVERRIDE;
   /*
@@ -78,8 +78,8 @@ class RPCProtectionManagerImpl : public RPCProtectionManager {
    * too
    * @param conrrelation_id conrrelation id
    */
-  void EncryptResponseByForce(const uint32_t app_id,
-                              const uint32_t conrrelation_id) OVERRIDE;
+  void ForceEncryptResponse(const uint32_t app_id,
+                            const uint32_t conrrelation_id) OVERRIDE;
   /*
    * @param connection_key connection key
    * @param function_id function id

@@ -35,7 +35,7 @@ bool RPCProtectionManagerImpl::IsFunctionInGroup(
 
 bool RPCProtectionManagerImpl::CheckPolicyEncryptionFlag(
     const uint32_t function_id,
-    std::shared_ptr<Application> app,
+    const Application& app,
     const uint32_t correlation_id,
     const bool is_rpc_service_secure) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,7 +52,7 @@ bool RPCProtectionManagerImpl::CheckPolicyEncryptionFlag(
     return false;
   }
 
-  const auto policy_app_id = app->policy_app_id();
+  const auto policy_app_id = app.policy_app_id();
   if (!rpc_encryption_data_accessor.AppNeedEncryption(policy_app_id)) {
     return false;
   }
@@ -68,7 +68,7 @@ bool RPCProtectionManagerImpl::CheckPolicyEncryptionFlag(
                     "Message need encryption. Function name is "
                         << function_name);
       message_needed_encryption_.insert(
-          std::make_pair(app->app_id(), correlation_id));
+          std::make_pair(app.app_id(), correlation_id));
       return true;
     }
   }
@@ -102,7 +102,7 @@ bool RPCProtectionManagerImpl::IsExceptionRPC(
           kPutFile == policy_fucntion_id || kOnHMIStatus == policy_fucntion_id);
 }
 
-void RPCProtectionManagerImpl::EncryptResponseByForce(
+void RPCProtectionManagerImpl::ForceEncryptResponse(
     const uint32_t app_id, const uint32_t correlation_id) {
   message_needed_encryption_.insert(std::make_pair(app_id, correlation_id));
 };
@@ -113,7 +113,6 @@ RPCProtectionManagerImpl::CreateEncryptionNeededResponse(
     const uint32_t function_id,
     const uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  // negative_responses_.insert(std::make_pair(connection_key, correlation_id));
   auto it = message_needed_encryption_.find(
       std::make_pair(connection_key, correlation_id));
   if (it != message_needed_encryption_.end()) {

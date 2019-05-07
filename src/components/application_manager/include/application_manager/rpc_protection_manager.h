@@ -35,6 +35,8 @@
 
 #include <cstdint>
 #include <memory>
+#include "application_manager/application.h"
+#include "smart_objects/smart_object.h"
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
@@ -66,13 +68,13 @@ class RPCProtectionManager {
 
   /*
    * @param function_id function id
-   * @param app smart pointer to Application
+   * @param app ref to Application
    * @param conrrelation_id conrrelation id
    * @param is_rpc_service_secure the flag the secure service started
    * @return true if function need encryption for current app,  else false
    */
   virtual bool CheckPolicyEncryptionFlag(const uint32_t function_id,
-                                         std::shared_ptr<Application> app,
+                                         const Application& app,
                                          const uint32_t conrrelation_id,
                                          const bool is_rpc_service_secure) = 0;
   /*
@@ -90,18 +92,18 @@ class RPCProtectionManager {
   * @param app_id application id
   * @param conrrelation_id conrrelation id
   */
-  virtual void EncryptResponseByForce(const uint32_t app_id,
-                                      const uint32_t conrrelation_id) = 0;
+  virtual void ForceEncryptResponse(const uint32_t app_id,
+                                    const uint32_t conrrelation_id) = 0;
   /*
    * @param connection_key connection key
    * @param function_id function id
    * @param conrrelation_id conrrelation id
    * @return response with error code ENCRYPTION_NEEDED
    */
-  virtual std::shared_ptr<smart_objects::SmartObject>
-  CreateEncryptionNeededResponse(const uint32_t connection_key,
-                                 const uint32_t function_id,
-                                 const uint32_t conrrelation_id) = 0;
+  virtual smart_objects::SmartObjectSPtr CreateEncryptionNeededResponse(
+      const uint32_t connection_key,
+      const uint32_t function_id,
+      const uint32_t conrrelation_id) = 0;
 };
 }  // namespace policy
 

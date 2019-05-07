@@ -41,12 +41,12 @@ class MockRPCProtectionManager : public RPCProtectionManager {
  public:
   MOCK_METHOD4(CheckPolicyEncryptionFlag,
                bool(const uint32_t function_id,
-                    std::shared_ptr<Application> app,
+                    const Application& app,
                     const uint32_t conrrelation_id,
                     const bool is_rpc_service_secure));
   MOCK_METHOD2(DoesRPCNeedEncryption,
                bool(const uint32_t app_id, const uint32_t conrrelation_id));
-  MOCK_METHOD2(EncryptResponseByForce,
+  MOCK_METHOD2(ForceEncryptResponse,
                void(const uint32_t app_id, const uint32_t conrrelation_id));
   MOCK_METHOD3(CreateEncryptionNeededResponse,
                std::shared_ptr<smart_objects::SmartObject>(

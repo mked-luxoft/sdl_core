@@ -2303,9 +2303,8 @@ void MessageHelper::SendOnPermissionsChangeNotification(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   if (require_encryption.is_initialized()) {
-    const bool require_encryption_bool = *require_encryption;
     content[strings::msg_params][strings::requireEncryption] =
-        require_encryption_bool;
+        static_cast<bool>(*require_encryption);
   }
   content[strings::msg_params]["permissionItem"] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);

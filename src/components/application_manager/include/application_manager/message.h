@@ -100,6 +100,12 @@ class Message {
   void set_smart_object(const smart_objects::SmartObject& object);
   void set_data_size(size_t data_size);
   void set_payload_size(size_t payload_size);
+
+  /**
+   * @brief sets message's protection flag
+   * @param  protection - bool value, if message is encrypted - true, otherwise
+   * - false
+   */
   void set_message_protection(bool protection);
 
   static bool is_sufficient_version(
