@@ -333,9 +333,9 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
 
 PolicyHandler::~PolicyHandler() {}
 
-RPCEncryptionDataAccessorInterface& PolicyHandler::RPCEncryptionDataAccessor()
-    const {
-  return *(policy_manager_.get());
+PolicyEncryptionFlagGetterInterfaceSPtr
+PolicyHandler::PolicyEncryptionFlagGetter() const {
+  return policy_manager_;
 }
 
 bool PolicyHandler::PolicyEnabled() const {

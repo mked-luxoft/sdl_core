@@ -386,7 +386,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
                        << message.protocol_version() << ".");
       return false;
   }
-  output[strings::params][strings::protection] = message.is_message_protected();
+  output[strings::params][strings::protection] = message.is_message_encrypted();
 
   LOG4CXX_DEBUG(logger_, "Successfully parsed message into smart object");
   return true;

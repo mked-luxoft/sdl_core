@@ -734,6 +734,16 @@ class CacheManager : public CacheManagerInterface {
   void OnDeviceSwitching(const std::string& device_id_from,
                          const std::string& device_id_to) OVERRIDE;
 
+  rpc::Optional<rpc::Boolean> GetAppEncryptionRequiredFlag(
+      const std::string& application_policy_name) const OVERRIDE;
+
+  rpc::Optional<rpc::Boolean> GetFunctionalGroupingEncryptionRequiredFlag(
+      const std::string& functional_group) const OVERRIDE;
+
+  void GetApplicationParams(
+      const std::string& application_name,
+      policy_table::ApplicationParams& application_policies) const OVERRIDE;
+
  private:
   std::string currentDateTime();
   struct AppHMITypeToString {

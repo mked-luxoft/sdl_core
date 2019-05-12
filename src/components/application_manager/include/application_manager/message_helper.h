@@ -494,7 +494,7 @@ class MessageHelper {
   static void SendOnPermissionsChangeNotification(
       uint32_t connection_key,
       const policy::Permissions& permissions,
-      const policy::EncryptionRequired require_encryption,
+      const policy::EncryptionRequired encryprion_required,
       ApplicationManager& app_mngr);
 
   /*

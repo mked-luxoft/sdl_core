@@ -195,7 +195,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
           message->protocol_version()));
   outgoing_message->set_data_size(message->data_size());
   outgoing_message->set_payload_size(message->payload_size());
-  outgoing_message->set_message_protection(message->protection_flag());
+  outgoing_message->set_message_encryption(message->protection_flag());
 
   if (!payload.data.empty()) {
     const BinaryData binary_payload_data(payload.data);

@@ -73,9 +73,9 @@ class Message {
 
   /**
    * @brief retreives message's protection flag
-   * @return bool value, if message is encrypted - true, otherwise - false
+   * @return true if message is encrypted, otherwise returns false
    */
-  bool is_message_protected() const;
+  bool is_message_encrypted() const;
 
   MessageType type() const;
   protocol_handler::MajorProtocolVersion protocol_version() const;
@@ -106,7 +106,7 @@ class Message {
    * @param  protection - bool value, if message is encrypted - true, otherwise
    * - false
    */
-  void set_message_protection(bool protection);
+  void set_message_encryption(const bool protection);
 
   static bool is_sufficient_version(
       protocol_handler::MajorProtocolVersion minVersion,
@@ -136,7 +136,7 @@ class Message {
   size_t payload_size_;
   protocol_handler::MajorProtocolVersion version_;
 
-  bool is_message_protected_;
+  bool is_message_encrypted_;
 };
 
 typedef std::shared_ptr<application_manager::Message> MobileMessage;

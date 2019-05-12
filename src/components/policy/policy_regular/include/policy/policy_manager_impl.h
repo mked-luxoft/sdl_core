@@ -48,7 +48,7 @@
 #include "utils/timer.h"
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
-#include "application_manager/policies/rpc_encryption_data_accessor_interface.h"
+#include "application_manager/policies/policy_encryption_flag_getter.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -74,18 +74,19 @@ class PolicyManagerImpl : public PolicyManager {
    * \param policy_app_id policy app id
    * \return groups that exist for app
    */
-  const Strings GetGroupsForApp(
+  const std::vector<std::string> GetFunctionGroupsForApp(
       const std::string& policy_app_id) const OVERRIDE;
   /*
    * \param policy_group group
    * \return true if the group need encryption
    */
-  bool GroupNeedEncryption(const std::string& policy_group) const OVERRIDE;
+  bool FunctionGroupNeedEncryption(
+      const std::string& policy_group) const OVERRIDE;
   /*
    * \param policy_group group
    * \return RPCs that exists in group
    */
-  const std::vector<std::string> GetRPCsForGroup(
+  const std::vector<std::string> GetRPCsForFunctionGroup(
       const std::string& group) const OVERRIDE;
   /*
    * \param function_id function id

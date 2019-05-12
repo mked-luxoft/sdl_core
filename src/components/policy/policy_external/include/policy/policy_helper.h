@@ -309,6 +309,8 @@ struct ProcessFunctionalGroup {
   GroupConsent GetGroupState(const std::string& group_name);
   /*
   * @brief Fills encryption required flags for all rpcs in functional group
+  * @param encryption_required Optional object containing encryption required
+  * flag
   */
   void FillEncryptionFlagForRpcs(
       const policy::EncryptionRequired encryption_required);

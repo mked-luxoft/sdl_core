@@ -35,6 +35,7 @@
 
 #include <cstdint>
 #include <memory>
+
 #include "application_manager/application.h"
 #include "smart_objects/smart_object.h"
 
@@ -56,17 +57,18 @@ namespace application_manager {
   * application and function group level, as well as make decisions whether
   * certain RPC should be encrypted or not.
   * It mediates communication between PRCService and
-  * RPCEncryptionDataAccessorInterface which is implemented by PolicyManager,
+  * PolicyEncryptionFlagGetterInterface which is implemented by PolicyManager,
   * providing adequate level of abstraction.
   */
 class RPCProtectionManager {
  public:
-  /*!
+  /*
    * @brief virtual destructor RPCProtectionManager
    */
   virtual ~RPCProtectionManager() {}
 
   /*
+   * @brief checks whether given rpc requires encryption by policy
    * @param function_id function id
    * @param app ref to Application
    * @param conrrelation_id conrrelation id
@@ -74,27 +76,22 @@ class RPCProtectionManager {
    * @return true if function need encryption for current app,  else false
    */
   virtual bool CheckPolicyEncryptionFlag(const uint32_t function_id,
-                                         const Application& app,
+                                         const ApplicationSharedPtr app,
                                          const uint32_t conrrelation_id,
                                          const bool is_rpc_service_secure) = 0;
   /*
+   * @brief check whether given rpc is saved to internal cache and needs to be
+   * encrypted before sending to mobile
    * @param app_id application id
    * @param correlation_id conrrelation id
    * @return true if the message with correlation id correlation_id needed e
    * ncryption else false
    */
-  virtual bool DoesRPCNeedEncryption(const uint32_t app_id,
-                                     const uint32_t conrrelation_id) = 0;
+  virtual bool IsInEncryptionNeededCache(
+      const uint32_t app_id, const uint32_t conrrelation_id) const = 0;
   /*
-  * @brief massage will be encrypted by force
-  * If request encrypted but not needed by policy, sdl must encrypted response
-  * too
-  * @param app_id application id
-  * @param conrrelation_id conrrelation id
-  */
-  virtual void ForceEncryptResponse(const uint32_t app_id,
-                                    const uint32_t conrrelation_id) = 0;
-  /*
+   * @brief create encryption needed response in case when received unencrypted
+   * rpc that requires encryption
    * @param connection_key connection key
    * @param function_id function id
    * @param conrrelation_id conrrelation id
@@ -104,6 +101,22 @@ class RPCProtectionManager {
       const uint32_t connection_key,
       const uint32_t function_id,
       const uint32_t conrrelation_id) = 0;
+
+  /*
+   * @brief Adds app id and correlation id of a message to internal cache
+   * @param app_id application if
+   * @param correlation_id correlation id
+   */
+  virtual void AddToEncryptionNeededCache(const uint32_t app_id,
+                                          const uint32_t correlation_id) = 0;
+
+  /*
+   * @brief Removes app id and correlation id of a message from internal cache
+   * @param app_id application if
+   * @param correlation_id correlation id
+   */
+  virtual void RemoveFromEncryptionNeededCache(
+      const uint32_t app_id, const uint32_t correlation_id) = 0;
 };
 }  // namespace policy
 

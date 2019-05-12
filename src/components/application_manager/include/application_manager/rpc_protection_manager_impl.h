@@ -43,75 +43,45 @@ namespace application_manager {
 */
 class RPCProtectionManagerImpl : public RPCProtectionManager {
  public:
-  /*!
-   * @brief constructor RPCProtectionManagerImpl
-   * @param policy_handler policy handler interface
-   */
   RPCProtectionManagerImpl(policy::PolicyHandlerInterface& policy_handler);
 
-  /*!
-   * @brief destructor RPCProtectionManagerImpl
-   */
   ~RPCProtectionManagerImpl() OVERRIDE {}
 
-  /*
-   * @param function_id function id
-   * @param app smart pointer to Application
-   * @param conrrelation_id conrrelation id
-   * @param is_rpc_service_secure the flag the secure service started
-   * @return true if function need encryption for current app,  else false
-   */
   bool CheckPolicyEncryptionFlag(const uint32_t function_id,
-                                 const Application& app,
+                                 const ApplicationSharedPtr app,
                                  const uint32_t conrrelation_id,
                                  const bool is_rpc_service_secure) OVERRIDE;
-  /*
-   * @param conrrelation_id conrrelation id
-   * @return true if the message with correlation id correlation_id needed e
-   * ncryption else false
-   */
-  bool DoesRPCNeedEncryption(const uint32_t app_id,
-                             const uint32_t conrrelation_id) OVERRIDE;
-  /*
-   * @brief massage will be encrypted by force
-   * If request encrypted but not needed by policy, sdl must encrypted response
-   * too
-   * @param conrrelation_id conrrelation id
-   */
-  void ForceEncryptResponse(const uint32_t app_id,
-                            const uint32_t conrrelation_id) OVERRIDE;
-  /*
-   * @param connection_key connection key
-   * @param function_id function id
-   * @param conrrelation_id conrrelation id
-   * @return response with error code ENCRYPTION_NEEDED
-   */
+
+  bool IsInEncryptionNeededCache(const uint32_t app_id,
+                                 const uint32_t conrrelation_id) const OVERRIDE;
+
   smart_objects::SmartObjectSPtr CreateEncryptionNeededResponse(
       const uint32_t connection_key,
       const uint32_t function_id,
       const uint32_t conrrelation_id) OVERRIDE;
 
+  void AddToEncryptionNeededCache(const uint32_t app_id,
+                                  const uint32_t correlation_id) OVERRIDE;
+
+  void RemoveFromEncryptionNeededCache(const uint32_t app_id,
+                                       const uint32_t correlation_id) OVERRIDE;
+
  private:
   /*
+   * @brief check whether given rpc is an exeption
    * @param function_id function id
    * @return true if function_id is an exception (rpc that can be sent before
    * app is registered, hence before secure rpc service is established)
    */
   bool IsExceptionRPC(const uint32_t function_id) const;
+
   /*
-   * @param app_id application id
-   * @param conrrelation_id conrrelation id
-   * @return true if the message with correlation id is a negative response with
-   * result code ENCRYPTION_NEEDED
-   */
-  // bool CheckNegativeResponse(const uint32_t app_id,
-  //                            const uint32_t conrrelation_id);
-  /*
-   * @param function function name
+   * @brief checks whether given function is in functional group
+   * @param function_name function name
    * @param group group name
    * @return true if the function exists in group else return false
    */
-  bool IsFunctionInGroup(const std::string& function,
+  bool IsFunctionInGroup(const std::string& function_name,
                          const std::string& group) const;
 
   policy::PolicyHandlerInterface& policy_handler_;
@@ -120,6 +90,7 @@ class RPCProtectionManagerImpl : public RPCProtectionManager {
 
   std::set<AppIdCorrIdPair> negative_responses_;
   std::set<AppIdCorrIdPair> message_needed_encryption_;
+  sync_primitives::Lock message_needed_encryption_lock_;
 };
 }  // namespace policy
 

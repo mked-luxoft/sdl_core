@@ -2284,7 +2284,7 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 void MessageHelper::SendOnPermissionsChangeNotification(
     uint32_t connection_key,
     const policy::Permissions& permissions,
-    const policy::EncryptionRequired require_encryption,
+    const policy::EncryptionRequired encryprion_required,
     ApplicationManager& app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
@@ -2302,9 +2302,9 @@ void MessageHelper::SendOnPermissionsChangeNotification(
   content[strings::msg_params] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  if (require_encryption.is_initialized()) {
+  if (encryprion_required.is_initialized()) {
     content[strings::msg_params][strings::requireEncryption] =
-        static_cast<bool>(*require_encryption);
+        static_cast<bool>(*encryprion_required);
   }
   content[strings::msg_params]["permissionItem"] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -2327,7 +2327,6 @@ void MessageHelper::SendOnPermissionsChangeNotification(
     permission_item["rpcName"] = (*it_permissions).first;
     const policy::RpcPermissions& rpc_permissions = (*it_permissions).second;
 
-    // Filling the requireEncryption of PermissionItem
     if (rpc_permissions.require_encryption.is_initialized()) {
       const bool require_encryption = *rpc_permissions.require_encryption;
       permission_item[strings::requireEncryption] = require_encryption;

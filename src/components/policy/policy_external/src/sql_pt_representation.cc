@@ -645,6 +645,10 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
       *rpcs_tbl.user_consent_prompt = func_group.GetString(2);
     }
 
+    if (!func_group.IsNull(3)) {
+      *rpcs_tbl.encryption_required = func_group.GetBoolean(3);
+    }
+
     const int group_id = func_group.GetInteger(0);
 
     rpcs.Bind(0, group_id);
@@ -764,6 +768,10 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;
+
+    if (!query.IsNull(5)) {
+      *params.encryption_required = query.GetBoolean(5);
+    }
     // Data should be gathered from db by  "default" key if application has
     // default policies
 
@@ -1037,6 +1045,10 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   app_query.Bind(2, app.second.is_null());
   app_query.Bind(3, *app.second.memory_kb);
   app_query.Bind(4, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
+
+  app.second.encryption_required.is_initialized()
+      ? app_query.Bind(5, *app.second.encryption_required)
+      : app_query.Bind(5);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");

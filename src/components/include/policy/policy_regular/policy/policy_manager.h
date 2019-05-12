@@ -36,7 +36,7 @@
 #include <vector>
 #include <cstdint>
 
-#include "application_manager/policies/rpc_encryption_data_accessor_interface.h"
+#include "application_manager/policies/policy_encryption_flag_getter.h"
 #include "utils/callable.h"
 #include "policy/policy_types.h"
 #include "policy/policy_table/types.h"
@@ -50,7 +50,7 @@ class PolicySettings;
 typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
 class PolicyManager : public usage_statistics::StatisticsManager,
-                      public RPCEncryptionDataAccessorInterface {
+                      public PolicyEncryptionFlagGetterInterface {
  public:
   virtual ~PolicyManager() {}
 

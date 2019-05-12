@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_RPC_ENCRYPTION_MANAGER
-#define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_RPC_ENCRYPTION_MANAGER
+#ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_ENCRYPTION_FLAG_GETTER
+#define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_ENCRYPTION_FLAG_GETTER
 
 #include <string>
 #include "policy/policy_table/types.h"
@@ -40,16 +40,17 @@ using rpc::policy_table_interface_base::Strings;
 
 namespace policy {
 /*
-* @brief RPCEncryptionDataAccessorInterface interface
+* @brief PolicyEncryptionFlagGetterInterface interface
 */
-class RPCEncryptionDataAccessorInterface {
+class PolicyEncryptionFlagGetterInterface {
  public:
   /*!
-  * @brief virtual destructor RPCEncryptionDataAccessorInterface
+  * @brief virtual destructor PolicyEncryptionFlagGetterInterface
   */
-  virtual ~RPCEncryptionDataAccessorInterface() {}
+  virtual ~PolicyEncryptionFlagGetterInterface() {}
 
   /*
+   * @brief retreives flag whether given application needs encryption
    * @param policy_app_id policy app id
    * @return true if the app need encryption
    */
@@ -64,26 +65,31 @@ class RPCEncryptionDataAccessorInterface {
       const std::string& policy_app_id) const = 0;
 
   /*
+   * @brief retreives function group for app
    * @param policy_app_id policy app id
    * @return groups that exist for app
    */
-  virtual const Strings GetGroupsForApp(
+  virtual const std::vector<std::string> GetFunctionGroupsForApp(
       const std::string& policy_app_id) const = 0;
 
   /*
+   * @brief retreives flag indicating whether function group needs encryption
    * @param policy_group group
    * @return true if the group need encryption
    */
-  virtual bool GroupNeedEncryption(const std::string& policy_group) const = 0;
+  virtual bool FunctionGroupNeedEncryption(
+      const std::string& policy_group) const = 0;
 
   /*
+   * @brief retreives rpcs for given function group
    * @param policy_group group
    * @return RPCs that exists in group
    */
-  virtual const std::vector<std::string> GetRPCsForGroup(
+  virtual const std::vector<std::string> GetRPCsForFunctionGroup(
       const std::string& group) const = 0;
 
   /*
+   * @brief retreives policy function name
    * @param function_id function id
    * @return policy function name
    */
@@ -92,4 +98,4 @@ class RPCEncryptionDataAccessorInterface {
 };
 
 }  // policy
-#endif  // SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_RPC_ENCRYPTION_MANAGER
+#endif  // SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_ENCRYPTION_FLAG_GETTER

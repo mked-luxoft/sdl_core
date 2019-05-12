@@ -67,20 +67,21 @@ class RPCEncryptionManagerInterface {
    * @param policy_app_id policy app id
    * @return groups that exist for app
    */
-  virtual const Strings GetGroupsForApp(
+  virtual const std::vector<std::string> GetFunctionGroupsForApp(
       const std::string& policy_app_id) const = 0;
 
   /*
    * @param policy_group group
    * @return true if the group need encryption
    */
-  virtual bool GroupNeedEncryption(const std::string& policy_group) const = 0;
+  virtual bool FunctionGroupNeedEncryption(
+      const std::string& policy_group) const = 0;
 
   /*
    * @param policy_group group
    * @return RPCs that exists in group
    */
-  virtual const std::vector<std::string> GetRPCsForGroup(
+  virtual const std::vector<std::string> GetRPCsForFunctionGroup(
       const std::string& group) const = 0;
 
   /*

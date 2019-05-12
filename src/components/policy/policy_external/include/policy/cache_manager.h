@@ -780,9 +780,15 @@ class CacheManager : public CacheManagerInterface {
                                const std::string& policy_app_id,
                                policy::Permissions& permission);
 
-  std::shared_ptr<policy_table::Table> pt() const {
-    return pt_;
-  }
+  rpc::Optional<rpc::Boolean> GetAppEncryptionRequiredFlag(
+      const std::string& application_policy_name) const OVERRIDE;
+
+  rpc::Optional<rpc::Boolean> GetFunctionalGroupingEncryptionRequiredFlag(
+      const std::string& functional_group) const OVERRIDE;
+
+  void GetApplicationParams(
+      const std::string& application_name,
+      policy_table::ApplicationParams& application_policies) const OVERRIDE;
 
  private:
   std::shared_ptr<policy_table::Table> pt_;
