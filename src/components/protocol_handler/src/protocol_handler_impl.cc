@@ -1126,12 +1126,24 @@ void ProtocolHandlerImpl::OnUnexpectedDisconnect(
   OnConnectionClosed(connection_id);
 }
 
-void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
+void ProtocolHandlerImpl::NotifyOnGetSystemTimeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
+  security_manager_->ResetPendingSystemTimeRequests();
 #ifdef ENABLE_SECURITY
-  security_manager_->NotifyListenersOnHandshakeFailed();
+  security_manager_->NotifyListenersOnGetSystemTimeFailed();
 #endif  // ENABLE_SECURITY
 }
+
+void ProtocolHandlerImpl::ProcessFailedPTU() {
+  security_manager_->ProcessFailedPTU();
+}
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+void ProtocolHandlerImpl::ProcessFailedCertDecrypt() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  security_manager_->ProcessFailedCertDecrypt();
+}
+#endif
 
 void ProtocolHandlerImpl::OnTransportConfigUpdated(
     const transport_manager::transport_adapter::TransportConfig& configs) {
@@ -1620,6 +1632,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       std::find(audio_transports.begin(), audio_transports.end(), transport) !=
           audio_transports.end();
 
+  const uint32_t connection_key = session_observer_.KeyFromPair(
+      packet->connection_id(), packet->session_id());
+
+  service_status_update_handler_->OnServiceUpdate(
+      connection_key, service_type, ServiceStatus::SERVICE_RECEIVED);
+
   if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
       (ServiceType::kAudio == service_type && !is_audio_allowed)) {
     LOG4CXX_DEBUG(logger_,
@@ -1817,12 +1835,14 @@ void ProtocolHandlerImpl::NotifySessionStarted(
         context.connection_id_, context.new_session_id_);
 
     std::shared_ptr<HandshakeHandler> handler =
-        std::make_shared<HandshakeHandler>(*this,
-                                           session_observer_,
-                                           *fullVersion,
-                                           context,
-                                           packet->protocol_version(),
-                                           start_session_ack_params);
+        std::make_shared<HandshakeHandler>(
+            *this,
+            session_observer_,
+            *fullVersion,
+            context,
+            packet->protocol_version(),
+            start_session_ack_params,
+            *(service_status_update_handler_.get()));
 
     security_manager::SSLContext* ssl_context =
         security_manager_->CreateSSLContext(
@@ -1853,6 +1873,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
       // mark service as protected
       session_observer_.SetProtectionFlag(connection_key, service_type);
       // Start service as protected with current SSLContext
+      service_status_update_handler_->OnServiceUpdate(
+          connection_key,
+          context.service_type_,
+          ServiceStatus::SERVICE_ACCEPTED);
       SendStartSessionAck(context.connection_id_,
                           context.new_session_id_,
                           packet->protocol_version(),
@@ -1889,7 +1913,11 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     return;
   }
 #endif  // ENABLE_SECURITY
+  const uint32_t connection_key = session_observer_.KeyFromPair(
+      context.connection_id_, context.new_session_id_);
   if (rejected_params.empty()) {
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key, context.service_type_, ServiceStatus::SERVICE_ACCEPTED);
     SendStartSessionAck(context.connection_id_,
                         context.new_session_id_,
                         packet->protocol_version(),
@@ -1899,6 +1927,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                         *fullVersion,
                         *start_session_ack_params);
   } else {
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key,
+        context.service_type_,
+        ServiceStatus::SERVICE_START_FAILED);
     SendStartSessionNAck(context.connection_id_,
                          packet->session_id(),
                          protocol_version,
@@ -2077,6 +2109,11 @@ void ProtocolHandlerImpl::Stop() {
 
   sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
   start_session_frame_map_.clear();
+}
+
+void ProtocolHandlerImpl::set_service_status_update_handler(
+    std::unique_ptr<ServiceStatusUpdateHandler> handler) {
+  service_status_update_handler_ = std::move(handler);
 }
 
 #ifdef ENABLE_SECURITY
