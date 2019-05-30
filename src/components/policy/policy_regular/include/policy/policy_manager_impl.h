@@ -957,7 +957,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Starts new retry sequence
    */
-  void StartRetrySequence();
+  void OnPTUIterationTimeout();
 
  private:
   /**
