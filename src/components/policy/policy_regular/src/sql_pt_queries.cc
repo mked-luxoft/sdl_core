@@ -884,7 +884,7 @@ const std::string kInsertApplicationFull =
     " `is_predata`, `memory_kb`, `heart_beat_timeout_ms`, "
     " `certificate`, `hybrid_app_preference_value`, `endpoint`, `enabled`, "
     " `auth_token`, `cloud_transport_type`, `icon_url`, "
-    "`allow_unknown_rpc_passthrough`) "
+    "`allow_unknown_rpc_passthrough`, `encryption_required) "
     "  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 const std::string kSelectApplicationFull =
@@ -893,7 +893,7 @@ const std::string kSelectApplicationFull =
     "  `heart_beat_timeout_ms`, `certificate`, `hybrid_app_preference_value`, "
     "  `endpoint`, `enabled`, `auth_token`, `cloud_transport_type`, "
     "`icon_url`, "
-    "  `allow_unknown_rpc_passthrough` "
+    "  `allow_unknown_rpc_passthrough`, `encryption_required`"
     "FROM `application` "
     "WHERE `id` = "
     "?";
