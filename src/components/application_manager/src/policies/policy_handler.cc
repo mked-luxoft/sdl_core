@@ -126,7 +126,10 @@ struct HMILevelPredicate
       : level_(level) {}
 
   bool operator()(const ApplicationSharedPtr app) const {
-    return level_ == app->hmi_level() ? true : false;
+    return level_ == app->hmi_level(
+                         mobile_apis::PredefinedWindows::DEFAULT_WINDOW)
+               ? true
+               : false;
   }
 
  private:
@@ -948,7 +951,8 @@ void PolicyHandler::OnPendingPermissionChange(
     return;
   }
 
-  mobile_apis::HMILevel::eType app_hmi_level = app->hmi_level();
+  mobile_apis::HMILevel::eType app_hmi_level =
+      app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
 
   switch (app_hmi_level) {
     case mobile_apis::HMILevel::eType::HMI_FULL:
@@ -1335,7 +1339,8 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
 
   // The application currently not running (i.e. in NONE) should change HMI
   // level to default
-  mobile_apis::HMILevel::eType current_hmi_level = app->hmi_level();
+  mobile_apis::HMILevel::eType current_hmi_level =
+      app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
   mobile_apis::HMILevel::eType hmi_level =
       MessageHelper::StringToHMILevel(default_hmi);
 
@@ -1473,12 +1478,13 @@ bool PolicyHandler::GetPriority(const std::string& policy_app_id,
 
 void PolicyHandler::CheckPermissions(
     const application_manager::ApplicationSharedPtr app,
+    const application_manager::WindowID window_id,
     const PTString& rpc,
     const RPCParams& rpc_params,
     CheckPermissionResult& result) {
   POLICY_LIB_CHECK_VOID();
   const std::string hmi_level =
-      MessageHelper::StringifiedHMILevel(app->hmi_level());
+      MessageHelper::StringifiedHMILevel(app->hmi_level(window_id));
   if (hmi_level.empty()) {
     LOG4CXX_WARN(logger_,
                  "HMI level for " << app->policy_app_id() << " is invalid, rpc "
@@ -2219,7 +2225,8 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
                                    mobile_apis::HMILevel::eType level) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
-  if (app->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
+  if (app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW) ==
+      mobile_apis::HMILevel::HMI_NONE) {
     // If default is FULL, send request to HMI. Notification to mobile will be
     // sent on response receiving.
     if (mobile_apis::HMILevel::HMI_FULL == level) {
