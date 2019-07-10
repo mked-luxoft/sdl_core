@@ -249,6 +249,7 @@
 #include "sdl_rpc_plugin/commands/hmi/rc_is_ready_response.h"
 
 #include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification_from_hmi.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -875,8 +876,13 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                  : factory.GetCreator<commands::BCGetFilePathResponse>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSystemCapabilityUpdated: {
-      return factory
-          .GetCreator<commands::OnBCSystemCapabilityUpdatedNotification>();
+      return (application_manager::commands::Command::CommandSource::
+                  SOURCE_HMI == source)
+                 ? factory.GetCreator<
+                       commands::
+                           OnBCSystemCapabilityUpdatedNotificationFromHMI>()
+                 : factory.GetCreator<
+                       commands::OnBCSystemCapabilityUpdatedNotification>();
     }
     default: { return factory.GetCreator<InvalidCommand>(); }
   }
