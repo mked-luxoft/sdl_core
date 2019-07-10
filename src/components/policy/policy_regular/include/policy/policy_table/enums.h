@@ -457,6 +457,16 @@ enum FunctionID {
   PerformAppServiceInteractionID = 55,
 
   /**
+   * @brief CreateWindowID.
+   */
+  CreateWindowID = 56,
+
+  /**
+   * @brief DeleteWindowID.
+   */
+  DeleteWindowID = 57,
+
+  /**
    * @brief CloseApplicationID.
    */
   CloseApplicationID = 58,
