@@ -168,6 +168,7 @@ struct DeactivateApplication {
     if (device_id_ == app->device()) {
       state_ctrl_.SetRegularState(
           app,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
           mobile_apis::HMILevel::HMI_NONE,
           mobile_apis::AudioStreamingState::NOT_AUDIBLE,
           mobile_apis::VideoStreamingState::NOT_STREAMABLE,
@@ -943,6 +944,7 @@ void PolicyHandler::OnPendingPermissionChange(
         app_id, permissions, application_manager_);
     application_manager_.state_controller().SetRegularState(
         app,
+        mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
         mobile_apis::HMILevel::HMI_NONE,
         mobile_apis::AudioStreamingState::NOT_AUDIBLE,
         mobile_apis::VideoStreamingState::NOT_STREAMABLE,
@@ -1106,7 +1108,11 @@ struct SDLAlowedNotification {
       } else {
         return;
       }
-      state_controller_.SetRegularState(app, default_mobile_hmi, true);
+      state_controller_.SetRegularState(
+          app,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          default_mobile_hmi,
+          true);
     }
   }
 
@@ -1215,7 +1221,12 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
                                     : VideoStreamingState::NOT_STREAMABLE;
 
       application_manager_.state_controller().SetRegularState(
-          app, mobile_apis::HMILevel::HMI_FULL, audio_state, video_state, true);
+          app,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          mobile_apis::HMILevel::HMI_FULL,
+          audio_state,
+          video_state,
+          true);
       last_activated_app_id_ = 0;
     } else {
       DeactivateApplication deactivate_notification(
@@ -1363,10 +1374,16 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
 
       if (hmi_level == mobile_apis::HMILevel::HMI_FULL) {
         application_manager_.state_controller().SetRegularState(
-            app, hmi_level, true);
+            app,
+            mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            hmi_level,
+            true);
       } else {
         application_manager_.state_controller().SetRegularState(
-            app, hmi_level, false);
+            app,
+            mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            hmi_level,
+            false);
       }
       break;
     }
