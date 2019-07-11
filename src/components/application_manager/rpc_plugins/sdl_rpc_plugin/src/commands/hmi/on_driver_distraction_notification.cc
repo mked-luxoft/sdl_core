@@ -64,7 +64,11 @@ struct OnDriverDistractionProcessor {
       const RPCParams params;
       policy::CheckPermissionResult result;
       application_manager_.GetPolicyHandler().CheckPermissions(
-          application, stringified_function_id_, params, result);
+          application,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          stringified_function_id_,
+          params,
+          result);
       if (result.hmi_level_permitted != policy::kRpcAllowed) {
         MobileMessageQueue messages;
         application->SwapMobileMessageQueue(messages);

@@ -83,8 +83,8 @@ MATCHER_P2(CheckNotificationParams, function_id, state, "") {
   return is_function_id_matched && is_state_matched;
 }
 
-ACTION_P(GetArg3, result) {
-  arg3 = *result;
+ACTION_P(GetArg4, result) {
+  arg4 = *result;
 }
 
 TEST_F(HMIOnDriverDistractionNotificationTest, Run_PushMobileMessage_SUCCESS) {
@@ -108,8 +108,8 @@ TEST_F(HMIOnDriverDistractionNotificationTest, Run_PushMobileMessage_SUCCESS) {
   result.hmi_level_permitted = policy::kRpcDisallowed;
   EXPECT_CALL(app_mngr_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler_interface_));
-  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
-      .WillOnce(GetArg3(&result));
+  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _, _))
+      .WillOnce(GetArg4(&result));
 
   EXPECT_CALL(*mock_app,
               PushMobileMessage(CheckNotificationParams(
@@ -141,8 +141,8 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
   result.hmi_level_permitted = policy::kRpcAllowed;
   EXPECT_CALL(app_mngr_, GetPolicyHandler())
       .WillOnce(ReturnRef(mock_policy_handler_interface_));
-  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
-      .WillOnce(GetArg3(&result));
+  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _, _))
+      .WillOnce(GetArg4(&result));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   CheckNotificationParams(
