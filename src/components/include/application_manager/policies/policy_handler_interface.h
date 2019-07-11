@@ -90,6 +90,7 @@ class PolicyHandlerInterface {
                            std::string* priority) const = 0;
   virtual void CheckPermissions(
       const application_manager::ApplicationSharedPtr app,
+      const application_manager::WindowID window_id,
       const PTString& rpc,
       const RPCParams& rpc_params,
       CheckPermissionResult& result) = 0;
