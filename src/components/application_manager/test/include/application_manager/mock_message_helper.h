@@ -282,6 +282,10 @@ class MockMessageHelper {
 
   MOCK_METHOD1(PrintSmartObject,
                bool(const smart_objects::SmartObject& object));
+
+  MOCK_METHOD1(ExtractWindowIdFromSmartObject,
+               WindowID(const smart_objects::SmartObject& s_map));
+
   MOCK_METHOD3(SendTTSGlobalProperties,
                void(ApplicationSharedPtr app,
                     const bool default_help_prompt,
@@ -320,6 +324,11 @@ class MockMessageHelper {
   MOCK_METHOD2(BroadcastCapabilityUpdate,
                void(smart_objects::SmartObject& msg_params,
                     ApplicationManager& app_mngr));
+  MOCK_METHOD3(CreateUICreateWindowRequestsToHMI,
+               smart_objects::SmartObjectList(
+                   ApplicationSharedPtr application,
+                   ApplicationManager& app_manager,
+                   const smart_objects::SmartObject& windows_info));
 
   static MockMessageHelper* message_helper_mock();
 };

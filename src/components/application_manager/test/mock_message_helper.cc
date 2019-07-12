@@ -524,6 +524,12 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
   return MockMessageHelper::message_helper_mock()->PrintSmartObject(object);
 }
 
+WindowID MessageHelper::ExtractWindowIdFromSmartObject(
+    const smart_objects::SmartObject& s_map) {
+  return MockMessageHelper::message_helper_mock()
+      ->ExtractWindowIdFromSmartObject(s_map);
+}
+
 void MessageHelper::SendSetAppIcon(const uint32_t app_id,
                                    const std::string& icon_path,
                                    ApplicationManager& application_manager) {
@@ -589,5 +595,13 @@ void MessageHelper::BroadcastCapabilityUpdate(
     smart_objects::SmartObject& msg_params, ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->BroadcastCapabilityUpdate(
       msg_params, app_mngr);
+}
+
+smart_objects::SmartObjectList MessageHelper::CreateUICreateWindowRequestsToHMI(
+    application_manager::ApplicationSharedPtr application,
+    ApplicationManager& app_mngr,
+    const smart_objects::SmartObject& windows_info) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateUICreateWindowRequestsToHMI(application, app_mngr, windows_info);
 }
 }  // namespace application_manager
