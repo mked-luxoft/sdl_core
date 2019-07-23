@@ -2477,8 +2477,22 @@ void MessageHelper::SendOnPermissionsChangeNotification(
 
     permission_item["rpcName"] = (*it_permissions).first;
     const policy::RpcPermissions& rpc_permissions = (*it_permissions).second;
+    auto str_from_opt = [](const EncryptionRequired& flag) -> std::string {
+      if (!flag.is_initialized()) {
+        return "MISSING";
+      }
+
+      return *flag ? "TRUE" : "FALSE";
+    };
+    LOG4CXX_DEBUG(logger_,
+                  "RPC Permissions: "
+                      << (*it_permissions).first << " encryption required: "
+                      << str_from_opt(rpc_permissions.require_encryption));
     auto item_require_encryption = permission_item_encryption_flag_state(
         encryprion_required, rpc_permissions.require_encryption);
+    LOG4CXX_DEBUG(
+        logger_,
+        "item_require_encryption: " << str_from_opt(item_require_encryption));
     if (item_require_encryption.is_initialized()) {
       const bool require_encryption = *item_require_encryption;
       permission_item[strings::require_encryption] = require_encryption;

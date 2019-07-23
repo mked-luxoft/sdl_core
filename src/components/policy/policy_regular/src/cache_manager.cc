@@ -1714,6 +1714,13 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
 
   table = policy_table::Table(&value);
 
+  for (const auto& fg : table.policy_table.functional_groupings) {
+    LOG4CXX_DEBUG(logger_, "DISPLAYING group: " << fg.first);
+    for (const auto& rpc : fg.second.rpcs) {
+      LOG4CXX_DEBUG(logger_, "DISPLAYING RPC : " << rpc.first);
+    }
+  }
+
   Json::StyledWriter s_writer;
   LOG4CXX_DEBUG(logger_, "PT out:");
   LOG4CXX_DEBUG(logger_, s_writer.write(table.ToJsonValue()));

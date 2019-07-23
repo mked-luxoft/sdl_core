@@ -848,6 +848,7 @@ ProcessFunctionalGroup::ProcessFunctionalGroup(
 
 bool ProcessFunctionalGroup::operator()(const StringsValueType& group_name) {
   const std::string group_name_str = group_name;
+  LOG4CXX_DEBUG(logger_, "Processing group: " << group_name_str);
   FuncGroupConstItr it = fg_.find(group_name_str);
 
   if (fg_.end() != it) {
@@ -855,15 +856,31 @@ bool ProcessFunctionalGroup::operator()(const StringsValueType& group_name) {
     FillNotificationData filler(
         data_, GetGroupState(group_name_str), undefined_group_consent_);
     std::for_each(rpcs.begin(), rpcs.end(), filler);
-    FillEncryptionFlagForRpcs((*it).second.encryption_required);
+    FillEncryptionFlagForRpcs(rpcs, (*it).second.encryption_required);
   }
   return true;
 }
 
 void ProcessFunctionalGroup::FillEncryptionFlagForRpcs(
+    const policy_table::Rpc& rpcs,
     const EncryptionRequired encryption_required) {
   auto update_encryption_required = [](EncryptionRequired& current,
                                        const EncryptionRequired& incoming) {
+    auto str_from_opt = [](const EncryptionRequired& flag) -> std::string {
+      if (!flag.is_initialized()) {
+        return "MISSING";
+      }
+
+      return *flag ? "TRUE" : "FALSE";
+    };
+    LOG4CXX_DEBUG(logger_,
+                  "RPC Permissions: encryption required: current "
+                      << str_from_opt(current));
+
+    LOG4CXX_DEBUG(logger_,
+                  "RPC Permissions: encryption required: incoming "
+                      << str_from_opt(incoming));
+
     if (!incoming.is_initialized()) {
       return;
     }
@@ -873,10 +890,17 @@ void ProcessFunctionalGroup::FillEncryptionFlagForRpcs(
     current = incoming;
   };
 
-  for (auto& item : data_) {
-    update_encryption_required(item.second.require_encryption,
-                               encryption_required);
+  for (const auto& rpc : rpcs) {
+    auto& item = data_[rpc.first];
+    LOG4CXX_DEBUG(logger_, "Processing rpc: " << rpc.first);
+    update_encryption_required(item.require_encryption, encryption_required);
   }
+
+  //  for (auto& item : data_) {
+  //    LOG4CXX_DEBUG(logger_, "Processing rpc: " << item.first);
+  //    update_encryption_required(item.second.require_encryption,
+  //                               encryption_required);
+  //  }
 }
 
 GroupConsent ProcessFunctionalGroup::GetGroupState(
