@@ -26,8 +26,9 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
     return;
   }
 
-  auto lol = (*display_capabilities_)[strings::window_capabilities];
-  const auto& kek = incoming_display_capabilities[strings::window_capabilities];
+  auto lol = (*display_capabilities_)[0][strings::window_capabilities];
+  const auto& kek =
+      incoming_display_capabilities[0][strings::window_capabilities];
   *display_capabilities_ = incoming_display_capabilities;
 
   LOG4CXX_DEBUG(logger_, "BEFORE KEK");
@@ -52,7 +53,7 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
   MessageHelper::PrintSmartObject(*display_capabilities_);
   LOG4CXX_DEBUG(logger_, "PRINT LOL");
   MessageHelper::PrintSmartObject(lol);
-  (*display_capabilities_)[strings::window_capabilities] = lol;
+  (*display_capabilities_)[0][strings::window_capabilities] = lol;
 
   LOG4CXX_DEBUG(logger_, "AFTER KEK");
   MessageHelper::PrintSmartObject(*display_capabilities_);

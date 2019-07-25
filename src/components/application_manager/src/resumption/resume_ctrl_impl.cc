@@ -297,8 +297,13 @@ void ResumeCtrlImpl::RestoreWidgetsHMIState(
 
   requests_msg_.erase(request);
 
-  if (0 == --(resuming_widgets_counter_[application->app_id()])) {
+  auto& count = resuming_widgets_counter_[application->app_id()];
+  count--;
+  LOG4CXX_DEBUG(logger_, "Current count is: " << count);
+
+  if (0 == count) {
     ProcessSystemCapabilityUpdated(application);
+    resuming_widgets_counter_.erase(application->app_id());
   }
 }
 
@@ -327,7 +332,7 @@ void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
   MessageHelper::PrintSmartObject(message);
 
   application_manager_.GetRPCService().ManageMobileCommand(
-      display_capabilities, commands::Command::SOURCE_SDL);
+      notification, commands::Command::SOURCE_SDL);
 }
 
 bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {

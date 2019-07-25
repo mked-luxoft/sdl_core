@@ -109,38 +109,42 @@ void OnBCSystemCapabilityUpdatedNotificationFromHMI::Run() {
 
   const auto& system_capability =
       (*message_)[strings::msg_params][strings::system_capability];
-  MessageHelper::PrintSmartObject(system_capability);
+  //  MessageHelper::PrintSmartObject(system_capability);
 
-  LOG4CXX_DEBUG(logger_, "ASSIGNING DISP CAPS2: ");
-  auto system_caps2 =
-      (*message_)[strings::msg_params][strings::system_capability]
-                 [strings::display_capabilities];
+  //  LOG4CXX_DEBUG(logger_, "ASSIGNING DISP CAPS2: ");
+  //  auto system_caps2 =
+  //      (*message_)[strings::msg_params][strings::system_capability]
+  //                 [strings::display_capabilities];
 
-  LOG4CXX_DEBUG(logger_, "ASSIGNING DISPLAY NAME: ");
-  auto disp_name =
-      system_capability[strings::display_capabilities]["displayName"];
+  //  LOG4CXX_DEBUG(logger_, "ASSIGNING DISPLAY NAME: ");
+  //  auto disp_name =
+  //      system_capability[strings::display_capabilities]["displayName"];
 
-  LOG4CXX_DEBUG(logger_, "ASSIGNING windowTypeSupported: ");
-  auto win_type_supported =
-      system_capability[strings::display_capabilities]["windowTypeSupported"];
+  //  LOG4CXX_DEBUG(logger_, "ASSIGNING windowTypeSupported: ");
+  //  auto win_type_supported =
+  //      system_capability[strings::display_capabilities]["windowTypeSupported"];
 
-  LOG4CXX_DEBUG(logger_, "ASSIGNING WINDOW CAPS: ");
-  auto win_caps = system_capability[strings::display_capabilities]
-                                   [strings::window_capabilities];
+  //  LOG4CXX_DEBUG(logger_, "ASSIGNING WINDOW CAPS: ");
+  //  auto win_caps = system_capability[strings::display_capabilities]
+  //                                   [strings::window_capabilities];
 
-  LOG4CXX_DEBUG(logger_, "PRINTING WINDOW CAPS: ");
-  MessageHelper::PrintSmartObject(win_caps);
-  //  auto kek =
+  //  LOG4CXX_DEBUG(logger_, "PRINTING WINDOW CAPS: ");
+  //  MessageHelper::PrintSmartObject(win_caps);
+  //  //  auto kek =
   //      system_capability[strings::display_capabilities]["windowCapabilities"];
   if (mobile_apis::SystemCapabilityType::DISPLAY ==
           system_capability[strings::system_capability_type].asInt() &&
       system_capability.keyExists(strings::display_capabilities)) {
-    if (ProcessSystemDisplayCapabilitiesResult::FAIL ==
-        ProcessSystemDisplayCapabilities(
-            system_capability[strings::display_capabilities])) {
+    const auto result = ProcessSystemDisplayCapabilities(
+        system_capability[strings::display_capabilities]);
+    if (ProcessSystemDisplayCapabilitiesResult::FAIL == result) {
       LOG4CXX_ERROR(logger_,
                     "Failed to process display capabilities. Notification will "
                     "be ignored");
+      return;
+    } else if (ProcessSystemDisplayCapabilitiesResult::CAPABILITIES_CACHED ==
+               result) {
+      LOG4CXX_TRACE(logger_, "Capabilities are being cached for resuming app");
       return;
     }
   }

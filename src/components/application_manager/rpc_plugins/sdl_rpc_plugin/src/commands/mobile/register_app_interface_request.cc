@@ -790,6 +790,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   bool resumption =
       (*message_)[strings::msg_params].keyExists(strings::hash_id);
 
+  LOG4CXX_DEBUG(logger_, "APP NEEDS TO RESUME: " << resumption);
   bool need_restore_vr = resumption;
 
   std::string hash_id;
@@ -823,6 +824,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     resumption = resumer.IsApplicationSaved(application->policy_app_id(),
                                             application->mac_address());
   }
+
+  LOG4CXX_DEBUG(logger_, "APP NEEDS TO RESUME2: " << resumption);
 
   AppHmiTypes hmi_types;
   if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
@@ -860,11 +863,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
   GetPolicyHandler().OnAppRegisteredOnMobile(application->policy_app_id());
-
-  if (result_code != mobile_apis::Result::RESUME_FAILED) {
-    resumer.StartResumption(application, hash_id);
-  } else {
-    resumer.StartResumptionOnlyHMILevel(application);
+  if (resumption) {
+    if (result_code != mobile_apis::Result::RESUME_FAILED) {
+      resumer.StartResumption(application, hash_id);
+    } else {
+      resumer.StartResumptionOnlyHMILevel(application);
+    }
   }
 
   // By default app subscribed to CUSTOM_BUTTON
