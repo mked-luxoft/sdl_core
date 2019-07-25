@@ -365,6 +365,8 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
+  application->set_is_resuming(false);
+
   // Version negotiation
   utils::SemanticVersion module_version(
       major_version, minor_version, patch_version);
@@ -807,6 +809,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       need_restore_vr = false;
     } else {
       add_info = "Resume succeeded.";
+      application->set_is_resuming(false);
     }
   }
   if ((mobile_apis::Result::SUCCESS == result_code) &&

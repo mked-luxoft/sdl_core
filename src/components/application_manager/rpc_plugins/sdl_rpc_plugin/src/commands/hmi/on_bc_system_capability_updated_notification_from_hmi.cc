@@ -87,7 +87,9 @@ OnBCSystemCapabilityUpdatedNotificationFromHMI::
   (*message_)[strings::params][strings::connection_key] =
       (*message_)[strings::msg_params][strings::app_id];
   (*message_)[strings::msg_params].erase(strings::app_id);
-
+  LOG4CXX_DEBUG(logger_,
+                "App with app id: " << app->app_id() << " is resuming: "
+                                    << std::boolalpha << app->is_resuming());
   if (app->is_resuming()) {
     LOG4CXX_DEBUG(logger_, "Application is resuming");
     app->display_capabilities_builder().UpdateDisplayCapabilities(
@@ -107,6 +109,29 @@ void OnBCSystemCapabilityUpdatedNotificationFromHMI::Run() {
 
   const auto& system_capability =
       (*message_)[strings::msg_params][strings::system_capability];
+  MessageHelper::PrintSmartObject(system_capability);
+
+  LOG4CXX_DEBUG(logger_, "ASSIGNING DISP CAPS2: ");
+  auto system_caps2 =
+      (*message_)[strings::msg_params][strings::system_capability]
+                 [strings::display_capabilities];
+
+  LOG4CXX_DEBUG(logger_, "ASSIGNING DISPLAY NAME: ");
+  auto disp_name =
+      system_capability[strings::display_capabilities]["displayName"];
+
+  LOG4CXX_DEBUG(logger_, "ASSIGNING windowTypeSupported: ");
+  auto win_type_supported =
+      system_capability[strings::display_capabilities]["windowTypeSupported"];
+
+  LOG4CXX_DEBUG(logger_, "ASSIGNING WINDOW CAPS: ");
+  auto win_caps = system_capability[strings::display_capabilities]
+                                   [strings::window_capabilities];
+
+  LOG4CXX_DEBUG(logger_, "PRINTING WINDOW CAPS: ");
+  MessageHelper::PrintSmartObject(win_caps);
+  //  auto kek =
+  //      system_capability[strings::display_capabilities]["windowCapabilities"];
   if (mobile_apis::SystemCapabilityType::DISPLAY ==
           system_capability[strings::system_capability_type].asInt() &&
       system_capability.keyExists(strings::display_capabilities)) {

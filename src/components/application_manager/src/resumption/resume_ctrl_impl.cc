@@ -314,7 +314,7 @@ void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
   message[strings::params][strings::message_type] = MessageType::kNotification;
   smart_objects::SmartObject system_capability(smart_objects::SmartType_Map);
   system_capability[strings::system_capability_type] =
-      static_cast<int32_t>(mobile_apis::SystemCapabilityType::DISPLAYS);
+      static_cast<int32_t>(mobile_apis::SystemCapabilityType::DISPLAY);
   system_capability[strings::display_capabilities] = *display_capabilities;
   message[strings::msg_params][strings::system_capability] = system_capability;
 
@@ -403,6 +403,10 @@ bool ResumeCtrlImpl::SetAppHMIState(
     return false;
   }
   application->set_is_resuming(true);
+  LOG4CXX_DEBUG(logger_,
+                "LOLKEK WITH APP ID: " << application->app_id()
+                                       << " IS RESUMING: " << std::boolalpha
+                                       << application->is_resuming());
   application_manager_.state_controller().SetRegularState(
       application, mobile_apis::PredefinedWindows::DEFAULT_WINDOW, hmi_level);
   LOG4CXX_INFO(logger_,
