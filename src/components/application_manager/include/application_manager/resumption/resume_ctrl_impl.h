@@ -602,6 +602,9 @@ class ResumeCtrlImpl : public ResumeCtrl,
   mobile_apis::HMILevel::eType GetHmiLevelOnLowBandwidthTransport(
       app_mngr::ApplicationConstSharedPtr application) const;
 
+  void ProcessSystemCapabilityUpdated(
+      const application_manager::ApplicationSharedPtr app);
+
   /**
    *@brief Mapping applications to time_stamps
    *       wait for timer to resume HMI Level
@@ -620,6 +623,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
   time_t wake_up_time_;
   std::shared_ptr<ResumptionData> resumption_storage_;
   application_manager::ApplicationManager& application_manager_;
+  typedef std::map<int32_t, int32_t> ResumingWidgetsCounter;
+  ResumingWidgetsCounter resuming_widgets_counter_;
   /**
    *@brief Mapping correlation id to request
    *wait for on event response from HMI to resume HMI Level

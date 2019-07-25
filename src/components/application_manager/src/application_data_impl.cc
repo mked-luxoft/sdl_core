@@ -679,6 +679,12 @@ void DynamicApplicationDataImpl::AddWindowInfo(
   }
 }
 
+DisplayCapabilitiesBuilder&
+DynamicApplicationDataImpl::display_capabilities_builder() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return display_capabilities_builder_;
+}
+
 void DynamicApplicationDataImpl::RemoveWindowInfo(const WindowID window_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   window_params_map_.erase(window_id);

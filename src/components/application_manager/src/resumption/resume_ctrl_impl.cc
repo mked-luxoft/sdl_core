@@ -30,6 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/resumption/resume_ctrl_impl.h"
+#include "application_manager/display_capabilities_builder.h"
 
 #include <algorithm>
 #include <fstream>
@@ -295,6 +296,38 @@ void ResumeCtrlImpl::RestoreWidgetsHMIState(
       application, window_id, window_type, mobile_apis::HMILevel::HMI_NONE);
 
   requests_msg_.erase(request);
+
+  if (0 == --(resuming_widgets_counter_[application->app_id()])) {
+    ProcessSystemCapabilityUpdated(application);
+  }
+}
+
+void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
+    const ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const auto display_capabilities =
+      app->display_capabilities_builder().display_capabilities();
+  DCHECK(display_capabilities);
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+  smart_objects::SmartObject system_capability(smart_objects::SmartType_Map);
+  system_capability[strings::system_capability_type] =
+      static_cast<int32_t>(mobile_apis::SystemCapabilityType::DISPLAYS);
+  system_capability[strings::display_capabilities] = *display_capabilities;
+  message[strings::msg_params][strings::system_capability] = system_capability;
+
+  // Construct and send mobile notification
+  message[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::OnSystemCapabilityUpdatedID;
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>(message);
+
+  MessageHelper::PrintSmartObject(message);
+
+  application_manager_.GetRPCService().ManageMobileCommand(
+      display_capabilities, commands::Command::SOURCE_SDL);
 }
 
 bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
@@ -393,6 +426,7 @@ void ResumeCtrlImpl::RestoreAppWidgets(
       application, application_manager_, windows_info);
 
   requests_msg_.clear();
+  resuming_widgets_counter_[application->app_id()] = request_list.size();
   for (auto& request : request_list) {
     requests_msg_.insert(std::make_pair(
         (*request)[strings::params][strings::correlation_id].asInt(), request));
