@@ -1,19 +1,52 @@
+/*
+ * Copyright (c) 2019, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "application_manager/display_capabilities_builder.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
 namespace application_manager {
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "DisplayCapabilitiesBuilder")
+
 DisplayCapabilitiesBuilder::DisplayCapabilitiesBuilder(Application& application)
     : owner_(application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  //  display_capabilities_ = std::make_shared<smart_objects::SmartObject>(
-  //      smart_objects::SmartType_Map);
 }
 
 void DisplayCapabilitiesBuilder::InitBuilder(
     DisplayCapabilitiesBuilder::ResumeCallback resume_callback,
     const smart_objects::SmartObject& windows_info) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(display_capabilities_lock_);
   resume_callback_ = resume_callback;
   for (size_t i = 0; i < windows_info.length(); ++i) {
     auto window_id = windows_info[i][strings::window_id].asInt();
@@ -26,120 +59,47 @@ void DisplayCapabilitiesBuilder::InitBuilder(
 void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
     const smart_objects::SmartObject& incoming_display_capabilities) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace smart_objects;
+  sync_primitives::AutoLock lock(display_capabilities_lock_);
 
   if (!display_capabilities_) {
-    display_capabilities_ = std::make_shared<smart_objects::SmartObject>(
-        smart_objects::SmartType_Map);
-    LOG4CXX_DEBUG(logger_,
-                  "Current display capability is empty, taking incoming");
-    for (size_t i = 0;
-         i < incoming_display_capabilities[0][strings::window_capabilities]
-                 .length();
-         ++i) {
-      auto window_id =
-          incoming_display_capabilities[0][strings::window_capabilities][i]
-                                       [strings::window_id]
-                                           .asInt();
-      if (window_ids_to_resume_.end() !=
-          window_ids_to_resume_.find(window_id)) {
-        LOG4CXX_DEBUG(logger_, "STOP WAITING FOR: " << window_id);
-        window_ids_to_resume_.erase(window_id);
-      }
-    }
-    *display_capabilities_ = incoming_display_capabilities;
-    //    MessageHelper::PrintSmartObject(*display_capabilities_);
-    if (window_ids_to_resume_.empty()) {
-      LOG4CXX_DEBUG(logger_, "TRIGERRING NOTIFICATION");
-      resume_callback_(owner_, *display_capabilities_);
-    }
-    return;
+    display_capabilities_ = std::make_shared<SmartObject>(SmartType_Array);
   }
 
-  auto lol = (*display_capabilities_)[0][strings::window_capabilities];
-  const auto& kek =
+  // As per v6.0, only single display is supported
+  auto cur_window_caps =
+      (*display_capabilities_)[0][strings::window_capabilities];
+
+  const auto& inc_window_caps =
       incoming_display_capabilities[0][strings::window_capabilities];
-  *display_capabilities_ = incoming_display_capabilities;
 
-  //  LOG4CXX_DEBUG(logger_, "BEFORE KEK");
-  //  MessageHelper::PrintSmartObject(*display_capabilities_);
-
-  auto is_waiting_for_window_id = [&lol, this](const WindowID window_id) {
-    for (size_t i = 0; i < lol.length(); ++i) {
-      if (window_ids_to_resume_.end() !=
-          window_ids_to_resume_.find(window_id)) {
-        return true;
-      }
-    }
-    return false;
-  };
-
-  for (size_t i = 0; i < kek.length(); ++i) {
-    const auto& window_id = kek[i][strings::window_id].asInt();
-    if (is_waiting_for_window_id(window_id)) {
-      lol[lol.length()] = kek[i];
-      LOG4CXX_DEBUG(logger_, "STOP WAITING FOR: " << window_id);
+  for (size_t i = 0; i < inc_window_caps.length(); ++i) {
+    const WindowID window_id = inc_window_caps[i][strings::window_id].asInt();
+    if (window_ids_to_resume_.end() != window_ids_to_resume_.find(window_id)) {
+      cur_window_caps[cur_window_caps.length()] = inc_window_caps[i];
+      LOG4CXX_DEBUG(logger_, "Stop waiting for: " << window_id);
       window_ids_to_resume_.erase(window_id);
     }
   }
 
-  (*display_capabilities_)[0][strings::window_capabilities] = lol;
+  *display_capabilities_ = incoming_display_capabilities;
+  (*display_capabilities_)[0][strings::window_capabilities] = cur_window_caps;
 
   if (window_ids_to_resume_.empty()) {
-    LOG4CXX_DEBUG(logger_, "TRIGERRING NOTIFICATION");
+    LOG4CXX_TRACE(logger_, "Invoking resume callback");
     resume_callback_(owner_, *display_capabilities_);
   }
-
-  //  LOG4CXX_DEBUG(logger_, "AFTER KEK, BUT BEFORE ASSIGNMENT");
-  //  MessageHelper::PrintSmartObject(*display_capabilities_);
-  //  LOG4CXX_DEBUG(logger_, "PRINT LOL");
-  //  MessageHelper::PrintSmartObject(lol);
-
-  //  LOG4CXX_DEBUG(logger_, "AFTER KEK");
-  //  MessageHelper::PrintSmartObject(*display_capabilities_);
-
-  //  MessageHelper::PrintSmartObject(incoming_display_capabilities);
-  //  MessageHelper::PrintSmartObject(*display_capabilities_);
-  //  smart_objects::SmartObject current_window_capabilities =
-  //      (*display_capabilities_)["windowCapabilities"];
-  //  LOG4CXX_DEBUG(logger_, "LOLKEK1");
-  //  LOG4CXX_DEBUG(
-  //      logger_,
-  //      "incoming_widow_capabilities type: "
-  //          << incoming_display_capabilities["windowCapabilities"].getType());
-  //  auto& incoming_window_capabilities =
-  //      incoming_display_capabilities["windowCapabilities"];
-  //  LOG4CXX_DEBUG(logger_, "LOLKEK2");
-  //  for (size_t i; i < incoming_window_capabilities.length(); ++i) {
-  //    LOG4CXX_DEBUG(logger_, "LOLKEK!!!");
-  //    LOG4CXX_DEBUG(logger_,
-  //                  "WINDOW CAP TYPE: " <<
-  //                  current_window_capabilities.getType());
-  //    current_window_capabilities[current_window_capabilities.length()] =
-  //        incoming_window_capabilities[i];
-  //}
-
-  //  (*display_capabilities_) = incoming_display_capabilities;
-  //  LOG4CXX_DEBUG(logger_, "LOLKEK3");
-  //  (*display_capabilities_)["windowCapabilities"] =
-  //  current_window_capabilities; LOG4CXX_DEBUG(logger_, "LOLKEK4");
-
-  //  MessageHelper::PrintSmartObject(*display_capabilities_);
 }  // namespace application_manager
 
 const smart_objects::SmartObjectSPtr
 DisplayCapabilitiesBuilder::display_capabilities() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return display_capabilities_;
+  return std::make_shared<smart_objects::SmartObject>(*display_capabilities_);
 }
 
-void DisplayCapabilitiesBuilder::ResetSDisplayCapabilities() {
+void DisplayCapabilitiesBuilder::ResetDisplayCapabilities() {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(display_capabilities_lock_);
   display_capabilities_.reset();
-}
-
-void DisplayCapabilitiesBuilder::AddWindowIDToResume(const WindowID window_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  window_ids_to_resume_.insert(window_id);
 }
 }  // namespace application_manager

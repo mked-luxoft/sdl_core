@@ -301,27 +301,9 @@ void ResumeCtrlImpl::RestoreWidgetsHMIState(
 void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
     Application& app, const smart_objects::SmartObject& display_capabilities) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject message(smart_objects::SmartType_Map);
 
-  message[strings::params][strings::message_type] = MessageType::kNotification;
-  message[strings::params][strings::connection_key] = app.app_id();
-  message[strings::params][strings::protocol_type] =
-      commands::CommandImpl::mobile_protocol_type_;
-  message[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-  smart_objects::SmartObject system_capability(smart_objects::SmartType_Map);
-  system_capability[strings::system_capability_type] =
-      static_cast<int32_t>(mobile_apis::SystemCapabilityType::DISPLAY);
-  system_capability[strings::display_capabilities] = display_capabilities;
-  message[strings::msg_params][strings::system_capability] = system_capability;
-
-  // Construct and send mobile notification
-  message[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::OnSystemCapabilityUpdatedID;
-  smart_objects::SmartObjectSPtr notification =
-      std::make_shared<smart_objects::SmartObject>(message);
-
-  MessageHelper::PrintSmartObject(*notification);
+  auto notification = MessageHelper::CreateDisplayCapabilityUpdateToMobile(
+      display_capabilities, app);
 
   application_manager_.GetRPCService().ManageMobileCommand(
       notification, commands::Command::SOURCE_SDL);

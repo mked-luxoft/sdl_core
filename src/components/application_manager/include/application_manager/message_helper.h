@@ -930,6 +930,9 @@ class MessageHelper {
   static void BroadcastCapabilityUpdate(smart_objects::SmartObject& msg_params,
                                         ApplicationManager& app_mngr);
 
+  static smart_objects::SmartObjectSPtr CreateDisplayCapabilityUpdateToMobile(
+      const smart_objects::SmartObject& system_capabilities, Application& app);
+
  private:
   /**
    * @brief Allows to fill SO according to the  current permissions.
