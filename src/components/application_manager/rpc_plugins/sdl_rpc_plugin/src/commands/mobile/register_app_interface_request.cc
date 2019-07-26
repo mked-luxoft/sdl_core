@@ -821,6 +821,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
                                             application->mac_address());
   }
 
+  if (resumption) {
+    resumer.StartWaitingForDisplayCapabilitiesUpdate(application);
+  }
+
   AppHmiTypes hmi_types;
   if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
     smart_objects::SmartArray* hmi_types_ptr =
@@ -857,11 +861,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
   GetPolicyHandler().OnAppRegisteredOnMobile(application->policy_app_id());
-
-  if (result_code != mobile_apis::Result::RESUME_FAILED) {
-    resumer.StartResumption(application, hash_id);
-  } else {
-    resumer.StartResumptionOnlyHMILevel(application);
+  if (resumption) {
+    if (result_code != mobile_apis::Result::RESUME_FAILED) {
+      resumer.StartResumption(application, hash_id);
+    } else {
+      resumer.StartResumptionOnlyHMILevel(application);
+    }
   }
 
   // By default app subscribed to CUSTOM_BUTTON
