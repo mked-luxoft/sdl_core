@@ -196,7 +196,8 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , window_params_map_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , is_perform_interaction_active_(false)
     , is_reset_global_properties_active_(false)
-    , perform_interaction_mode_(-1) {}
+    , perform_interaction_mode_(-1)
+    , display_capabilities_builder_(*this) {}
 
 DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
   if (help_prompt_) {

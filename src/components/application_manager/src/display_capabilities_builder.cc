@@ -3,26 +3,49 @@
 #include "application_manager/smart_object_keys.h"
 namespace application_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "DisplayCapabilitiesBuilder")
-DisplayCapabilitiesBuilder::DisplayCapabilitiesBuilder() {
+DisplayCapabilitiesBuilder::DisplayCapabilitiesBuilder(Application& application)
+    : owner_(application) {
   LOG4CXX_AUTO_TRACE(logger_);
   display_capabilities_ = std::make_shared<smart_objects::SmartObject>(
       smart_objects::SmartType_Map);
 }
 
-DisplayCapabilitiesBuilder::DisplayCapabilitiesBuilder(
-    const smart_objects::SmartObject& display_capabilities) {
+void DisplayCapabilitiesBuilder::InitBuilder(
+    DisplayCapabilitiesBuilder::ResumeCallback resume_callback,
+    const smart_objects::SmartObject& windows_info) {
   LOG4CXX_AUTO_TRACE(logger_);
-  display_capabilities_ =
-      std::make_shared<smart_objects::SmartObject>(display_capabilities);
+  resume_callback_ = resume_callback;
+  for (size_t i = 0; i < windows_info.length(); ++i) {
+    auto window_id = windows_info[i][strings::window_id].asInt();
+    LOG4CXX_DEBUG(logger_,
+                  "Inserting " << window_id << " to waiting container");
+    window_ids_to_resume_.insert(window_id);
+  }
 }
+
 void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
     const smart_objects::SmartObject& incoming_display_capabilities) {
   LOG4CXX_AUTO_TRACE(logger_);
+
   if (display_capabilities_->empty()) {
     LOG4CXX_DEBUG(logger_,
                   "Current display capability is empty, taking incoming");
+    for (size_t i = 0;
+         i < incoming_display_capabilities[0][strings::window_capabilities]
+                 .length();
+         ++i) {
+      auto window_id =
+          incoming_display_capabilities[0][strings::window_capabilities][i]
+                                       [strings::window_id]
+                                           .asInt();
+      if (window_ids_to_resume_.end() !=
+          window_ids_to_resume_.find(window_id)) {
+        LOG4CXX_DEBUG(logger_, "STOP WAITING FOR: " << window_id);
+        window_ids_to_resume_.erase(window_id);
+      }
+    }
     *display_capabilities_ = incoming_display_capabilities;
-    MessageHelper::PrintSmartObject(*display_capabilities_);
+    //    MessageHelper::PrintSmartObject(*display_capabilities_);
     return;
   }
 
@@ -31,12 +54,13 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
       incoming_display_capabilities[0][strings::window_capabilities];
   *display_capabilities_ = incoming_display_capabilities;
 
-  LOG4CXX_DEBUG(logger_, "BEFORE KEK");
-  MessageHelper::PrintSmartObject(*display_capabilities_);
+  //  LOG4CXX_DEBUG(logger_, "BEFORE KEK");
+  //  MessageHelper::PrintSmartObject(*display_capabilities_);
 
-  auto find_window_capability = [&lol](const WindowID window_id) {
+  auto is_waiting_for_window_id = [&lol, this](const WindowID window_id) {
     for (size_t i = 0; i < lol.length(); ++i) {
-      if (lol[i][strings::window_id].asInt() == window_id) {
+      if (window_ids_to_resume_.end() !=
+          window_ids_to_resume_.find(window_id)) {
         return true;
       }
     }
@@ -44,19 +68,28 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
   };
 
   for (size_t i = 0; i < kek.length(); ++i) {
-    if (!find_window_capability(kek[i][strings::window_id].asInt())) {
+    const auto& window_id = kek[i][strings::window_id].asInt();
+    if (is_waiting_for_window_id(window_id)) {
       lol[lol.length()] = kek[i];
+      LOG4CXX_DEBUG(logger_, "STOP WAITING FOR: " << window_id);
+      window_ids_to_resume_.erase(window_id);
     }
   }
 
-  LOG4CXX_DEBUG(logger_, "AFTER KEK, BUT BEFORE ASSIGNMENT");
-  MessageHelper::PrintSmartObject(*display_capabilities_);
-  LOG4CXX_DEBUG(logger_, "PRINT LOL");
-  MessageHelper::PrintSmartObject(lol);
   (*display_capabilities_)[0][strings::window_capabilities] = lol;
 
-  LOG4CXX_DEBUG(logger_, "AFTER KEK");
-  MessageHelper::PrintSmartObject(*display_capabilities_);
+  if (window_ids_to_resume_.empty()) {
+    LOG4CXX_DEBUG(logger_, "TRIGERRING NOTIFICATION");
+    resume_callback_(owner_, *display_capabilities_);
+  }
+
+  //  LOG4CXX_DEBUG(logger_, "AFTER KEK, BUT BEFORE ASSIGNMENT");
+  //  MessageHelper::PrintSmartObject(*display_capabilities_);
+  //  LOG4CXX_DEBUG(logger_, "PRINT LOL");
+  //  MessageHelper::PrintSmartObject(lol);
+
+  //  LOG4CXX_DEBUG(logger_, "AFTER KEK");
+  //  MessageHelper::PrintSmartObject(*display_capabilities_);
 
   //  MessageHelper::PrintSmartObject(incoming_display_capabilities);
   //  MessageHelper::PrintSmartObject(*display_capabilities_);
@@ -93,10 +126,16 @@ DisplayCapabilitiesBuilder::display_capabilities() const {
   return display_capabilities_;
 }
 
-void DisplayCapabilitiesBuilder::Clear() {
+void DisplayCapabilitiesBuilder::ResetSDisplayCapabilities() {
   LOG4CXX_AUTO_TRACE(logger_);
   display_capabilities_.reset();
   display_capabilities_ = std::make_shared<smart_objects::SmartObject>(
       smart_objects::SmartType_Map);
+}
+
+void DisplayCapabilitiesBuilder::AddWindowIDToResume(const WindowID window_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  window_ids_to_resume_.insert(window_id);
 }
 }  // namespace application_manager

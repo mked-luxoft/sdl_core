@@ -296,31 +296,24 @@ void ResumeCtrlImpl::RestoreWidgetsHMIState(
       application, window_id, window_type, mobile_apis::HMILevel::HMI_NONE);
 
   requests_msg_.erase(request);
-
-  auto& count = resuming_widgets_counter_[application->app_id()];
-  count--;
-  LOG4CXX_DEBUG(logger_, "Current count is: " << count);
-
-  if (0 == count) {
-    ProcessSystemCapabilityUpdated(application);
-    resuming_widgets_counter_.erase(application->app_id());
-  }
 }
 
 void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
-    const ApplicationSharedPtr app) {
+    const Application& app,
+    const smart_objects::SmartObject& display_capabilities) {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  const auto display_capabilities =
-      app->display_capabilities_builder().display_capabilities();
-  DCHECK(display_capabilities);
   smart_objects::SmartObject message(smart_objects::SmartType_Map);
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
+  message[strings::params][strings::connection_key] = app.app_id();
+  message[strings::params][strings::protocol_type] =
+      commands::CommandImpl::mobile_protocol_type_;
+  message[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
   smart_objects::SmartObject system_capability(smart_objects::SmartType_Map);
   system_capability[strings::system_capability_type] =
       static_cast<int32_t>(mobile_apis::SystemCapabilityType::DISPLAY);
-  system_capability[strings::display_capabilities] = *display_capabilities;
+  system_capability[strings::display_capabilities] = display_capabilities;
   message[strings::msg_params][strings::system_capability] = system_capability;
 
   // Construct and send mobile notification
@@ -329,7 +322,7 @@ void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
   smart_objects::SmartObjectSPtr notification =
       std::make_shared<smart_objects::SmartObject>(message);
 
-  MessageHelper::PrintSmartObject(message);
+  MessageHelper::PrintSmartObject(*notification);
 
   application_manager_.GetRPCService().ManageMobileCommand(
       notification, commands::Command::SOURCE_SDL);
@@ -431,6 +424,14 @@ void ResumeCtrlImpl::RestoreAppWidgets(
     return;
   }
   const auto& windows_info = saved_app[strings::windows_info];
+  auto resume_callback =
+      [this](Application& app,
+             const smart_objects::SmartObject& display_capabilities) -> void {
+    LOG4CXX_AUTO_TRACE(logger_);
+    ProcessSystemCapabilityUpdated(app, display_capabilities);
+  };
+  auto& builder = application->display_capabilities_builder();
+  builder.InitBuilder(resume_callback, windows_info);
   auto request_list = MessageHelper::CreateUICreateWindowRequestsToHMI(
       application, application_manager_, windows_info);
 
