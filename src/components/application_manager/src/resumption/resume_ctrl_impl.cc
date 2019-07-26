@@ -299,8 +299,7 @@ void ResumeCtrlImpl::RestoreWidgetsHMIState(
 }
 
 void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
-    const Application& app,
-    const smart_objects::SmartObject& display_capabilities) {
+    Application& app, const smart_objects::SmartObject& display_capabilities) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject message(smart_objects::SmartType_Map);
 
@@ -326,6 +325,7 @@ void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
 
   application_manager_.GetRPCService().ManageMobileCommand(
       notification, commands::Command::SOURCE_SDL);
+  app.set_is_resuming(false);
 }
 
 bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
@@ -744,6 +744,7 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(logger_, "app_id : " << application->app_id());
+  is_resumption_active_ = true;
 
   smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
   const std::string& device_mac = application->mac_address();
@@ -769,6 +770,7 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
   } else {
     LOG4CXX_WARN(logger_, "Application not saved");
   }
+  is_resumption_active_ = false;
   return result;
 }
 

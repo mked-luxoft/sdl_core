@@ -6,8 +6,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "DisplayCapabilitiesBuilder")
 DisplayCapabilitiesBuilder::DisplayCapabilitiesBuilder(Application& application)
     : owner_(application) {
   LOG4CXX_AUTO_TRACE(logger_);
-  display_capabilities_ = std::make_shared<smart_objects::SmartObject>(
-      smart_objects::SmartType_Map);
+  //  display_capabilities_ = std::make_shared<smart_objects::SmartObject>(
+  //      smart_objects::SmartType_Map);
 }
 
 void DisplayCapabilitiesBuilder::InitBuilder(
@@ -27,7 +27,9 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
     const smart_objects::SmartObject& incoming_display_capabilities) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (display_capabilities_->empty()) {
+  if (!display_capabilities_) {
+    display_capabilities_ = std::make_shared<smart_objects::SmartObject>(
+        smart_objects::SmartType_Map);
     LOG4CXX_DEBUG(logger_,
                   "Current display capability is empty, taking incoming");
     for (size_t i = 0;
@@ -46,6 +48,10 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
     }
     *display_capabilities_ = incoming_display_capabilities;
     //    MessageHelper::PrintSmartObject(*display_capabilities_);
+    if (window_ids_to_resume_.empty()) {
+      LOG4CXX_DEBUG(logger_, "TRIGERRING NOTIFICATION");
+      resume_callback_(owner_, *display_capabilities_);
+    }
     return;
   }
 
@@ -129,8 +135,6 @@ DisplayCapabilitiesBuilder::display_capabilities() const {
 void DisplayCapabilitiesBuilder::ResetSDisplayCapabilities() {
   LOG4CXX_AUTO_TRACE(logger_);
   display_capabilities_.reset();
-  display_capabilities_ = std::make_shared<smart_objects::SmartObject>(
-      smart_objects::SmartType_Map);
 }
 
 void DisplayCapabilitiesBuilder::AddWindowIDToResume(const WindowID window_id) {

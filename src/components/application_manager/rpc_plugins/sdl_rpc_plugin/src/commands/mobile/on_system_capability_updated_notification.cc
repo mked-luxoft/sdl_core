@@ -208,14 +208,14 @@ void OnSystemCapabilityUpdatedNotification::Run() {
     if (mobile_apis::SystemCapabilityType::DISPLAY == system_capability_type) {
       LOG4CXX_DEBUG(logger_, "Using common display capabilities");
       auto capabilities = hmi_capabilities_.system_display_capabilities();
-      if (app->is_resuming()) {
+      if (app->display_capabilities_builder().display_capabilities()) {
         LOG4CXX_DEBUG(logger_,
                       "Application "
                           << app->app_id()
                           << " is resuming. Providing cached capabilities");
-        auto& display_caps =
-            *(app->display_capabilities_builder().display_capabilities());
-        capabilities = new smart_objects::SmartObject(display_caps);
+        auto display_caps =
+            app->display_capabilities_builder().display_capabilities();
+        capabilities = display_caps.get();
       } else if (app->display_capabilities()) {
         LOG4CXX_DEBUG(logger_,
                       "Application " << app->app_id()

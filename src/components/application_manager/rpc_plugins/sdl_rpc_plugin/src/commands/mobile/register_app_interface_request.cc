@@ -810,7 +810,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       need_restore_vr = false;
     } else {
       add_info = "Resume succeeded.";
-      application->set_is_resuming(false);
     }
   }
   if ((mobile_apis::Result::SUCCESS == result_code) &&
@@ -869,6 +868,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     } else {
       resumer.StartResumptionOnlyHMILevel(application);
     }
+    LOG4CXX_DEBUG(logger_,
+                  "APP " << application->app_id() << " IS NO LONGER RESUMING!");
+    application->set_is_resuming(false);
   }
 
   // By default app subscribed to CUSTOM_BUTTON

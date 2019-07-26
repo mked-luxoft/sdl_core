@@ -603,7 +603,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
       app_mngr::ApplicationConstSharedPtr application) const;
 
   void ProcessSystemCapabilityUpdated(
-      const app_mngr::Application& app,
+      app_mngr::Application& app,
       const smart_objects::SmartObject& display_capabilities);
 
   /**

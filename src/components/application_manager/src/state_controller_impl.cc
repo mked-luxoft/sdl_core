@@ -448,6 +448,10 @@ HmiStatePtr StateControllerImpl::ResolveHmiState(ApplicationSharedPtr app,
   available_state->set_video_streaming_state(state->video_streaming_state());
   available_state->set_system_context(state->system_context());
 
+  LOG4CXX_DEBUG(logger_,
+                "APP " << app->app_id() << " IS RESUMING IN RESOLVE HMI STATE: "
+                       << std::boolalpha << app->is_resuming());
+
   if (app->is_resuming()) {
     HMILevel::eType available_level =
         GetAvailableHmiLevel(app, state->hmi_level());
