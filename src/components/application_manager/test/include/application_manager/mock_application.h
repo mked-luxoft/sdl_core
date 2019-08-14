@@ -249,6 +249,9 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(night_color_scheme, smart_objects::SmartObject());
   MOCK_CONST_METHOD0(display_layout, std::string());
   MOCK_CONST_METHOD0(display_capabilities, smart_objects::SmartObjectSPtr());
+  MOCK_CONST_METHOD1(display_capabilities,
+                     smart_objects::SmartObjectSPtr(
+                         const application_manager::WindowID window_id));
 
   MOCK_METHOD2(set_window_layout,
                void(const application_manager::WindowID window_id,

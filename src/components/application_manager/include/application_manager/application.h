@@ -207,6 +207,9 @@ class DynamicApplicationData {
    */
   virtual smart_objects::SmartObjectSPtr display_capabilities() const = 0;
 
+  virtual smart_objects::SmartObjectSPtr display_capabilities(
+      const WindowID window_id) const = 0;
+
   virtual void load_global_properties(const smart_objects::SmartObject& so) = 0;
   virtual void set_help_prompt(
       const smart_objects::SmartObject& help_prompt) = 0;

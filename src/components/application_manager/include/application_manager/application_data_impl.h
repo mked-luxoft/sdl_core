@@ -107,6 +107,8 @@ class DynamicApplicationDataImpl : public virtual Application {
   smart_objects::SmartObject night_color_scheme() const OVERRIDE;
   std::string display_layout() const OVERRIDE;
   smart_objects::SmartObjectSPtr display_capabilities() const OVERRIDE;
+  smart_objects::SmartObjectSPtr display_capabilities(
+      const WindowID window_id) const OVERRIDE;
 
   void set_window_layout(const WindowID window_id,
                          const std::string& layout) OVERRIDE;

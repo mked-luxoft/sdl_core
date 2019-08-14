@@ -360,6 +360,46 @@ DynamicApplicationDataImpl::display_capabilities() const {
   return display_capabilities_;
 }
 
+smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
+    const WindowID window_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  MessageHelper::PrintSmartObject(*display_capabilities_);
+
+  auto display_caps = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Array);
+  smart_objects::SmartObject window_cap(smart_objects::SmartType_Null);
+  const auto window_caps =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+  if (!window_caps) {
+    LOG4CXX_WARN(logger_, "LOLKEK, nullptr");
+    return display_capabilities_;
+  }
+  auto find_res =
+      std::find_if(window_caps->begin(),
+                   window_caps->end(),
+                   [&window_id](const smart_objects::SmartObject& element) {
+                     if (window_id == element[strings::window_id].asInt()) {
+                       return true;
+                     }
+
+                     return false;
+                   });
+
+  DCHECK(find_res != window_caps->end());
+  const auto disp_caps_keys = (*display_capabilities_)[0].enumerate();
+  for (const auto& key : disp_caps_keys) {
+    if (strings::window_capabilities == key) {
+      continue;
+    }
+    (*display_caps)[0][key] = (*display_capabilities_)[0][key];
+  }
+
+  (*display_caps)[0][strings::window_capabilities][0] = *find_res;
+
+  return display_caps;
+}
+
 void DynamicApplicationDataImpl::load_global_properties(
     const smart_objects::SmartObject& properties_so) {
   SetGlobalProperties(properties_so.getElement(strings::vr_help_title),

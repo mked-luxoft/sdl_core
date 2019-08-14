@@ -33,6 +33,7 @@
 #include "mobile/get_system_capability_request.h"
 
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/mock_hmi_capabilities.h"
 #include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
@@ -85,6 +86,9 @@ TEST_F(
   ON_CALL(*mock_app_, display_capabilities())
       .WillByDefault(Return(system_display_capabilities));
 
+  ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
+      .WillByDefault(Return(system_display_capabilities));
+
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
@@ -101,6 +105,9 @@ TEST_F(
       mobile_apis::SystemCapabilityType::DISPLAYS;
 
   EXPECT_CALL(*mock_app_, display_capabilities()).WillOnce(Return(nullptr));
+
+  ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
+      .WillByDefault(Return(nullptr));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
