@@ -164,6 +164,9 @@ void GetSystemCapabilityRequest::Run() {
         return;
       }
 
+      LOG4CXX_DEBUG(logger_, "LOLKEK6");
+      MessageHelper::PrintSmartObject(*capabilities);
+
       response_params[strings::system_capability]
                      [strings::display_capabilities] = *capabilities;
       break;

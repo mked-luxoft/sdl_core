@@ -144,6 +144,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   void set_display_layout(const std::string& layout);
   void set_display_capabilities(
       const smart_objects::SmartObject& display_capabilities) OVERRIDE;
+  void remove_window_capability(const WindowID window_id) OVERRIDE;
   /*
    * @brief Adds a command to the in application menu
    */

@@ -251,6 +251,12 @@ class DynamicApplicationData {
       const smart_objects::SmartObject& display_capabilities) = 0;
 
   /**
+   * @brief deletes stored window capability for given window id
+   * @param window id of capability to remove
+   */
+  virtual void remove_window_capability(const WindowID window_id) = 0;
+
+  /**
    * @brief Sets layout for application's specific window
    * @param window_id window id for which layout should be set
    * @param layout - layout to be set

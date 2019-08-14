@@ -33,6 +33,7 @@
 #include <algorithm>
 
 #include "application_manager/application_data_impl.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
 #include "utils/logger.h"
 
@@ -498,8 +499,89 @@ void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
 
 void DynamicApplicationDataImpl::set_display_capabilities(
     const smart_objects::SmartObject& display_capabilities) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto& incoming_window_capabilities =
+      display_capabilities[0][strings::window_capabilities];
+
+  LOG4CXX_DEBUG(logger_, "LOLKEK1");
+  //  MessageHelper::PrintSmartObject(*display_capabilities_);
+  smart_objects::SmartObject current_window_capabilities;
+  if (display_capabilities_) {
+    current_window_capabilities =
+        (*display_capabilities_)[0][strings::window_capabilities];
+  }
+
+  LOG4CXX_DEBUG(logger_, "LOLKEK2");
   display_capabilities_.reset(
       new smart_objects::SmartObject(display_capabilities));
+
+  LOG4CXX_DEBUG(logger_, "LOLKEK3");
+
+  auto has_window_id =
+      [&current_window_capabilities](const WindowID window_id) {
+        for (uint32_t i = 0; i < current_window_capabilities.length(); ++i) {
+          const auto& window_capability = current_window_capabilities[i];
+          if ((!window_capability.keyExists(strings::window_id)) &&
+              0 == window_id) {
+            return true;
+          }
+          const auto current_window_id =
+              window_capability[strings::window_id].asInt();
+          if (window_id == current_window_id) {
+            return true;
+          }
+        }
+        return false;
+      };
+  for (uint32_t i = 0; i < incoming_window_capabilities.length(); ++i) {
+    const auto window_id =
+        incoming_window_capabilities[i][strings::window_id].asInt();
+    if (!has_window_id(window_id)) {
+      current_window_capabilities[current_window_capabilities.length()] =
+          incoming_window_capabilities[i];
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_, "LOLKEK4");
+
+  (*display_capabilities_)[0][strings::window_capabilities] =
+      current_window_capabilities;
+
+  MessageHelper::PrintSmartObject(*display_capabilities_);
+
+  LOG4CXX_DEBUG(logger_, "LOLKEK5");
+}
+
+void DynamicApplicationDataImpl::remove_window_capability(
+    const WindowID window_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  MessageHelper::PrintSmartObject(*display_capabilities_);
+
+  LOG4CXX_DEBUG(logger_,
+                "disp caps type is: " << display_capabilities_->getType());
+
+  //  auto& window_cap = ;
+  //  MessageHelper::PrintSmartObject(window_cap);
+
+  auto window_capabilities =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+  DCHECK_OR_RETURN_VOID(window_capabilities);
+
+  for (auto it = window_capabilities->begin(); it != window_capabilities->end();
+       ++it) {
+    const auto cur_window_id = (*it).keyExists(strings::window_id)
+                                   ? (*it)[strings::window_id].asInt()
+                                   : 0;
+    if (window_id == cur_window_id) {
+      window_capabilities->erase(it);
+      return;
+    }
+  }
+
+  LOG4CXX_WARN(
+      logger_,
+      "No window id " << window_id << " found in display capabilities");
 }
 
 void DynamicApplicationDataImpl::set_window_layout(const WindowID window_id,

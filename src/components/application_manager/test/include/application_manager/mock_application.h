@@ -418,6 +418,8 @@ class MockApplication : public ::application_manager::Application {
                application_manager::DisplayCapabilitiesBuilder&());
   MOCK_METHOD1(GetSoftButtonWindowID,
                application_manager::WindowID(const uint32_t button_id));
+  MOCK_METHOD1(remove_window_capability,
+               void(const application_manager::WindowID window_id));
 };
 
 }  // namespace application_manager_test
