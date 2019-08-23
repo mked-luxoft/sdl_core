@@ -217,8 +217,18 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
 
       const bool app_hmi_state_is_set =
           SetAppHMIState(application, saved_hmi_level, true);
-      if (app_hmi_state_is_set) {
+      auto is_hash_valid = [this, &saved_app](const uint32_t app_id) -> bool {
+        auto saved_hash = saved_app[strings::hash_id].asString();
+        const auto it = app_hash_map_.find(app_id);
+        if (app_hash_map_.end() == it) {
+          return false;
+        }
+        return it->second == saved_hash;
+      };
+      if (app_hmi_state_is_set && is_hash_valid(application->app_id())) {
         RestoreAppWidgets(application, saved_app);
+      } else {
+        return false;
       }
     } else {
       result = false;
@@ -311,6 +321,7 @@ void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
   application_manager_.GetRPCService().ManageMobileCommand(
       notification, commands::Command::SOURCE_SDL);
   app.set_is_resuming(false);
+  app_hash_map_.erase(app.app_id());
 }
 
 bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
@@ -524,6 +535,7 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
     // such apps
     SetupDefaultHMILevel(application);
   }
+  app_hash_map_[application->app_id()] = hash;
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
@@ -749,7 +761,7 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
 }
 
 void ResumeCtrlImpl::StartWaitingForDisplayCapabilitiesUpdate(
-    app_mngr::ApplicationSharedPtr application) {
+    const std::string& hash, app_mngr::ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
   resumption_storage_->GetSavedApplication(
@@ -763,7 +775,8 @@ void ResumeCtrlImpl::StartWaitingForDisplayCapabilitiesUpdate(
   auto& builder = application->display_capabilities_builder();
 
   smart_objects::SmartObject windows_info(smart_objects::SmartType_Null);
-  if (saved_app.keyExists(strings::windows_info)) {
+  if (saved_app[strings::hash_id].asString() == hash &&
+      saved_app.keyExists(strings::windows_info)) {
     windows_info = saved_app[strings::windows_info];
   }
   builder.InitBuilder(resume_callback, windows_info);

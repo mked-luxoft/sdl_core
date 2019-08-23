@@ -309,6 +309,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
                               const std::string& device_id) const OVERRIDE;
 
   void StartWaitingForDisplayCapabilitiesUpdate(
+      const std::string& hash,
       app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
@@ -634,6 +635,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
   time_t wake_up_time_;
   std::shared_ptr<ResumptionData> resumption_storage_;
   application_manager::ApplicationManager& application_manager_;
+  std::map<uint32_t, std::string> app_hash_map_;
   /**
    *@brief Mapping correlation id to request
    *wait for on event response from HMI to resume HMI Level

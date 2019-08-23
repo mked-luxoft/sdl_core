@@ -300,7 +300,7 @@ class ResumeCtrl {
                                       const std::string& device_id) const = 0;
 
   virtual void StartWaitingForDisplayCapabilitiesUpdate(
-      app_mngr::ApplicationSharedPtr application) = 0;
+      const std::string& hash, app_mngr::ApplicationSharedPtr application) = 0;
 
   virtual time_t LaunchTime() const = 0;
 

@@ -836,7 +836,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // will not be resumed, notification should be sent for default window as
   // it will be resumed in any case
   if (resumption) {
-    resumer.StartWaitingForDisplayCapabilitiesUpdate(application);
+    resumer.StartWaitingForDisplayCapabilitiesUpdate(hash_id, application);
   }
 
   AppHmiTypes hmi_types;

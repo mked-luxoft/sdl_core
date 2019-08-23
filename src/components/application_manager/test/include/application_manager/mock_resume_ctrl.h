@@ -108,8 +108,9 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_METHOD1(RestoreWidgetsHMIState,
                void(const smart_objects::SmartObject& response_message));
 
-  MOCK_METHOD1(StartWaitingForDisplayCapabilitiesUpdate,
-               void(application_manager::ApplicationSharedPtr application));
+  MOCK_METHOD2(StartWaitingForDisplayCapabilitiesUpdate,
+               void(const std::string& hash,
+                    application_manager::ApplicationSharedPtr application));
 
 #ifdef BUILD_TESTS
   MOCK_METHOD1(set_resumption_storage,
