@@ -1637,17 +1637,25 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
   const auto& force_protected = get_settings().force_protected_service();
 
+  const auto& force_unprotected = get_settings().force_unprotected_service();
+
   const bool is_force_protected =
       (helpers::in_range(force_protected, service_type));
 
-  const bool can_start_unprotected = is_force_protected && protection;
+  const bool is_force_unprotected =
+      (helpers::in_range(force_unprotected, service_type));
+
+  const bool can_start_protected = is_force_protected && protection;
+
+  const bool can_start_unprotected = is_force_unprotected && !protection;
 
   service_status_update_handler_->OnServiceUpdate(
       connection_key, service_type, ServiceStatus::SERVICE_RECEIVED);
 
   if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
       (ServiceType::kAudio == service_type && !is_audio_allowed) ||
-      (is_force_protected && !can_start_unprotected)) {
+      (is_force_protected && !can_start_protected) ||
+      (is_force_unprotected && !can_start_unprotected)) {
     LOG4CXX_DEBUG(logger_,
                   "Rejecting StartService for service:"
                       << service_type << ", over transport: " << transport
