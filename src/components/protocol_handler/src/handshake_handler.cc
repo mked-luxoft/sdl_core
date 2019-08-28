@@ -208,6 +208,7 @@ void HandshakeHandler::ProcessFailedHandshake(BsonObject& params,
                                               ServiceStatus service_status) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Handshake failed");
+  LOG4CXX_DEBUG(logger_, "service type is: " << context_.service_type_);
   const std::vector<int>& force_protected =
       protocol_handler_.get_settings().force_protected_service();
 

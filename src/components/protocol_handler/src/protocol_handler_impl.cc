@@ -1639,6 +1639,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
   const auto& force_unprotected = get_settings().force_unprotected_service();
 
+  for (auto id : force_unprotected) {
+    LOG4CXX_DEBUG(logger_,
+                  ">>>LOLKEK: force unprotected: " << std::boolalpha << id);
+  }
+
   const bool is_force_protected =
       (helpers::in_range(force_protected, service_type));
 
@@ -1651,6 +1656,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
   service_status_update_handler_->OnServiceUpdate(
       connection_key, service_type, ServiceStatus::SERVICE_RECEIVED);
+
+  LOG4CXX_DEBUG(logger_,
+                "service is force UNprotected: " << is_force_unprotected
+                                                 << " can start protected: "
+                                                 << can_start_protected);
 
   if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
       (ServiceType::kAudio == service_type && !is_audio_allowed) ||
