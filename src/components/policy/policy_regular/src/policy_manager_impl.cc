@@ -1233,7 +1233,9 @@ void PolicyManagerImpl::StopRetrySequence() {
     timer_retry_sequence_.Stop();
   }
 
-  ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
+  if (update_status_manager_.IsUpdateRequired()) {
+    ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
+  }
 }
 
 std::string PolicyManagerImpl::ForcePTExchangeAtUserRequest() {
