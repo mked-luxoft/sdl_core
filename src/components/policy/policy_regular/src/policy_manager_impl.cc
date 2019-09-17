@@ -78,7 +78,13 @@ PolicyManagerImpl::PolicyManagerImpl()
     , retry_sequence_url_(0, 0, "")
     , wrong_ptu_update_received_(false)
     , send_on_update_sent_out_(false)
-    , trigger_ptu_(false) {}
+    , trigger_ptu_(false) {
+  LOG4CXX_DEBUG(logger_, "Constructing policy manager impl at: " << this);
+}
+
+PolicyManagerImpl::~PolicyManagerImpl() {
+  LOG4CXX_DEBUG(logger_, "Destroying policy manager impl at: " << this);
+}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
