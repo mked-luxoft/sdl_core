@@ -58,6 +58,7 @@ struct CheckAppPolicy;
 class PolicyManagerImpl : public PolicyManager {
  public:
   PolicyManagerImpl();
+  ~PolicyManagerImpl();
   /*
    * \param policy_app_id policy app id
    * \return true if the app need encryption

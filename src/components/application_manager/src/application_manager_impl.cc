@@ -193,6 +193,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , is_low_voltage_(false)
     , apps_size_(0)
     , is_stopping_(false) {
+  LOG4CXX_DEBUG(logger_, "Constructing Application Manager at" << this);
   std::srand(std::time(nullptr));
   AddPolicyObserver(this);
 
@@ -226,6 +227,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Destroying Application Manager at" << this);
 
   is_stopping_ = true;
   SendOnSDLClose();
