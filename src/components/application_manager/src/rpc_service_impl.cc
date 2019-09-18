@@ -121,6 +121,11 @@ bool RPCServiceImpl::ManageMobileCommand(
     return false;
   }
 
+  if (app_manager_.is_stopping()) {
+    LOG4CXX_WARN(logger_, "App manager is stopping, message will be skipped");
+    return false;
+  }
+
   MessageHelper::PrintSmartObject(*message);
 
   const uint32_t connection_key = static_cast<uint32_t>(
@@ -331,6 +336,11 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
 
   if (app_manager_.IsLowVoltage()) {
     LOG4CXX_WARN(logger_, "Low Voltage is active");
+    return false;
+  }
+
+  if (app_manager_.is_stopping()) {
+    LOG4CXX_WARN(logger_, "App manager is stopping, message will be skipped");
     return false;
   }
 
