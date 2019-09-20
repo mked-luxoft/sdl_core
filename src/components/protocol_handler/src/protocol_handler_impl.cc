@@ -147,6 +147,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
 }
 
 ProtocolHandlerImpl::~ProtocolHandlerImpl() {
+  LOG4CXX_DEBUG(logger_, "Destroying protocol handler at: " << this);
   sync_primitives::AutoLock lock(protocol_observers_lock_);
   if (!protocol_observers_.empty()) {
     LOG4CXX_WARN(logger_,

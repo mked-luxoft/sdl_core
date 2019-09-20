@@ -66,7 +66,16 @@ RPCServiceImpl::RPCServiceImpl(
     , hmi_so_factory_(hmi_so_factory)
     , mobile_so_factory_(mobile_so_factory) {}
 
-RPCServiceImpl::~RPCServiceImpl() {}
+RPCServiceImpl::~RPCServiceImpl() {
+  LOG4CXX_DEBUG(logger_, "Destroying RPCServiceImpl at: " << this);
+}
+
+void RPCServiceImpl::Stop() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  messages_to_mobile_.Shutdown();
+  messages_to_hmi_.Shutdown();
+}
 
 EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
     const smart_objects::SmartObject& message,
@@ -401,6 +410,7 @@ void RPCServiceImpl::Handle(const impl::MessageToHmi message) {
 
 void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
   LOG4CXX_AUTO_TRACE(logger_);
+
   if (!protocol_handler_) {
     LOG4CXX_WARN(logger_,
                  "Protocol Handler is not set; cannot send message to mobile.");

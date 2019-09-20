@@ -227,7 +227,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Destroying Application Manager at" << this);
+  LOG4CXX_DEBUG(logger_, "Destroying Application Manager at " << this);
 
   is_stopping_ = true;
   SendOnSDLClose();
@@ -2352,6 +2352,8 @@ bool ApplicationManagerImpl::Stop() {
   // for PASA customer policy backup should happen :AllApp(SUSPEND)
   LOG4CXX_DEBUG(logger_, "Unloading policy library.");
   GetPolicyHandler().UnloadPolicyLibrary();
+
+  rpc_service_->Stop();
 
   return true;
 }

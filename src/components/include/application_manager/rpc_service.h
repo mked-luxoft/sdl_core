@@ -101,6 +101,8 @@ class RPCService {
       const hmi_apis::messageType::eType& message_type,
       const std::map<std::string, SMember>& members) = 0;
 
+  virtual void Stop() = 0;
+
   /**
    * @brief set_protocol_handler
    * @param handler

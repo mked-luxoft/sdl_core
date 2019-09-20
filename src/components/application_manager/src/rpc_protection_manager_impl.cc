@@ -59,6 +59,10 @@ bool RPCProtectionManagerImpl::CheckPolicyEncryptionFlag(
     const ApplicationSharedPtr app,
     const bool is_rpc_service_secure) const {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!app) {
+    LOG4CXX_WARN(logger_, "Received app nullptr");
+    return false;
+  }
   const auto& policy_encryption_flag_getter =
       policy_handler_.PolicyEncryptionFlagGetter();
   const std::string function_name =
@@ -69,11 +73,6 @@ bool RPCProtectionManagerImpl::CheckPolicyEncryptionFlag(
     LOG4CXX_WARN(logger_,
                  "Exception RPC can be sent in an non secure service despite "
                  "encryption required flag");
-    return false;
-  }
-
-  if (!app) {
-    LOG4CXX_WARN(logger_, "Received app nullptr");
     return false;
   }
 
