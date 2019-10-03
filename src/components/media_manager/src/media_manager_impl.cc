@@ -325,7 +325,8 @@ void MediaManagerImpl::OnMessageReceived(
   ApplicationSharedPtr app = application_manager_.application(streaming_app_id);
   if (app) {
     if (ServiceType::kAudio == service_type &&
-        "socket" == settings().audio_server_type()) {
+        "socket" == settings().audio_server_type() &&
+        streamer_[service_type]->is_app_performing_activity(streaming_app_id)) {
       stream_data_size_ += message->data_size();
       uint32_t ms_for_all_data = DataSizeToMilliseconds(stream_data_size_);
       uint32_t ms_since_stream_start =
