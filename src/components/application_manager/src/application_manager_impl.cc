@@ -2070,9 +2070,35 @@ void ApplicationManagerImpl::ProcessServiceStatusUpdate(
   rpc_service_->ManageHMICommand(notification);
 
   if (hmi_apis::Common_ServiceEvent::REQUEST_REJECTED == service_event) {
+    StopServicesForApp(app, service_type);
     state_ctrl_.SetRegularState(app,
                                 mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
                                 mobile_apis::HMILevel::HMI_NONE);
+  }
+}
+
+void ApplicationManagerImpl::StopServicesForApp(
+    ApplicationSharedPtr app,
+    hmi_apis::Common_ServiceType::eType service_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!app) {
+    LOG4CXX_WARN(logger_, "Received invalid app");
+    return;
+  }
+
+  switch (service_type) {
+    case hmi_apis::Common_ServiceType::VIDEO: {
+      {
+        sync_primitives::AutoLock lock(navi_service_status_lock_);
+        navi_service_status_.erase(app->app_id());
+      }
+      break;
+    }
+    case hmi_apis::Common_ServiceType::AUDIO: {
+      break;
+    }
+    default:
+      break;
   }
 }
 
@@ -3371,6 +3397,7 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
       connection_handler().SendEndService(app_id, ServiceType::kAudio);
       app->StopStreamingForce(ServiceType::kAudio);
     }
+
     DisallowStreaming(app_id);
 
     navi_app_to_stop_.push_back(app_id);

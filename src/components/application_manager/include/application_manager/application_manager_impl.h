@@ -1138,6 +1138,11 @@ class ApplicationManagerImpl
 
  private:
   /**
+   * @brief Stop services that failed to start
+   */
+  void StopServicesForApp(ApplicationSharedPtr app,
+                          hmi_apis::Common_ServiceType::eType service_type);
+  /**
    * @brief PullLanguagesInfo allows to pull information about languages.
    *
    * @param app_data entry to parse
