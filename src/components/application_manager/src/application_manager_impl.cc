@@ -2068,6 +2068,12 @@ void ApplicationManagerImpl::ProcessServiceStatusUpdate(
       service_type, service_event, reason, app_id);
 
   rpc_service_->ManageHMICommand(notification);
+
+  if (hmi_apis::Common_ServiceEvent::REQUEST_REJECTED == service_event) {
+    state_ctrl_.SetRegularState(app,
+                                mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+                                mobile_apis::HMILevel::HMI_NONE);
+  }
 }
 
 void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
