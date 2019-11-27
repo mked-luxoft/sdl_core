@@ -149,6 +149,8 @@ class UpdateStatusManager {
    */
   void ScheduleUpdate();
 
+  void PendingUpdate();
+
   /**
    * @brief PendingUpdate will change state from Update_Needed
    * to Update_Pending
