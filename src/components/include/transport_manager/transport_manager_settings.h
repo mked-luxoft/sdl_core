@@ -71,6 +71,21 @@ class TransportManagerSettings : public TransportManagerMMESettings {
       const = 0;
 
   /**
+   *@brief Returns websocket server address
+   */
+  virtual const std::string& websocket_server_address() const = 0;
+
+  /**
+   * @brief Returns port for websocket server
+   */
+  virtual uint16_t websocket_server_port() const = 0;
+
+  /**
+   * @brief Returns port for websocket secured server
+   */
+  virtual uint16_t websocket_secured_server_port() const = 0;
+
+  /**
    * @brief Returns retry timeout for cloud app connections
    */
   virtual uint32_t cloud_app_retry_timeout() const = 0;
