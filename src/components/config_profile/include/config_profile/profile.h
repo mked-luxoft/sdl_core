@@ -414,6 +414,21 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
       const OVERRIDE;
 
   /**
+   * @brief Returns websocket server address
+   */
+  const std::string& websocket_server_address() const OVERRIDE;
+
+  /**
+   * @brief Returns port for websocket server
+   */
+  uint16_t websocket_server_port() const OVERRIDE;
+
+  /**
+   * @brief Returns port for websocket secured server
+   */
+  uint16_t websocket_secured_server_port() const OVERRIDE;
+
+  /**
    * @brief Returns retry timeout for cloud app connections
    */
   uint32_t cloud_app_retry_timeout() const OVERRIDE;
@@ -991,6 +1006,9 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string system_files_path_;
   uint16_t transport_manager_tcp_adapter_port_;
   std::string transport_manager_tcp_adapter_network_interface_;
+  std::string websocket_server_address_;
+  uint16_t websocket_server_port_;
+  uint16_t websocket_secured_server_port_;
   uint32_t cloud_app_retry_timeout_;
   uint16_t cloud_app_max_retry_attempts_;
   std::vector<uint8_t> bluetooth_uuid_;
