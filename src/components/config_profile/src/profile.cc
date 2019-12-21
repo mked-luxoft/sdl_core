@@ -851,7 +851,7 @@ uint16_t Profile::websocket_server_port() const {
 }
 
 uint16_t Profile::websocket_secured_server_port() const {
-  return websocket_server_port_;
+  return websocket_secured_server_port_;
 }
 
 uint32_t Profile::cloud_app_retry_timeout() const {
