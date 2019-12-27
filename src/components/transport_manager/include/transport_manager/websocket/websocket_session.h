@@ -28,54 +28,53 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#ifndef TRANSPORT_ADAPTER_WEBSOCKET_SERVER_SESSION_H
+#define TRANSPORT_ADAPTER_WEBSOCKET_SERVER_SESSION_H
 
-#include <algorithm>
 #include <boost/asio/bind_executor.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/ssl/stream.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
-#include <cstdlib>
-#include <functional>
-#include <iostream>
-#include <memory>
-#include <queue>
-#include <string>
-#include <thread>
-#include <vector>
+#include "protocol/raw_message.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
+#include "utils/logger.h"
+
+namespace transport_manager {
+namespace transport_adapter {
+
+using DataReceiveCallback =
+    std::function<void(protocol_handler::RawMessagePtr)>;
+using DataWriteCallback = std::function<TransportAdapter::Error(
+    protocol_handler::RawMessagePtr message)>;
 
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
 namespace websocket =
     boost::beast::websocket;  // from <boost/beast/websocket.hpp>
 
-namespace transport_manager {
-namespace transport_adapter {
-
 CREATE_LOGGERPTR_GLOBAL(ws_logger_, "WebSocketSession")
 
 class TransportAdapterController;
 
-template <class ExecutorType = tcp::socket&>
+template <typename ExecutorType = tcp::socket&>
 class WebSocketSession
     : public std::enable_shared_from_this<WebSocketSession<ExecutorType> > {
  public:
   WebSocketSession(boost::asio::ip::tcp::socket socket,
-                   TransportAdapterController* controller);
+                   DataReceiveCallback dataReceive);
 
   WebSocketSession(boost::asio::ip::tcp::socket socket,
                    ssl::context& ctx,
-                   TransportAdapterController* controller);
+                   DataReceiveCallback dataReceive);
 
   virtual ~WebSocketSession();
 
   virtual void AsyncAccept();
   virtual void AsyncRead(boost::system::error_code ec);
-  virtual void WriteDown(::protocol_handler::RawMessagePtr message);
-  virtual ExecutorType GetExecutor();
+  virtual TransportAdapter::Error WriteDown(
+      ::protocol_handler::RawMessagePtr message);
+  // virtual ExecutorType GetExecutor();
   virtual void Read(boost::system::error_code ec,
                     std::size_t bytes_transferred);
 
@@ -84,8 +83,10 @@ class WebSocketSession
   websocket::stream<ExecutorType> ws_;
   boost::asio::strand<boost::asio::io_context::executor_type> strand_;
   boost::beast::multi_buffer buffer_;
-  TransportAdapterController* controller_;
+  DataReceiveCallback dataReceive_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
+#endif  // TRANSPORT_ADAPTER_WEBSOCKET_SERVER_SESSION_H

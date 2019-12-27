@@ -37,27 +37,25 @@ namespace transport_adapter {
 
 using namespace boost::beast::websocket;
 
-template <class ExecutorType>
+template <typename ExecutorType>
 WebSocketSecureSession<ExecutorType>::WebSocketSecureSession(
-    boost::asio::ip::tcp::socket socket,
-    ssl::context& ctx,
-    TransportAdapterController* controller)
-    : WebSocketSession<ExecutorType>(socket, ctx, controller) {}
+    tcp::socket socket, ssl::context& ctx, DataReceiveCallback dataReceive)
+    : WebSocketSession<ExecutorType>(std::move(socket), ctx, dataReceive) {}
 
-template <class ExecutorType>
+template <typename ExecutorType>
 void WebSocketSecureSession<ExecutorType>::AsyncAccept() {
   LOG4CXX_AUTO_TRACE(ws_logger_);
   // Perform the SSL handshake
-  ws_.next_layer().async_handshake(
-      ssl::stream_base::server,
-      boost::asio::bind_executor(
-          strand_,
-          std::bind(&WebSocketSecureSession::AsyncHandshake,
-                    shared_from_this(),
-                    std::placeholders::_1)));
+  //   WebSocketSecureSession<ExecutorType>::ws_.next_layer().async_handshake(
+  //       ssl::stream_base::server,
+  //       boost::asio::bind_executor(
+  //           WebSocketSecureSession<ExecutorType>::strand_,
+  //           std::bind(&WebSocketSecureSession::AsyncHandshake,
+  //                     this->shared_from_this(),
+  //                     std::placeholders::_1)));
 }
 
-template <class ExecutorType>
+template <typename ExecutorType>
 void WebSocketSecureSession<ExecutorType>::AsyncHandshake(
     boost::system::error_code ec) {
   LOG4CXX_AUTO_TRACE(ws_logger_);

@@ -28,7 +28,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#ifndef TRANSPORT_ADAPTER_WEBSOCKET_SERVER_SECURE_SESSION_H
+#define TRANSPORT_ADAPTER_WEBSOCKET_SERVER_SECURE_SESSION_H
 
 #include "transport_manager/websocket/websocket_session.h"
 
@@ -37,12 +38,12 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(wss_logger_, "WebSocketSecureSession")
 
-template <class ExecutorType = ssl::stream<tcp::socket&> >
+template <typename ExecutorType = ssl::stream<tcp::socket&> >
 class WebSocketSecureSession : public WebSocketSession<ExecutorType> {
  public:
-  WebSocketSecureSession(boost::asio::ip::tcp::socket socket,
+  WebSocketSecureSession(tcp::socket,
                          ssl::context& ctx,
-                         TransportAdapterController* controller);
+                         DataReceiveCallback dataReceive);
 
   void AsyncAccept() OVERRIDE;
   virtual void AsyncHandshake(boost::system::error_code ec);
@@ -50,3 +51,5 @@ class WebSocketSecureSession : public WebSocketSession<ExecutorType> {
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
+#endif  // TRANSPORT_ADAPTER_WEBSOCKET_SERVER_SECURE_SESSION_H
