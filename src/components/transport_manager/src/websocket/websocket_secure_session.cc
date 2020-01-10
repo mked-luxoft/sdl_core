@@ -37,23 +37,38 @@ namespace transport_adapter {
 
 using namespace boost::beast::websocket;
 
-template <typename ExecutorType>
-WebSocketSecureSession<ExecutorType>::WebSocketSecureSession(
+template <>
+WebSocketSecureSession<ssl::stream<tcp::socket&> >::WebSocketSecureSession(
     tcp::socket socket, ssl::context& ctx, DataReceiveCallback dataReceive)
-    : WebSocketSession<ExecutorType>(std::move(socket), ctx, dataReceive) {}
+    : WebSocketSession<ssl::stream<tcp::socket&> >(
+          std::move(socket), ctx, dataReceive) {}
 
 template <typename ExecutorType>
 void WebSocketSecureSession<ExecutorType>::AsyncAccept() {
-  LOG4CXX_AUTO_TRACE(ws_logger_);
+  //  LOG4CXX_AUTO_TRACE(ws_logger_);
   // Perform the SSL handshake
-  //   WebSocketSecureSession<ExecutorType>::ws_.next_layer().async_handshake(
-  //       ssl::stream_base::server,
-  //       boost::asio::bind_executor(
-  //           WebSocketSecureSession<ExecutorType>::strand_,
-  //           std::bind(&WebSocketSecureSession::AsyncHandshake,
-  //                     this->shared_from_this(),
-  //                     std::placeholders::_1)));
+  WebSocketSecureSession<ExecutorType>::ws_.next_layer().async_handshake(
+      ssl::stream_base::server,
+      boost::asio::bind_executor(
+          WebSocketSecureSession<ExecutorType>::strand_,
+          std::bind(&WebSocketSecureSession::AsyncHandshake,
+                    this,
+                    std::placeholders::_1)));
 }
+
+// template <>
+// void WebSocketSecureSession<ssl::stream<tcp::socket&> >::AsyncAccept() {
+//  //  LOG4CXX_AUTO_TRACE(ws_logger_);
+//  // Perform the SSL handshake
+//  WebSocketSecureSession<ssl::stream<tcp::socket&> >::ws_.next_layer()
+//      .async_handshake(
+//          ssl::stream_base::server,
+//          boost::asio::bind_executor(
+//              WebSocketSecureSession<ssl::stream<tcp::socket&> >::strand_,
+//              std::bind(&WebSocketSecureSession::AsyncHandshake,
+//                        this,
+//                        std::placeholders::_1)));
+//}
 
 template <typename ExecutorType>
 void WebSocketSecureSession<ExecutorType>::AsyncHandshake(
@@ -70,7 +85,7 @@ void WebSocketSecureSession<ExecutorType>::AsyncHandshake(
   WebSocketSession<ExecutorType>::AsyncAccept();
 }
 
-template class WebSocketSecureSession<ssl::stream<tcp::socket&> >;
+// template class WebSocketSecureSession<ssl::stream<tcp::socket&> >;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
