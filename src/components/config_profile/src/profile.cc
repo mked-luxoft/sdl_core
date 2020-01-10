@@ -136,8 +136,10 @@ const char* kAudioStreamFileKey = "AudioStreamFile";
 const char* kSecurityProtocolKey = "Protocol";
 const char* kSecurityCertificatePathKey = "CertificatePath";
 const char* kSecurityCACertificatePathKey = "CACertificatePath";
+const char* kSecurityWSServerCertificatePathKey = "WSServerCertificatePath";
 const char* kSecuritySSLModeKey = "SSLMode";
 const char* kSecurityKeyPathKey = "KeyPath";
+const char* kSecurityWSServerKeyPathKey = "WSServerKeyPath";
 const char* kSecurityCipherListKey = "CipherList";
 const char* kSecurityVerifyPeerKey = "VerifyPeer";
 const char* kBeforeUpdateHours = "UpdateBeforeHours";
@@ -1063,6 +1065,10 @@ const std::string& Profile::ca_cert_path() const {
   return ca_cert_path_;
 }
 
+const std::string& Profile::ws_server_cert_path() const {
+  return ws_server_cert_path_;
+}
+
 const std::string& Profile::ssl_mode() const {
   return ssl_mode_;
 }
@@ -1265,11 +1271,18 @@ void Profile::UpdateValues() {
       &cert_path_, "", kSecuritySection, kSecurityCertificatePathKey);
   ReadStringValue(
       &ca_cert_path_, "", kSecuritySection, kSecurityCACertificatePathKey);
+  ReadStringValue(&ws_server_cert_path_,
+                  "",
+                  kSecuritySection,
+                  kSecurityWSServerCertificatePathKey);
 
   ReadStringValue(
       &ssl_mode_, kDefaultSSLMode, kSecuritySection, kSecuritySSLModeKey);
 
   ReadStringValue(&key_path_, "", kSecuritySection, kSecurityKeyPathKey);
+
+  ReadStringValue(
+      &ws_server_key_path_, "", kSecuritySection, kSecurityWSServerKeyPathKey);
 
   ReadStringValue(
       &ciphers_list_, SSL_TXT_ALL, kSecuritySection, kSecurityCipherListKey);

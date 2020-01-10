@@ -503,6 +503,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& key_path() const;
 
   /**
+   * @brief Returns ws server key path to pem file
+   */
+  const std::string& ws_server_key_path() const;
+
+  /**
    * @brief Returns certificate path to pem file
    */
   const std::string& cert_path() const;
@@ -511,6 +516,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @brief Returns ca certificate path to pem file
    */
   const std::string& ca_cert_path() const;
+
+  /**
+   * @brief Returns ws server certificate path to pem file
+   */
+  const std::string& ws_server_cert_path() const;
 
   /**
    * @brief Returns ciphers
@@ -1032,8 +1042,10 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 #ifdef ENABLE_SECURITY
   std::string cert_path_;
   std::string ca_cert_path_;
+  std::string ws_server_cert_path_;
   std::string ssl_mode_;
   std::string key_path_;
+  std::string ws_server_key_path_;
   std::string ciphers_list_;
   bool verify_peer_;
   uint32_t update_before_hours_;

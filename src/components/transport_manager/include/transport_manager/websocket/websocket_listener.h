@@ -40,6 +40,9 @@
 #include "transport_manager/transport_adapter/client_connection_listener.h"
 #include "transport_manager/transport_manager_settings.h"
 #include "transport_manager/websocket/websocket_connection.h"
+#ifdef ENABLE_SECURITY
+#include "security_manager/security_manager_settings.h"
+#endif
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -56,9 +59,13 @@ class WebSocketListener : public ClientConnectionListener {
    * @param controller Pointer to the device adapter controller.
    * @param number of threads for listen incoming connections
    */
-  WebSocketListener(TransportAdapterController* controller,
-                    const TransportManagerSettings& settings,
-                    const int num_threads = 1);
+  WebSocketListener(
+      TransportAdapterController* controller,
+      const TransportManagerSettings& settings,
+#ifdef ENABLE_SECURITY
+      const security_manager::CryptoManagerSettings& security_settings,
+#endif
+      const int num_threads = 1);
 
   /**
    * @brief Destructor.
@@ -111,6 +118,10 @@ class WebSocketListener : public ClientConnectionListener {
   std::vector<std::shared_ptr<Connection> > mConnectionList;
   sync_primitives::Lock mConnectionListLock;
   const TransportManagerSettings& settings_;
+
+#ifdef ENABLE_SECURITY
+  const security_manager::CryptoManagerSettings& security_settings_;
+#endif
 };
 
 }  // namespace transport_adapter

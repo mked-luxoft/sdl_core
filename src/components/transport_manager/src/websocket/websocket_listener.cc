@@ -6,9 +6,13 @@ namespace transport_manager {
 namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "WebSocketListener")
 
-WebSocketListener::WebSocketListener(TransportAdapterController* controller,
-                                     const TransportManagerSettings& settings,
-                                     const int num_threads)
+WebSocketListener::WebSocketListener(
+    TransportAdapterController* controller,
+    const TransportManagerSettings& settings,
+#ifdef ENABLE_SECURITY
+    const security_manager::CryptoManagerSettings& security_settings,
+#endif
+    const int num_threads)
     : controller_(controller)
     , ioc_(num_threads)
     , ctx_(ssl::context::sslv23)
@@ -19,7 +23,12 @@ WebSocketListener::WebSocketListener(TransportAdapterController* controller,
     , io_pool_(num_threads)
     , secure_io_pool_(num_threads)
     , shutdown_(false)
-    , settings_(settings) {}
+    , settings_(settings)
+#ifdef ENABLE_SECURITY
+    , security_settings_(security_settings)
+#endif
+{
+}
 
 WebSocketListener::~WebSocketListener() {
   Terminate();
@@ -47,6 +56,26 @@ TransportAdapter::Error WebSocketListener::StartListening() {
   tcp::endpoint endpoint = {address, settings_.websocket_server_port()};
   tcp::endpoint secure_endpoint = {address,
                                    settings_.websocket_secured_server_port()};
+
+#ifdef ENABLE_SECURITY
+  const auto cert_path = security_settings_.module_cert_path();
+  ctx_.add_verify_path(cert_path);
+  ctx_.set_options(boost::asio::ssl::context::default_workarounds |
+                   boost::asio::ssl::context::no_sslv2);
+  const auto cert = boost::asio::buffer("ws_server_cert.pem");
+  const auto key = boost::asio::buffer("ws_server_key.pem");
+  using context = boost::asio::ssl::context_base;
+  boost::system::error_code sec_ec;
+  ctx_.use_certificate(cert, context::pem, sec_ec);
+  if (sec_ec) {
+    LOG4CXX_ERROR(logger_, "Loading WS server certificate failed: " << sec_ec);
+  }
+  sec_ec.clear();
+  ctx_.use_private_key(key, context::pem, sec_ec);
+  if (sec_ec) {
+    LOG4CXX_ERROR(logger_, "Loading WS server key failed: " << sec_ec);
+  }
+#endif
 
   auto init_acceptor = [&address](tcp::acceptor& acceptor,
                                   const tcp::endpoint& endpoint) {

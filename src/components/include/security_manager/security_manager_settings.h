@@ -60,6 +60,8 @@ class CryptoManagerSettings {
   virtual size_t maximum_payload_size() const = 0;
   virtual const std::vector<int>& force_protected_service() const = 0;
   virtual const std::vector<int>& force_unprotected_service() const = 0;
+  virtual const std::string& ws_server_cert_path() const = 0;
+  virtual const std::string& ws_server_key_path() const = 0;
 };
 
 }  // namespace security_manager

@@ -64,6 +64,14 @@ class CryptoManagerSettingsImpl : public CryptoManagerSettings {
     return profile_.cert_path();
   }
 
+  const std::string& ws_server_cert_path() const OVERRIDE {
+    return profile_.ws_server_cert_path();
+  }
+
+  const std::string& ws_server_key_path() const OVERRIDE {
+    return profile_.ws_server_key_path();
+  }
+
   const std::string& module_key_path() const OVERRIDE {
     return profile_.key_path();
   }
