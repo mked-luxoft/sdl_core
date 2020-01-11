@@ -503,11 +503,6 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& key_path() const;
 
   /**
-   * @brief Returns ws server key path to pem file
-   */
-  const std::string& ws_server_key_path() const;
-
-  /**
    * @brief Returns certificate path to pem file
    */
   const std::string& cert_path() const;
@@ -520,7 +515,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Returns ws server certificate path to pem file
    */
-  const std::string& ws_server_cert_path() const;
+  const std::string& ws_server_cert_path() const OVERRIDE;
+
+  /**
+   * @brief Returns ws server key path to pem file
+   */
+  const std::string& ws_server_key_path() const OVERRIDE;
 
   /**
    * @brief Returns ciphers

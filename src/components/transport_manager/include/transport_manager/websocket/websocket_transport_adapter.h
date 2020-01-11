@@ -36,11 +36,11 @@
 #ifndef TRANSPORT_ADAPTER_WEBSOCKET_TRANSPORT_ADAPTER_H
 #define TRANSPORT_ADAPTER_WEBSOCKET_TRANSPORT_ADAPTER_H
 
+#include "security_manager/security_manager_settings.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
 namespace transport_adapter {
-
 /**
  * @brief Transport adapter that use WebSocket transport. */
 class WebSocketTransportAdapter : public TransportAdapterImpl {

@@ -59,13 +59,9 @@ class WebSocketListener : public ClientConnectionListener {
    * @param controller Pointer to the device adapter controller.
    * @param number of threads for listen incoming connections
    */
-  WebSocketListener(
-      TransportAdapterController* controller,
-      const TransportManagerSettings& settings,
-#ifdef ENABLE_SECURITY
-      const security_manager::CryptoManagerSettings& security_settings,
-#endif
-      const int num_threads = 1);
+  WebSocketListener(TransportAdapterController* controller,
+                    const TransportManagerSettings& settings,
+                    const int num_threads = 1);
 
   /**
    * @brief Destructor.
@@ -98,30 +94,20 @@ class WebSocketListener : public ClientConnectionListener {
  protected:
   bool Run();
   bool WaitForConnection();
-  bool WaitForSecureConnection();
   void StartSession(boost::system::error_code ec);
-  void StartSecureSession(boost::system::error_code ec);
   void Shutdown();
 
  private:
   TransportAdapterController* controller_;
   boost::asio::io_context ioc_;
-  boost::asio::io_context secure_ioc_;
   ssl::context ctx_;
   tcp::acceptor acceptor_;
   tcp::socket socket_;
-  tcp::acceptor secure_acceptor_;
-  tcp::socket secure_socket_;
   boost::asio::thread_pool io_pool_;
-  boost::asio::thread_pool secure_io_pool_;
   std::atomic_bool shutdown_;
   std::vector<std::shared_ptr<Connection> > mConnectionList;
   sync_primitives::Lock mConnectionListLock;
   const TransportManagerSettings& settings_;
-
-#ifdef ENABLE_SECURITY
-  const security_manager::CryptoManagerSettings& security_settings_;
-#endif
 };
 
 }  // namespace transport_adapter

@@ -33,6 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "transport_manager/transport_manager_default.h"
+#include "security_manager/security_manager_settings.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "utils/logger.h"
 
