@@ -220,6 +220,7 @@ install(
   FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
     hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
+    ${CMAKE_SOURCE_DIR}/server-cert.pem ${CMAKE_SOURCE_DIR}/server-key.pem
   DESTINATION bin
 )
 
