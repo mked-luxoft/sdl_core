@@ -97,6 +97,16 @@ class WebSocketListener : public ClientConnectionListener {
   void StartSession(boost::system::error_code ec);
   void Shutdown();
 
+  std::shared_ptr<WebSocketConnection<WebSocketSession<> > > CreateConnection(
+      const DeviceUID&, const ApplicationHandle);
+  std::shared_ptr<WebSocketConnection<WebSocketSecureSession<> > >
+  CreateSecureConnection(const DeviceUID&, const ApplicationHandle);
+
+  template <typename Connection>
+  void ProcessConnection(std::shared_ptr<Connection> connection,
+                         const DeviceSptr,
+                         const ApplicationHandle);
+
  private:
   TransportAdapterController* controller_;
   boost::asio::io_context ioc_;
@@ -108,6 +118,7 @@ class WebSocketListener : public ClientConnectionListener {
   std::vector<std::shared_ptr<Connection> > mConnectionList;
   sync_primitives::Lock mConnectionListLock;
   const TransportManagerSettings& settings_;
+  bool start_secure_;
 };
 
 }  // namespace transport_adapter

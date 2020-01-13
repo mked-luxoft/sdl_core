@@ -17,7 +17,8 @@ WebSocketListener::WebSocketListener(TransportAdapterController* controller,
     , socket_(ioc_)
     , io_pool_(num_threads)
     , shutdown_(false)
-    , settings_(settings) {}
+    , settings_(settings)
+    , start_secure_(false) {}
 
 WebSocketListener::~WebSocketListener() {
   Terminate();
@@ -48,32 +49,34 @@ TransportAdapter::Error WebSocketListener::StartListening() {
   LOG4CXX_DEBUG(logger_, "Path to certificate : " << cert_path);
   const auto key_path = settings_.ws_server_key_path();
   LOG4CXX_DEBUG(logger_, "Path to key : " << key_path);
-  const bool start_secure = !cert_path.empty() && !key_path.empty();
+  start_secure_ = !cert_path.empty() && !key_path.empty();
 
-  if (start_secure && (!file_system::FileExists(cert_path) ||
-                       !file_system::FileExists(key_path))) {
+  if (start_secure_ && (!file_system::FileExists(cert_path) ||
+                        !file_system::FileExists(key_path))) {
     LOG4CXX_ERROR(logger_, "Certificate or key not found");
     return TransportAdapter::FAIL;
   }
 
-  if (start_secure) {
+  if (start_secure_) {
     LOG4CXX_INFO(logger_, "WebSocket server will start secure connection");
     ctx_.add_verify_path(cert_path);
-    ctx_.set_options(boost::asio::ssl::context::default_workarounds |
-                     boost::asio::ssl::context::no_sslv2);
-    const auto cert = boost::asio::buffer(cert_path);
-    const auto key = boost::asio::buffer(key_path);
+    ctx_.set_options(boost::asio::ssl::context::default_workarounds);
+    //    const auto cert = boost::asio::buffer(cert_path);
+    //    const auto key = boost::asio::buffer(key_path);
     using context = boost::asio::ssl::context_base;
+    ctx_.set_verify_mode(ssl::verify_fail_if_no_peer_cert);
     boost::system::error_code sec_ec;
-    ctx_.use_certificate(cert, context::pem, sec_ec);
+    ctx_.use_certificate_chain_file(cert_path, sec_ec);
     if (sec_ec) {
-      LOG4CXX_ERROR(logger_,
-                    "Loading WS server certificate failed: " << sec_ec);
+      LOG4CXX_ERROR(
+          logger_,
+          "Loading WS server certificate failed: " << sec_ec.message());
     }
     sec_ec.clear();
-    ctx_.use_private_key(key, context::pem, sec_ec);
+    ctx_.use_private_key_file(key_path, context::pem, sec_ec);
     if (sec_ec) {
-      LOG4CXX_ERROR(logger_, "Loading WS server key failed: " << sec_ec);
+      LOG4CXX_ERROR(logger_,
+                    "Loading WS server key failed: " << sec_ec.message());
     }
   }
 
@@ -138,6 +141,7 @@ bool WebSocketListener::Run() {
 }
 
 bool WebSocketListener::WaitForConnection() {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!shutdown_ && acceptor_.is_open()) {
     acceptor_.async_accept(
         socket_,
@@ -146,6 +150,46 @@ bool WebSocketListener::WaitForConnection() {
     return true;
   }
   return false;
+}
+
+template <>
+void WebSocketListener::ProcessConnection(
+    std::shared_ptr<WebSocketConnection<WebSocketSession<> > > connection,
+    const DeviceSptr device,
+    const ApplicationHandle app_handle) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  controller_->ConnectionCreated(
+      connection, device->unique_device_id(), app_handle);
+
+  controller_->ConnectDone(device->unique_device_id(), app_handle);
+
+  connection->Run();
+
+  mConnectionListLock.Acquire();
+  mConnectionList.push_back(connection);
+  mConnectionListLock.Release();
+
+  WaitForConnection();
+}
+
+template <>
+void WebSocketListener::ProcessConnection(
+    std::shared_ptr<WebSocketConnection<WebSocketSecureSession<> > > connection,
+    const DeviceSptr device,
+    const ApplicationHandle app_handle) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  controller_->ConnectionCreated(
+      connection, device->unique_device_id(), app_handle);
+
+  controller_->ConnectDone(device->unique_device_id(), app_handle);
+
+  connection->Run();
+
+  mConnectionListLock.Acquire();
+  mConnectionList.push_back(connection);
+  mConnectionListLock.Release();
+
+  WaitForConnection();
 }
 
 void WebSocketListener::StartSession(boost::system::error_code ec) {
@@ -175,21 +219,31 @@ void WebSocketListener::StartSession(boost::system::error_code ec) {
 
   LOG4CXX_INFO(logger_, "Connected client: " << device->name());
 
-  auto connection = std::make_shared<WebSocketConnection<WebSocketSession<> > >(
-      device->unique_device_id(), app_handle, std::move(socket_), controller_);
+  if (start_secure_) {
+    LOG4CXX_INFO(logger_, "KEK!!!!SECURE!!! ");
+    auto connection = CreateSecureConnection(device_uid, app_handle);
+    ProcessConnection(connection, device, app_handle);
+  } else {
+    LOG4CXX_INFO(logger_, "KEK!!!!UNSECURE!!! ");
+    auto connection = CreateConnection(device_uid, app_handle);
+    ProcessConnection(connection, device, app_handle);
+  }
 
-  controller_->ConnectionCreated(
-      connection, device->unique_device_id(), app_handle);
+  LOG4CXX_INFO(logger_, "KEK!!!! ");
+}
 
-  controller_->ConnectDone(device->unique_device_id(), app_handle);
+std::shared_ptr<WebSocketConnection<WebSocketSession<> > >
+WebSocketListener::CreateConnection(const DeviceUID& dev_id,
+                                    const ApplicationHandle handle) {
+  return std::make_shared<WebSocketConnection<WebSocketSession<> > >(
+      dev_id, handle, std::move(socket_), controller_);
+}
 
-  connection->Run();
-
-  mConnectionListLock.Acquire();
-  mConnectionList.push_back(connection);
-  mConnectionListLock.Release();
-
-  WaitForConnection();
+std::shared_ptr<WebSocketConnection<WebSocketSecureSession<> > >
+WebSocketListener::CreateSecureConnection(const DeviceUID& dev_id,
+                                          const ApplicationHandle handle) {
+  return std::make_shared<WebSocketConnection<WebSocketSecureSession<> > >(
+      dev_id, handle, std::move(socket_), ctx_, controller_);
 }
 
 void WebSocketListener::Shutdown() {

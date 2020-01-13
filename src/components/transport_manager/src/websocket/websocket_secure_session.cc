@@ -45,8 +45,13 @@ WebSocketSecureSession<ssl::stream<tcp::socket&> >::WebSocketSecureSession(
 
 template <typename ExecutorType>
 void WebSocketSecureSession<ExecutorType>::AsyncAccept() {
-  //  LOG4CXX_AUTO_TRACE(ws_logger_);
+  LOG4CXX_AUTO_TRACE(ws_logger_);
+  std::cout << "KEK!!!!!! AsyncAccept ENTERED!!" << std::endl;
   // Perform the SSL handshake
+
+  auto kek = this->shared_from_this();
+  LOG4CXX_DEBUG(ws_logger_, "KEK!!! : " << kek.get());
+  std::cout << "KEK!!! : " << kek.get() << std::endl;
   WebSocketSecureSession<ExecutorType>::ws_.next_layer().async_handshake(
       ssl::stream_base::server,
       boost::asio::bind_executor(

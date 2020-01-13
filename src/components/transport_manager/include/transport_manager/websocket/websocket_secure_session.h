@@ -49,7 +49,10 @@ class WebSocketSecureSession : public WebSocketSession<ExecutorType> {
   virtual void AsyncHandshake(boost::system::error_code ec);
 
   std::shared_ptr<WebSocketSecureSession<ExecutorType> > shared_from_this() {
-    return this->shared_from_this();
+    auto base_ptr =
+        static_cast<WebSocketSession<ExecutorType>*>(this)->shared_from_this();
+    return std::static_pointer_cast<WebSocketSecureSession<ExecutorType> >(
+        base_ptr);
   }
 };
 
