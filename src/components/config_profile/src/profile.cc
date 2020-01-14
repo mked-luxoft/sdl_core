@@ -137,6 +137,7 @@ const char* kSecurityProtocolKey = "Protocol";
 const char* kSecurityCertificatePathKey = "CertificatePath";
 const char* kSecurityCACertificatePathKey = "CACertificatePath";
 const char* kWSServerCertificatePathKey = "WSServerCertificatePath";
+const char* kWSServerCACertificaePathKey = "WSServerCACertificatePath";
 const char* kSecuritySSLModeKey = "SSLMode";
 const char* kSecurityKeyPathKey = "KeyPath";
 const char* kWSServerKeyPathKey = "WSServerKeyPath";
@@ -1073,6 +1074,10 @@ const std::string& Profile::ws_server_key_path() const {
   return ws_server_key_path_;
 }
 
+const std::string& Profile::ws_server_ca_cert_path() const {
+  return ws_server_ca_cert_path_;
+}
+
 const std::string& Profile::ssl_mode() const {
   return ssl_mode_;
 }
@@ -1935,7 +1940,16 @@ void Profile::UpdateValues() {
       &ws_server_key_path_, "", kTransportManagerSection, kWSServerKeyPathKey);
 
   LOG_UPDATED_VALUE(
-      ws_server_cert_path_, kWSServerKeyPathKey, kTransportManagerSection);
+      ws_server_key_path_, kWSServerKeyPathKey, kTransportManagerSection);
+
+  ReadStringValue(&ws_server_ca_cert_path_,
+                  "",
+                  kTransportManagerSection,
+                  kWSServerCACertificaePathKey);
+
+  LOG_UPDATED_VALUE(ws_server_ca_cert_path_,
+                    kWSServerCACertificaePathKey,
+                    kTransportManagerSection);
 
   // Websocket secured server port
   ReadUIntValue(&websocket_secured_server_port_,

@@ -49,10 +49,14 @@ TransportAdapter::Error WebSocketListener::StartListening() {
   LOG4CXX_DEBUG(logger_, "Path to certificate : " << cert_path);
   const auto key_path = settings_.ws_server_key_path();
   LOG4CXX_DEBUG(logger_, "Path to key : " << key_path);
-  start_secure_ = !cert_path.empty() && !key_path.empty();
+  const auto ca_cert_path = settings_.ws_server_ca_cert_path();
+  LOG4CXX_DEBUG(logger_, "Path to ca cert : " << ca_cert_path);
+  start_secure_ =
+      !cert_path.empty() && !key_path.empty() && !ca_cert_path.empty();
 
   if (start_secure_ && (!file_system::FileExists(cert_path) ||
-                        !file_system::FileExists(key_path))) {
+                        !file_system::FileExists(key_path) ||
+                        !file_system::FileExists(ca_cert_path))) {
     LOG4CXX_ERROR(logger_, "Certificate or key not found");
     return TransportAdapter::FAIL;
   }
@@ -61,12 +65,11 @@ TransportAdapter::Error WebSocketListener::StartListening() {
     LOG4CXX_INFO(logger_, "WebSocket server will start secure connection");
     ctx_.add_verify_path(cert_path);
     ctx_.set_options(boost::asio::ssl::context::default_workarounds);
-    //    const auto cert = boost::asio::buffer(cert_path);
-    //    const auto key = boost::asio::buffer(key_path);
     using context = boost::asio::ssl::context_base;
-    ctx_.set_verify_mode(ssl::verify_fail_if_no_peer_cert);
+    ctx_.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
     boost::system::error_code sec_ec;
     ctx_.use_certificate_chain_file(cert_path, sec_ec);
+    ctx_.load_verify_file(ca_cert_path);
     if (sec_ec) {
       LOG4CXX_ERROR(
           logger_,

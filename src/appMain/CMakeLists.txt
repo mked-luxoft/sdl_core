@@ -221,6 +221,7 @@ install(
     hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
     ${CMAKE_SOURCE_DIR}/server-cert.pem ${CMAKE_SOURCE_DIR}/server-key.pem
+    ${CMAKE_SOURCE_DIR}/ca-cert.pem
   DESTINATION bin
 )
 
