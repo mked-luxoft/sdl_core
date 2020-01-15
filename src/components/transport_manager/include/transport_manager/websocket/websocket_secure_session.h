@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2019 Livio, Inc.
+Copyright (c) 2020 Livio, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TRANSPORT_ADAPTER_WEBSOCKET_SERVER_SECURE_SESSION_H
-#define TRANSPORT_ADAPTER_WEBSOCKET_SERVER_SECURE_SESSION_H
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_SECURE_SESSION_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_SECURE_SESSION_H
 
 #include "transport_manager/websocket/websocket_session.h"
 
@@ -39,9 +39,7 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(wss_logger_, "WebSocketSecureSession")
 
 template <typename ExecutorType = ssl::stream<tcp::socket&> >
-class WebSocketSecureSession : public WebSocketSession<ExecutorType>,
-                               public std::enable_shared_from_this<
-                                   WebSocketSecureSession<ExecutorType> > {
+class WebSocketSecureSession : public WebSocketSession<ExecutorType> {
  public:
   WebSocketSecureSession(tcp::socket,
                          ssl::context& ctx,
@@ -49,9 +47,16 @@ class WebSocketSecureSession : public WebSocketSession<ExecutorType>,
 
   void AsyncAccept() OVERRIDE;
   virtual void AsyncHandshake(boost::system::error_code ec);
+
+  std::shared_ptr<WebSocketSecureSession<ExecutorType> > shared_from_this() {
+    auto base_ptr =
+        static_cast<WebSocketSession<ExecutorType>*>(this)->shared_from_this();
+    return std::static_pointer_cast<WebSocketSecureSession<ExecutorType> >(
+        base_ptr);
+  }
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // TRANSPORT_ADAPTER_WEBSOCKET_SERVER_SECURE_SESSION_H
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_SECURE_SESSION_H

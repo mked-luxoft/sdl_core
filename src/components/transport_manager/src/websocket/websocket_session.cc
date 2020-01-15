@@ -43,7 +43,7 @@ WebSocketSession<tcp::socket&>::WebSocketSession(
     : socket_(std::move(socket))
     , ws_(socket_)
     , strand_(ws_.get_executor())
-    , dataReceive_(dataReceive) {
+    , data_receive_(dataReceive) {
   ws_.binary(true);
 }
 
@@ -55,7 +55,7 @@ WebSocketSession<ssl::stream<tcp::socket&> >::WebSocketSession(
     : socket_(std::move(socket))
     , ws_(socket_, ctx)
     , strand_(ws_.get_executor())
-    , dataReceive_(dataReceive) {
+    , data_receive_(dataReceive) {
   ws_.binary(true);
 }
 
@@ -64,6 +64,7 @@ WebSocketSession<ExecutorType>::~WebSocketSession() {}
 
 template <typename ExecutorType>
 void WebSocketSession<ExecutorType>::AsyncAccept() {
+  LOG4CXX_AUTO_TRACE(ws_logger_);
   ws_.async_accept(
       boost::asio::bind_executor(strand_,
                                  std::bind(&WebSocketSession::AsyncRead,
@@ -126,7 +127,7 @@ void WebSocketSession<ExecutorType>::Read(boost::system::error_code ec,
   ::protocol_handler::RawMessagePtr frame(
       new protocol_handler::RawMessage(0, 0, data, size, false));
 
-  dataReceive_(frame);
+  data_receive_(frame);
 
   buffer_.consume(buffer_.size());
   AsyncRead(ec);

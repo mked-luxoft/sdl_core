@@ -2,7 +2,7 @@
  * \file websocket_listener.h
  * \brief WebSocketListener class header file.
  *
- * Copyright (c) 2019
+ * Copyright (c) 2020
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TRANSPORT_ADAPTER_WEBSOCKET_SERVER_LISTENER_H
-#define TRANSPORT_ADAPTER_WEBSOCKET_SERVER_LISTENER_H
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_LISTENER_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_LISTENER_H
 
 #include <boost/asio/thread_pool.hpp>
 #include "transport_manager/transport_adapter/client_connection_listener.h"
@@ -91,29 +91,29 @@ class WebSocketListener : public ClientConnectionListener {
  protected:
   bool Run();
   bool WaitForConnection();
-  bool WaitForSecureConnection();
   void StartSession(boost::system::error_code ec);
-  void StartSecureSession(boost::system::error_code ec);
   void Shutdown();
+
+  template <typename Connection>
+  void ProcessConnection(std::shared_ptr<Connection> connection,
+                         const DeviceSptr,
+                         const ApplicationHandle);
 
  private:
   TransportAdapterController* controller_;
   boost::asio::io_context ioc_;
-  boost::asio::io_context secure_ioc_;
   ssl::context ctx_;
   tcp::acceptor acceptor_;
   tcp::socket socket_;
-  tcp::acceptor secure_acceptor_;
-  tcp::socket secure_socket_;
   boost::asio::thread_pool io_pool_;
-  boost::asio::thread_pool secure_io_pool_;
   std::atomic_bool shutdown_;
-  std::vector<std::shared_ptr<Connection> > mConnectionList;
-  sync_primitives::Lock mConnectionListLock;
+  std::vector<std::shared_ptr<Connection> > connection_list_;
+  sync_primitives::Lock connection_list_lock;
   const TransportManagerSettings& settings_;
+  bool start_secure_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // TRANSPORT_ADAPTER_WEBSOCKET_SERVER_LISTENER_H
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_LISTENER_H
