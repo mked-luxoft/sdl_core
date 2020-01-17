@@ -45,12 +45,20 @@ namespace transport_manager_test {
 using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::ReturnRef;
 using namespace ::transport_manager;
 using namespace ::transport_manager::transport_adapter;
 
+namespace {
+const std::string kDefaultAddress = "127.0.0.1";
+const std::string kDefaultCertPath = "";
+const std::string kDefaultKeyPath = "";
+const std::string kDefaultCACertPath = "";
+}  // namespace
+
 class WebSocketListenerTest : public ::testing::Test {
  protected:
-  std::shared_ptr<WebSocketListener> ws_listener;
+  std::shared_ptr<WebSocketListener> ws_listener_;
   MockTransportManagerSettings mock_tm_settings_;
   MockTransportAdapterController mock_ta_controller_;
   std::shared_ptr<WSSampleClient> ws_client_;
@@ -58,24 +66,36 @@ class WebSocketListenerTest : public ::testing::Test {
  public:
   void SetUp() OVERRIDE {
     ON_CALL(mock_tm_settings_, websocket_server_address())
-        .WillByDefault(Return("127.0.0.1"));
+        .WillByDefault(ReturnRef(kDefaultAddress));
     ON_CALL(mock_tm_settings_, websocket_server_port())
-        .WillByDefault(Return("2020"));
+        .WillByDefault(Return(2020));
   }
 };
 
 TEST_F(WebSocketListenerTest, StartListening_ClientConnect_SUCCESS) {
-  ws_listener.reset();
-  ws_client_.reset();
-  ws_listener = std::make_shared<WebSocketListener>(nullptr, mock_tm_settings_);
+  ON_CALL(mock_tm_settings_, ws_server_cert_path())
+      .WillByDefault(ReturnRef(kDefaultCertPath));
+  ON_CALL(mock_tm_settings_, ws_server_key_path())
+      .WillByDefault(ReturnRef(kDefaultKeyPath));
+  ON_CALL(mock_tm_settings_, ws_server_ca_cert_path())
+      .WillByDefault(ReturnRef(kDefaultCACertPath));
+
+  //  ws_listener_.reset();
+  //  ws_client_.reset();
+  ws_listener_ =
+      std::make_shared<WebSocketListener>(nullptr, mock_tm_settings_);
   ws_client_ = std::make_shared<WSSampleClient>();
 
   EXPECT_CALL(mock_ta_controller_, AddDevice(_));
   //  EXPECT_CALL(mock_ta_controller_, ConnectDone(_, _));
   //  EXPECT_CALL(mock_ta_controller_, ConnectionCreated(_, _, _))
 
-  ws_listener->StartListening();
+  ws_listener_->StartListening();
+  sleep(1000);
   ws_client_->run();
+  sleep(1000);
+  ws_listener_->Terminate();
+  sleep(1000);
 }
 
 }  // namespace transport_manager_test

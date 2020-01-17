@@ -150,6 +150,7 @@ TransportAdapter::Error WebSocketListener::StartListening() {
 
 bool WebSocketListener::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  std::cout << "KEK!!!RUN ENTER!!!" << std::endl;
 
   bool is_connection_open = WaitForConnection();
   if (is_connection_open) {
@@ -163,11 +164,13 @@ bool WebSocketListener::Run() {
 
 bool WebSocketListener::WaitForConnection() {
   LOG4CXX_AUTO_TRACE(logger_);
+  std::cout << "KEK!!!WAITFORCONNECTIONENTER!!!" << std::endl;
   if (!shutdown_ && acceptor_.is_open()) {
     acceptor_.async_accept(
         socket_,
         std::bind(
             &WebSocketListener::StartSession, this, std::placeholders::_1));
+    std::cout << "KEK!!!WAITFORSTARTSESSION!!!" << std::endl;
     return true;
   }
   return false;
@@ -221,6 +224,8 @@ void WebSocketListener::StartSession(boost::system::error_code ec) {
     return;
   }
 
+  std::cout << "KEK!!!STARTSESSION!!!" << std::endl;
+
   if (shutdown_) {
     return;
   }
@@ -249,24 +254,33 @@ void WebSocketListener::StartSession(boost::system::error_code ec) {
     auto connection =
         std::make_shared<WebSocketConnection<WebSocketSession<> > >(
             device_uid, app_handle, std::move(socket_), controller_);
+    std::cout << "KEK!!!CONNECTION!!!" << std::endl;
     ProcessConnection(connection, device, app_handle);
+    std::cout << "KEK!!!PROCESSCONNECTION!!!" << std::endl;
   }
 }
 
 void WebSocketListener::Shutdown() {
   LOG4CXX_AUTO_TRACE(logger_);
+  std::cout << "KEK!!!ENTERSHUTDOWN!!!" << std::endl;
   if (false == shutdown_.exchange(true)) {
+    std::cout << "KEK!!!SHUTTINGDOWN!!!" << std::endl;
     ioc_.stop();
+    std::cout << "KEK!!!ioc.stop!!!" << std::endl;
     socket_.close();
+    std::cout << "KEK!!!socket.close!!!" << std::endl;
     boost::system::error_code ec;
     acceptor_.close(ec);
+    std::cout << "KEK!!!acceptor.close!!!" << std::endl;
 
     if (ec) {
       LOG4CXX_ERROR(logger_, "Acceptor closed with error: " << ec);
     }
 
     io_pool_.stop();
+    std::cout << "KEK!!!POOL STOP" << std::endl;
     io_pool_.join();
+    std::cout << "KEK!!!POOL JOIN!!!" << std::endl;
   }
 }
 

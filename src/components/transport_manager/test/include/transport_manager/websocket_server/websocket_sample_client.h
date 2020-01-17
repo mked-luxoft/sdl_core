@@ -29,7 +29,7 @@ class WSSampleClient : public std::enable_shared_from_this<WSSampleClient> {
 
   void run() {
     const auto host = "127.0.0.1";
-    const auto port = "66666";
+    const auto port = "2020";
     const auto target = "";
     boost::system::error_code ec;
 
@@ -38,15 +38,27 @@ class WSSampleClient : public std::enable_shared_from_this<WSSampleClient> {
       std::string str_err = "ErrorMessage: " + ec.message();
     }
 
+    std::cout << "KEK!!!!RESOLVED!!!!!" << std::endl;
+
     boost::asio::connect(ws_.next_layer(), results.begin(), results.end(), ec);
+    if (ec) {
+      std::string str_err = "ErrorMessage: " + ec.message();
+    }
+    std::cout << "KEK!!!!CONNECTED!!!!!" << std::endl;
 
     ws_.handshake(host, target, ec);
+    if (ec) {
+      std::string str_err = "ErrorMessage: " + ec.message();
+    }
+    std::cout << "KEK!!!!HANDSHAKE!!!!!" << std::endl;
     ws_.async_read(buffer_,
                    std::bind(&WSSampleClient::on_read,
-                             this,
+                             this->shared_from_this(),
                              std::placeholders::_1,
                              std::placeholders::_2));
+    std::cout << "KEK!!!!ASYNC_READ!!!!!" << std::endl;
     boost::asio::post(io_pool_, [&]() { ioc_.run(); });
+    std::cout << "KEK!!!!POST!!!!!" << std::endl;
   }
 
   void on_write(beast::error_code ec, std::size_t bytes_transferred) {
