@@ -73,6 +73,11 @@ std::vector<uint8_t> kBTUUID = {0x93,
                                 0xC8,
                                 0x22,
                                 0xA8};
+
+const uint16_t kPort = 12345u;
+const std::string kAdress = "127.0.0.1";
+const std::string kCertPath = "cert_path";
+const std::string kKeyPath = "key_path";
 }  // namespace
 
 TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
@@ -89,7 +94,7 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   EXPECT_CALL(transport_manager_settings, use_last_state())
       .WillRepeatedly(Return(false));
   EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
-      .WillRepeatedly(Return(12345u));
+      .WillRepeatedly(Return(kPort));
   std::string network_interface = "";
   EXPECT_CALL(transport_manager_settings,
               transport_manager_tcp_adapter_network_interface())
@@ -110,6 +115,18 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
       .WillRepeatedly(ReturnRef(dummy_parameter));
   EXPECT_CALL(transport_manager_settings, aoa_filter_serial_number())
       .WillRepeatedly(ReturnRef(dummy_parameter));
+
+  EXPECT_CALL(transport_manager_settings, websocket_server_address())
+      .WillRepeatedly(ReturnRef(kAdress));
+  EXPECT_CALL(transport_manager_settings, websocket_server_port())
+      .WillRepeatedly(Return(kPort));
+  EXPECT_CALL(transport_manager_settings, ws_server_cert_path())
+      .WillRepeatedly(ReturnRef(kCertPath));
+  EXPECT_CALL(transport_manager_settings, ws_server_key_path())
+      .WillRepeatedly(ReturnRef(kKeyPath));
+  EXPECT_CALL(transport_manager_settings, ws_server_ca_cert_path())
+      .WillRepeatedly(ReturnRef(kCertPath));
+
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }
@@ -123,7 +140,7 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   Json::Value custom_dictionary;
   Json::Value tcp_device;
   tcp_device[kDeviceName] = "unique_tcp_device_name";
-  tcp_device[kDeviceAddress] = "127.0.0.1";
+  tcp_device[kDeviceAddress] = kAdress;
   tcp_device[kDeviceApplications][0][kApplicationPort] = kApplicationPortValue;
   Json::Value bluetooth_device;
   bluetooth_device[kDeviceName] = "unique_bluetooth_device_name";
@@ -140,13 +157,25 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   EXPECT_CALL(transport_manager_settings, use_last_state())
       .WillRepeatedly(Return(true));
   EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
-      .WillRepeatedly(Return(12345u));
+      .WillRepeatedly(Return(1u));
   std::string network_interface = "";
   EXPECT_CALL(transport_manager_settings,
               transport_manager_tcp_adapter_network_interface())
       .WillRepeatedly(ReturnRef(network_interface));
   EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
       .WillRepeatedly(Return(kBTUUID.data()));
+
+  EXPECT_CALL(transport_manager_settings, websocket_server_address())
+      .WillRepeatedly(ReturnRef(kAdress));
+  EXPECT_CALL(transport_manager_settings, websocket_server_port())
+      .WillRepeatedly(Return(kPort));
+  EXPECT_CALL(transport_manager_settings, ws_server_cert_path())
+      .WillRepeatedly(ReturnRef(kCertPath));
+  EXPECT_CALL(transport_manager_settings, ws_server_key_path())
+      .WillRepeatedly(ReturnRef(kKeyPath));
+  EXPECT_CALL(transport_manager_settings, ws_server_ca_cert_path())
+      .WillRepeatedly(ReturnRef(kCertPath));
+
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }
@@ -160,7 +189,7 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
   Json::Value custom_dictionary;
   Json::Value tcp_device;
   tcp_device[kDeviceName] = "unique_tcp_device_name";
-  tcp_device[kDeviceAddress] = "127.0.0.1";
+  tcp_device[kDeviceAddress] = kAdress;
   tcp_device[kDeviceApplications][0][kApplicationPort] = "1";
   Json::Value bluetooth_device;
   bluetooth_device[kDeviceName] = "unique_bluetooth_device_name";
@@ -184,6 +213,18 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
       .WillRepeatedly(ReturnRef(network_interface));
   EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
       .WillRepeatedly(Return(kBTUUID.data()));
+
+  EXPECT_CALL(transport_manager_settings, websocket_server_address())
+      .WillRepeatedly(ReturnRef(kAdress));
+  EXPECT_CALL(transport_manager_settings, websocket_server_port())
+      .WillRepeatedly(Return(kPort));
+  EXPECT_CALL(transport_manager_settings, ws_server_cert_path())
+      .WillRepeatedly(ReturnRef(kCertPath));
+  EXPECT_CALL(transport_manager_settings, ws_server_key_path())
+      .WillRepeatedly(ReturnRef(kKeyPath));
+  EXPECT_CALL(transport_manager_settings, ws_server_ca_cert_path())
+      .WillRepeatedly(ReturnRef(kCertPath));
+
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }
