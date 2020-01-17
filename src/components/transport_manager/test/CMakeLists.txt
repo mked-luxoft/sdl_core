@@ -91,3 +91,4 @@ endif()
 create_test("transport_manager_test" "${SOURCES}" "${LIBRARIES}")
 
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY "test_certs/" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_certs)

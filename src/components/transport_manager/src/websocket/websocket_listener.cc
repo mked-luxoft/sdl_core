@@ -157,7 +157,6 @@ bool WebSocketListener::Run() {
   } else {
     LOG4CXX_ERROR(logger_, "Connection is shutdown or acceptor isn't open");
   }
-
   return is_connection_open;
 }
 
