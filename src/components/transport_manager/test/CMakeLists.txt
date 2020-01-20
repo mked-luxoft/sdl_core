@@ -50,6 +50,7 @@ if (NOT BUILD_CLOUD_APP_SUPPORT)
   list(APPEND EXCLUDE_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/websocket_client_connection_test.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/sample_websocket_server.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_connection_test.cc
   )
 endif()
 
