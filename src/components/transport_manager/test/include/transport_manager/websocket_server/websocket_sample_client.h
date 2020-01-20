@@ -26,16 +26,24 @@ using tcp = boost::asio::ip::tcp;
 class WSSampleClient : public std::enable_shared_from_this<WSSampleClient> {
  public:
   WSSampleClient() : resolver_(ioc_), ws_(ioc_), ctx_(ssl::context::sslv23) {}
+  ~WSSampleClient() {
+    ioc_.stop();
+    ws_.lowest_layer().close();
+
+    io_pool_.stop();
+    io_pool_.join();
+  }
 
   void run() {
-    const auto host = "127.0.0.1";
-    const auto port = "2020";
-    const auto target = "";
+    const std::string host = "127.0.0.1";
+    const std::string port = "2020";
+    const std::string target = "ws://" + host + ":" + port;
     boost::system::error_code ec;
 
     const auto results = resolver_.resolve(host, port, ec);
     if (ec) {
       std::string str_err = "ErrorMessage: " + ec.message();
+      std::cout << "KEK!!!!" << str_err << std::endl;
     }
 
     std::cout << "KEK!!!!RESOLVED!!!!!" << std::endl;
@@ -43,12 +51,14 @@ class WSSampleClient : public std::enable_shared_from_this<WSSampleClient> {
     boost::asio::connect(ws_.next_layer(), results.begin(), results.end(), ec);
     if (ec) {
       std::string str_err = "ErrorMessage: " + ec.message();
+      std::cout << "KEK!!!!" << str_err << std::endl;
     }
     std::cout << "KEK!!!!CONNECTED!!!!!" << std::endl;
 
     ws_.handshake(host, target, ec);
     if (ec) {
       std::string str_err = "ErrorMessage: " + ec.message();
+      std::cout << "KEK!!!!" << str_err << std::endl;
     }
     std::cout << "KEK!!!!HANDSHAKE!!!!!" << std::endl;
     ws_.async_read(buffer_,
@@ -84,6 +94,7 @@ class WSSampleClient : public std::enable_shared_from_this<WSSampleClient> {
   void on_close(beast::error_code ec) {
     //    if (ec)
     //      return fail(ec, "close");
+    std::cout << "KEK!!!!on_close" << std::endl;
 
     // If we get here then the connection is closed gracefully
 
@@ -98,8 +109,8 @@ class WSSampleClient : public std::enable_shared_from_this<WSSampleClient> {
   ssl::context ctx_;
   boost::asio::thread_pool io_pool_;
   beast::flat_buffer buffer_;
-  std::string host_;
-  std::string text_;
+  //  std::string host_;
+  //  std::string text_;
 };
 
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SAMPLE_CLIENT

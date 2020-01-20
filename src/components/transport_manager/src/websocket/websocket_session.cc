@@ -65,6 +65,8 @@ WebSocketSession<ExecutorType>::~WebSocketSession() {}
 template <typename ExecutorType>
 void WebSocketSession<ExecutorType>::AsyncAccept() {
   LOG4CXX_AUTO_TRACE(ws_logger_);
+  std::cout << "KEK!!!WebSocketSession<ExecutorType>::AsyncAccept()"
+            << std::endl;
   ws_.async_accept(
       boost::asio::bind_executor(strand_,
                                  std::bind(&WebSocketSession::AsyncRead,

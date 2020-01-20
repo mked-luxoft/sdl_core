@@ -158,7 +158,7 @@ bool WebSocketListener::Run() {
   } else {
     LOG4CXX_ERROR(logger_, "Connection is shutdown or acceptor isn't open");
   }
-
+  std::cout << "KEK!!!RUN EXIT!!!" << std::endl;
   return is_connection_open;
 }
 
@@ -243,6 +243,8 @@ void WebSocketListener::StartSession(boost::system::error_code ec) {
 
   DeviceSptr device = controller_->AddDevice(websocket_device);
 
+  std::cout << "KEK!!!STARTSESSION!!!DEVICEADD!!!" << std::endl;
+
   LOG4CXX_INFO(logger_, "Connected client: " << device->name());
 
   if (start_secure_) {
@@ -251,6 +253,7 @@ void WebSocketListener::StartSession(boost::system::error_code ec) {
             device_uid, app_handle, std::move(socket_), ctx_, controller_);
     ProcessConnection(connection, device, app_handle);
   } else {
+    std::cout << "KEK!!!STARTSESSION!!!UNSECURE!!!" << std::endl;
     auto connection =
         std::make_shared<WebSocketConnection<WebSocketSession<> > >(
             device_uid, app_handle, std::move(socket_), controller_);

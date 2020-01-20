@@ -36,6 +36,7 @@
 #include "transport_manager/transport_adapter/mock_transport_adapter_controller.h"
 #include "transport_manager/websocket/websocket_listener.h"
 
+#include <thread>
 #include "transport_manager/websocket_server/websocket_sample_client.h"
 
 namespace test {
@@ -45,6 +46,8 @@ namespace transport_manager_test {
 using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::ReturnArg;
+using ::testing::ReturnPointee;
 using ::testing::ReturnRef;
 using namespace ::transport_manager;
 using namespace ::transport_manager::transport_adapter;
@@ -64,6 +67,10 @@ class WebSocketListenerTest : public ::testing::Test {
   std::shared_ptr<WSSampleClient> ws_client_;
 
  public:
+  WebSocketListenerTest() {}
+  //      : mock_tm_settings_(new MockTransportManagerSettings())
+  //      , mock_ta_controller_(new MockTransportAdapterController()) {}
+
   void SetUp() OVERRIDE {
     ON_CALL(mock_tm_settings_, websocket_server_address())
         .WillByDefault(ReturnRef(kDefaultAddress));
@@ -82,20 +89,24 @@ TEST_F(WebSocketListenerTest, StartListening_ClientConnect_SUCCESS) {
 
   //  ws_listener_.reset();
   //  ws_client_.reset();
-  ws_listener_ =
-      std::make_shared<WebSocketListener>(nullptr, mock_tm_settings_);
+  ws_listener_ = std::make_shared<WebSocketListener>(
+      &mock_ta_controller_, mock_tm_settings_, 2);
   ws_client_ = std::make_shared<WSSampleClient>();
 
-  EXPECT_CALL(mock_ta_controller_, AddDevice(_));
-  //  EXPECT_CALL(mock_ta_controller_, ConnectDone(_, _));
-  //  EXPECT_CALL(mock_ta_controller_, ConnectionCreated(_, _, _))
+  EXPECT_CALL(mock_ta_controller_, AddDevice(_)).WillOnce(ReturnArg<0>());
+  EXPECT_CALL(mock_ta_controller_, ConnectDone(_, _));
+  EXPECT_CALL(mock_ta_controller_, ConnectionCreated(_, _, _));
 
   ws_listener_->StartListening();
-  sleep(1000);
+  //  std::thread server_thread(
+  //      std::bind(&WebSocketListener::StartListening, ws_listener_.get()));
+  //  server_thread.detach();
+  sleep(1);
   ws_client_->run();
-  sleep(1000);
-  ws_listener_->Terminate();
-  sleep(1000);
+  sleep(1);
+  //  ws_client_
+  //  ws_listener_->Terminate();
+  //  server_thread.join();
 }
 
 }  // namespace transport_manager_test

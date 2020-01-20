@@ -126,6 +126,7 @@ void WebSocketConnection<Session>::DataReceive(
 template <typename Session>
 void WebSocketConnection<Session>::Run() {
   LOG4CXX_AUTO_TRACE(wsc_logger_);
+  std::cout << "KEK!!!WebSocketConnection<Session>::Run!!!" << std::endl;
   session_->AsyncAccept();
 }
 
