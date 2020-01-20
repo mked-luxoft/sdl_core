@@ -80,6 +80,7 @@ TransportAdapter::Error WebSocketListener::StartListening() {
       return TransportAdapter::FAIL;
     }
   } else {
+    std::cout << "KEK!!!!STARTSECURESERVICE" << std::endl;
     LOG4CXX_INFO(logger_, "WebSocket server will start secure connection");
     ctx_.add_verify_path(cert_path);
     ctx_.set_options(boost::asio::ssl::context::default_workarounds);
@@ -252,6 +253,7 @@ void WebSocketListener::StartSession(boost::system::error_code ec) {
         std::make_shared<WebSocketConnection<WebSocketSecureSession<> > >(
             device_uid, app_handle, std::move(socket_), ctx_, controller_);
     ProcessConnection(connection, device, app_handle);
+    std::cout << "KEK!!!STARTSESSION!!!SECURE!!!" << std::endl;
   } else {
     std::cout << "KEK!!!STARTSESSION!!!UNSECURE!!!" << std::endl;
     auto connection =

@@ -38,6 +38,7 @@
 
 #include <thread>
 #include "transport_manager/websocket_server/websocket_sample_client.h"
+template class WSSampleClient<websocket::stream<tcp::socket> >;
 
 namespace test {
 namespace components {
@@ -57,25 +58,35 @@ const std::string kDefaultAddress = "127.0.0.1";
 const std::string kDefaultCertPath = "";
 const std::string kDefaultKeyPath = "";
 const std::string kDefaultCACertPath = "";
+const uint32_t kDefaultPort = 2020;
+const std::string kWSPath = "ws://";
+const std::string kWSSPath = "wss://";
+const std::string kWSValidTarget =
+    kWSPath + kDefaultAddress + ":" + std::to_string(kDefaultPort);
+const std::string kWSSValidTarget =
+    kWSSPath + kDefaultAddress + ":" + std::to_string(kDefaultPort);
+const std::string kCACertPath = "./test_certs/ca-cert.pem";
+const std::string kClientCertPath = "./test_certs/client-cert.pem";
+const std::string kClientKeyPath = "./test_certs/client-key.pem";
 }  // namespace
 
 class WebSocketListenerTest : public ::testing::Test {
  protected:
   std::shared_ptr<WebSocketListener> ws_listener_;
-  MockTransportManagerSettings mock_tm_settings_;
   MockTransportAdapterController mock_ta_controller_;
-  std::shared_ptr<WSSampleClient> ws_client_;
+  MockTransportManagerSettings mock_tm_settings_;
+  std::shared_ptr<WSSampleClient<WS> > ws_client_;
+  std::shared_ptr<WSSampleClient<WSS> > wss_client_;
 
  public:
   WebSocketListenerTest() {}
-  //      : mock_tm_settings_(new MockTransportManagerSettings())
-  //      , mock_ta_controller_(new MockTransportAdapterController()) {}
+  ~WebSocketListenerTest() OVERRIDE {}
 
   void SetUp() OVERRIDE {
     ON_CALL(mock_tm_settings_, websocket_server_address())
         .WillByDefault(ReturnRef(kDefaultAddress));
     ON_CALL(mock_tm_settings_, websocket_server_port())
-        .WillByDefault(Return(2020));
+        .WillByDefault(Return(kDefaultPort));
   }
 };
 
@@ -87,26 +98,129 @@ TEST_F(WebSocketListenerTest, StartListening_ClientConnect_SUCCESS) {
   ON_CALL(mock_tm_settings_, ws_server_ca_cert_path())
       .WillByDefault(ReturnRef(kDefaultCACertPath));
 
-  //  ws_listener_.reset();
-  //  ws_client_.reset();
   ws_listener_ = std::make_shared<WebSocketListener>(
       &mock_ta_controller_, mock_tm_settings_, 2);
-  ws_client_ = std::make_shared<WSSampleClient>();
+  ws_client_ =
+      std::make_shared<WSSampleClient<WS> >(kDefaultAddress, kWSValidTarget);
 
   EXPECT_CALL(mock_ta_controller_, AddDevice(_)).WillOnce(ReturnArg<0>());
   EXPECT_CALL(mock_ta_controller_, ConnectDone(_, _));
   EXPECT_CALL(mock_ta_controller_, ConnectionCreated(_, _, _));
 
-  ws_listener_->StartListening();
   //  std::thread server_thread(
   //      std::bind(&WebSocketListener::StartListening, ws_listener_.get()));
-  //  server_thread.detach();
-  sleep(1);
-  ws_client_->run();
-  sleep(1);
-  //  ws_client_
-  //  ws_listener_->Terminate();
+  ws_listener_->StartListening();
+  usleep(1000);
+  EXPECT_TRUE(ws_client_->run());
+  usleep(1000);
+  ws_client_->stop();
   //  server_thread.join();
+  ws_listener_.reset();
+  ws_client_.reset();
+}
+
+TEST_F(WebSocketListenerTest, StartListening_ClientConnectSecure_SUCCESS) {
+  const std::string server_cert = "./test_certs/server-cert.pem";
+  const std::string server_key = "./test_certs/server-key.pem";
+  const std::string ca_cert = "./test_certs/ca-cert.pem";
+  ON_CALL(mock_tm_settings_, ws_server_cert_path())
+      .WillByDefault(ReturnRef(server_cert));
+  ON_CALL(mock_tm_settings_, ws_server_key_path())
+      .WillByDefault(ReturnRef(server_key));
+  ON_CALL(mock_tm_settings_, ws_server_ca_cert_path())
+      .WillByDefault(ReturnRef(ca_cert));
+
+  ws_listener_ = std::make_shared<WebSocketListener>(
+      &mock_ta_controller_, mock_tm_settings_, 2);
+  wss_client_ =
+      std::make_shared<WSSampleClient<WSS> >(kDefaultAddress, kWSSValidTarget);
+  wss_client_->set_security_settings(
+      kCACertPath, kClientCertPath, kClientKeyPath);
+
+  EXPECT_CALL(mock_ta_controller_, AddDevice(_)).WillOnce(ReturnArg<0>());
+  EXPECT_CALL(mock_ta_controller_, ConnectDone(_, _));
+  EXPECT_CALL(mock_ta_controller_, ConnectionCreated(_, _, _));
+
+  //  std::thread server_thread(
+  //      std::bind(&WebSocketListener::StartListening, ws_listener_.get()));
+  ws_listener_->StartListening();
+  sleep(1);
+  EXPECT_TRUE(wss_client_->run());
+  usleep(5000);
+  wss_client_->stop();
+  //  server_thread.join();
+  ws_listener_.reset();
+  wss_client_.reset();
+}
+
+TEST_F(WebSocketListenerTest,
+       StartListening_ClientConnectSecureInvalidTarget_FAIL) {
+  const std::string server_cert = "./test_certs/server-cert.pem";
+  const std::string server_key = "./test_certs/server-key.pem";
+  const std::string ca_cert = "./test_certs/ca-cert.pem";
+  ON_CALL(mock_tm_settings_, ws_server_cert_path())
+      .WillByDefault(ReturnRef(server_cert));
+  ON_CALL(mock_tm_settings_, ws_server_key_path())
+      .WillByDefault(ReturnRef(server_key));
+  ON_CALL(mock_tm_settings_, ws_server_ca_cert_path())
+      .WillByDefault(ReturnRef(ca_cert));
+
+  ws_listener_ = std::make_shared<WebSocketListener>(
+      &mock_ta_controller_, mock_tm_settings_, 2);
+  wss_client_ =
+      std::make_shared<WSSampleClient<WSS> >(kDefaultAddress, kWSValidTarget);
+  wss_client_->set_security_settings(
+      kCACertPath, kClientCertPath, kClientKeyPath);
+
+  EXPECT_CALL(mock_ta_controller_, AddDevice(_)).WillOnce(ReturnArg<0>());
+  EXPECT_CALL(mock_ta_controller_, ConnectDone(_, _));
+  EXPECT_CALL(mock_ta_controller_, ConnectionCreated(_, _, _));
+
+  //  std::thread server_thread(
+  //      std::bind(&WebSocketListener::StartListening, ws_listener_.get()));
+  ws_listener_->StartListening();
+  usleep(1000);
+  EXPECT_FALSE(wss_client_->run());
+  usleep(5000);
+  wss_client_->stop();
+  //  server_thread.join();
+  ws_listener_.reset();
+  wss_client_.reset();
+}
+
+TEST_F(WebSocketListenerTest,
+       StartListening_ClientConnectSecureInvalidCert_FAIL) {
+  const std::string server_cert = "./test_certs/server-cert.pem";
+  const std::string server_key = "./test_certs/server-key.pem";
+  const std::string ca_cert = "./test_certs/ca-cert.pem";
+  ON_CALL(mock_tm_settings_, ws_server_cert_path())
+      .WillByDefault(ReturnRef(server_cert));
+  ON_CALL(mock_tm_settings_, ws_server_key_path())
+      .WillByDefault(ReturnRef(server_key));
+  ON_CALL(mock_tm_settings_, ws_server_ca_cert_path())
+      .WillByDefault(ReturnRef(ca_cert));
+
+  ws_listener_ = std::make_shared<WebSocketListener>(
+      &mock_ta_controller_, mock_tm_settings_, 2);
+  wss_client_ =
+      std::make_shared<WSSampleClient<WSS> >(kDefaultAddress, kWSSValidTarget);
+  wss_client_->set_security_settings(kCACertPath,
+                                     "./test_certs/invalid_cert.pem",
+                                     "./test_certs/invalid_key.pem");
+
+  EXPECT_CALL(mock_ta_controller_, AddDevice(_)).WillOnce(ReturnArg<0>());
+  EXPECT_CALL(mock_ta_controller_, ConnectDone(_, _));
+  EXPECT_CALL(mock_ta_controller_, ConnectionCreated(_, _, _));
+
+  std::thread server_thread(
+      std::bind(&WebSocketListener::StartListening, ws_listener_.get()));
+  usleep(1000);
+  EXPECT_FALSE(wss_client_->run());
+  usleep(5000);
+  wss_client_->stop();
+  server_thread.join();
+  ws_listener_.reset();
+  wss_client_.reset();
 }
 
 }  // namespace transport_manager_test
