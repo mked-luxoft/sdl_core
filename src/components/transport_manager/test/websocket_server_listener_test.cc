@@ -61,6 +61,7 @@ const std::string kDefaultKeyPath = "";
 const std::string kDefaultCACertPath = "";
 const uint32_t kDefaultPort = 2020;
 const std::string kDefaultPortStr = "2020";
+const uint32_t kWrongPort = 1000;
 const std::string kCACertPath = "./test_certs/ca-cert.pem";
 const std::string kClientCertPath = "./test_certs/client-cert.pem";
 const std::string kClientKeyPath = "./test_certs/client-key.pem";
@@ -162,6 +163,76 @@ TEST_F(WebSocketListenerTest,
   EXPECT_EQ(wss_client->IsHandshakeSuccessful(), false);
   server_thread.join();
 }
+
+TEST_F(WebSocketListenerTest, StartListening_CertificateNotFound_Fail) {
+  const std::string server_cert = "./test_certs/server-cert.pem";
+  const std::string server_key = "./test_certs/server-key.pem";
+  const std::string ca_cert = "./not_valid_path/ca-cert.pem";
+  ON_CALL(mock_tm_settings_, ws_server_cert_path())
+      .WillByDefault(ReturnRef(server_cert));
+  ON_CALL(mock_tm_settings_, ws_server_key_path())
+      .WillByDefault(ReturnRef(server_key));
+  ON_CALL(mock_tm_settings_, ws_server_ca_cert_path())
+      .WillByDefault(ReturnRef(ca_cert));
+
+  ws_listener_ = std::make_shared<WebSocketListener>(
+      &mock_ta_controller_, mock_tm_settings_, 2);
+  ws_client_ =
+      std::make_shared<WSSampleClient<WS> >(kDefaultAddress, kWSValidTarget);
+
+  EXPECT_EQ(ws_listener_->StartListening(), TransportAdapter::Error::FAIL);
+}
+
+TEST_F(WebSocketListenerTest, StartListening_WrongConfig_Fail) {
+  const std::string server_cert = "./test_certs/server-cert.pem";
+
+  ON_CALL(mock_tm_settings_, ws_server_cert_path())
+      .WillByDefault(ReturnRef(server_cert));
+  ON_CALL(mock_tm_settings_, ws_server_key_path())
+      .WillByDefault(ReturnRef(kDefaultKeyPath));
+  EXPECT_CALL(mock_tm_settings_, ws_server_ca_cert_path()).WillOnce(ReturnRef(kDefaultCACertPath));
+
+  ws_listener_ = std::make_shared<WebSocketListener>(
+      &mock_ta_controller_, mock_tm_settings_, 2);
+  ws_client_ =
+      std::make_shared<WSSampleClient<WS> >(kDefaultAddress, kWSValidTarget);
+
+  EXPECT_EQ(ws_listener_->StartListening(), TransportAdapter::Error::FAIL);
+}
+
+TEST_F(WebSocketListenerTest, StartListening_OpenAcceptor_Fail) {
+  ON_CALL(mock_tm_settings_, ws_server_cert_path())
+      .WillByDefault(ReturnRef(kDefaultCertPath));
+  ON_CALL(mock_tm_settings_, ws_server_key_path())
+      .WillByDefault(ReturnRef(kDefaultKeyPath));
+  EXPECT_CALL(mock_tm_settings_, ws_server_ca_cert_path()).WillOnce(ReturnRef(kDefaultCACertPath));
+  EXPECT_CALL(mock_tm_settings_, websocket_server_port())
+        .WillOnce(Return(kWrongPort));
+
+  ws_listener_ = std::make_shared<WebSocketListener>(
+      &mock_ta_controller_, mock_tm_settings_, 2);
+  ws_client_ =
+      std::make_shared<WSSampleClient<WS> >(kDefaultAddress, kWSValidTarget);
+
+  EXPECT_EQ(ws_listener_->StartListening(), TransportAdapter::Error::FAIL);
+}
+
+TEST_F(WebSocketListenerTest, StartListening_SuccesRun_Fail) {
+  ON_CALL(mock_tm_settings_, ws_server_cert_path())
+      .WillByDefault(ReturnRef(kDefaultCertPath));
+  ON_CALL(mock_tm_settings_, ws_server_key_path())
+      .WillByDefault(ReturnRef(kDefaultKeyPath));
+  EXPECT_CALL(mock_tm_settings_, ws_server_ca_cert_path()).WillOnce(ReturnRef(kDefaultCACertPath));
+
+  ws_listener_ = std::make_shared<WebSocketListener>(
+      &mock_ta_controller_, mock_tm_settings_, 2);
+  ws_client_ =
+      std::make_shared<WSSampleClient<WS> >(kDefaultAddress, kWSValidTarget);
+
+  ws_listener_->Terminate();
+  EXPECT_EQ(ws_listener_->StartListening(), TransportAdapter::Error::FAIL);
+}
+
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
