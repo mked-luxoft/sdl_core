@@ -40,7 +40,6 @@
 
 #include <thread>
 #include "transport_manager/websocket_server/websocket_sample_client.h"
-template class WSSampleClient<websocket::stream<tcp::socket> >;
 
 namespace test {
 namespace components {
@@ -64,10 +63,6 @@ const uint32_t kDefaultPort = 2020;
 const std::string kDefaultPortStr = "2020";
 const std::string kWSPath = "ws://";
 const std::string kWSSPath = "wss://";
-const std::string kWSValidTarget =
-    kWSPath + kDefaultAddress + ":" + std::to_string(kDefaultPort);
-const std::string kWSSValidTarget =
-    kWSSPath + kDefaultAddress + ":" + std::to_string(kDefaultPort);
 const std::string kCACertPath = "./test_certs/ca-cert.pem";
 const std::string kClientCertPath = "./test_certs/client-cert.pem";
 const std::string kClientKeyPath = "./test_certs/client-key.pem";
@@ -169,7 +164,6 @@ TEST_F(WebSocketListenerTest,
   EXPECT_EQ(wss_client->is_handshake_successful(), false);
   server_thread.join();
 }
-
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test

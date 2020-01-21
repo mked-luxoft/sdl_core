@@ -1,3 +1,38 @@
+/*
+ * \file websocket_listener.h
+ * \brief WebSocketListener class header file.
+ *
+ * Copyright (c) 2020
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SAMPLE_CLIENT
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SAMPLE_CLIENT
 
@@ -15,6 +50,9 @@
 #include <iostream>
 #include <memory>
 #include <string>
+
+namespace transport_manager {
+namespace transport_adapter {
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -42,43 +80,9 @@ class WSSampleClient
                  const SecurityParams& params);
   ~WSSampleClient() {}
 
-  bool run() {
-    boost::system::error_code ec;
-    ctx_.set_verify_mode(ssl::verify_none);
+  bool run();
 
-    auto results = resolver_.resolve(host_, port_, ec);
-    if (ec) {
-      std::string str_err = "ErrorMessage: " + ec.message();
-      std::cout << "KEK!!!!" << str_err << std::endl;
-    }
-
-    std::cout << "KEK!!!!RESOLVED!!!!!" << std::endl;
-
-    if (!connect(results)) {
-      return false;
-    }
-
-    std::cout << "KEK!!!!CONNECTED!!!!!" << std::endl;
-
-    if (!handshake(host_, "/")) {
-      return false;
-    }
-
-    std::cout << "KEK!!!!HANDSHAKE!!!!!" << std::endl;
-    ws_->async_read(buffer_,
-                    std::bind(&WSSampleClient::on_read,
-                              this->shared_from_this(),
-                              std::placeholders::_1,
-                              std::placeholders::_2));
-    std::cout << "KEK!!!!ASYNC_READ!!!!!" << std::endl;
-    boost::asio::post(io_pool_, [&]() { ioc_.run(); });
-    std::cout << "KEK!!!!POST!!!!!" << std::endl;
-    return true;
-  }
-
-  void on_read(beast::error_code ec, std::size_t bytes_transferred) {
-    boost::ignore_unused(bytes_transferred);
-  }
+  void on_read(beast::error_code ec, std::size_t bytes_transferred);
 
   bool connect(tcp::resolver::results_type& results);
 
@@ -87,6 +91,7 @@ class WSSampleClient
   void on_handshake_timeout();
 
   bool is_handshake_successful() const;
+
   void stop();
 
  private:
@@ -96,139 +101,12 @@ class WSSampleClient
   std::unique_ptr<Stream> ws_;
   boost::asio::thread_pool io_pool_;
   beast::flat_buffer buffer_;
-  bool secure_;
   std::string host_;
   std::string port_;
   std::atomic_bool handshake_successful_;
 };
 
-template <>
-WSSampleClient<WS>::WSSampleClient(const std::string& host,
-                                   const std::string& port)
-    : resolver_(ioc_)
-    , ctx_(ssl::context::sslv23_client)
-    , ws_(new WS(ioc_))
-    , secure_(false)
-    , host_(host)
-    , port_(port) {}
-
-template <>
-bool WSSampleClient<WS>::connect(tcp::resolver::results_type& results) {
-  boost::system::error_code ec;
-  boost::asio::connect(ws_->next_layer(), results.begin(), results.end(), ec);
-  if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
-    return false;
-  }
-  return true;
-}
-
-template <>
-bool WSSampleClient<WSS>::connect(tcp::resolver::results_type& results) {
-  boost::system::error_code ec;
-  boost::asio::connect(ws_->lowest_layer(), results.begin(), results.end(), ec);
-  if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
-    return false;
-  }
-  return true;
-}
-
-template <>
-bool WSSampleClient<WS>::handshake(const std::string& host,
-                                   const std::string& target) {
-  boost::system::error_code ec;
-  ws_->handshake(host, target, ec);
-  if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
-    return false;
-  }
-  return true;
-}
-
-template <>
-void WSSampleClient<WS>::stop() {
-  ioc_.stop();
-  ws_->lowest_layer().close();
-
-  io_pool_.stop();
-  io_pool_.join();
-}
-
-template <>
-bool WSSampleClient<WSS>::handshake(const std::string& host,
-                                    const std::string& target) {
-  std::cout << "KEK!!!!SECUREHANDSAKE!!!" << std::endl;
-  boost::system::error_code ec;
-
-  ws_->next_layer().handshake(ssl::stream_base::client, ec);
-  if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
-    return false;
-  }
-
-  ws_->handshake(host, target, ec);
-  if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
-    return false;
-  }
-
-  handshake_successful_ = true;
-  return true;
-}
-
-template <>
-void WSSampleClient<WSS>::stop() {
-  ioc_.stop();
-  ws_->next_layer().next_layer().shutdown(
-      boost::asio::ip::tcp::socket::shutdown_both);
-  ws_->lowest_layer().close();
-
-  io_pool_.stop();
-  io_pool_.join();
-}
-
-template <>
-void WSSampleClient<WSS>::on_handshake_timeout() {
-  std::cout << "KEK!!!HANDSHAKETIMEOUT!!!" << std::endl;
-
-  if (!handshake_successful_) {
-    stop();
-  }
-}
-
-template <>
-bool WSSampleClient<WSS>::is_handshake_successful() const {
-  return handshake_successful_;
-}
-
-template <>
-WSSampleClient<websocket::stream<ssl::stream<tcp::socket> > >::WSSampleClient(
-    const std::string& host,
-    const std::string& port,
-    const SecurityParams& params)
-    : resolver_(ioc_)
-    , ctx_(ssl::context::sslv23_client)
-    , ws_(nullptr)
-    , io_pool_(1)
-    , secure_(true)
-    , host_(host)
-    , port_(port)
-    , handshake_successful_(false) {
-  ctx_.set_verify_mode(ssl::context::verify_peer);
-  ctx_.load_verify_file(params.ca_cert_);
-  ctx_.use_certificate_chain_file(params.client_cert_);
-  ctx_.use_private_key_file(params.client_key_, boost::asio::ssl::context::pem);
-
-  ws_.reset(new WSS(ioc_, ctx_));
-}
-
-// template class WSSampleClient<websocket::stream<tcp::socket> >;
-// template class WSSampleClient<websocket::stream<ssl::stream<tcp::socket> > >;
+}  // namespace transport_adapter
+}  // namespace transport_manager
 
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SAMPLE_CLIENT
