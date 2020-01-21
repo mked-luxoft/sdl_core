@@ -67,7 +67,7 @@ WSSampleClient<WS>::WSSampleClient(const std::string& host,
     , port_(port) {}
 
 template <typename Stream>
-bool WSSampleClient<Stream>::run() {
+bool WSSampleClient<Stream>::Run() {
   boost::system::error_code ec;
   ctx_.set_verify_mode(ssl::verify_none);
 
@@ -79,19 +79,19 @@ bool WSSampleClient<Stream>::run() {
 
   std::cout << "KEK!!!!RESOLVED!!!!!" << std::endl;
 
-  if (!connect(results)) {
+  if (!Connect(results)) {
     return false;
   }
 
   std::cout << "KEK!!!!CONNECTED!!!!!" << std::endl;
 
-  if (!handshake(host_, "/")) {
+  if (!Handshake(host_, "/")) {
     return false;
   }
 
   std::cout << "KEK!!!!HANDSHAKE!!!!!" << std::endl;
   ws_->async_read(buffer_,
-                  std::bind(&WSSampleClient::on_read,
+                  std::bind(&WSSampleClient::OnRead,
                             this->shared_from_this(),
                             std::placeholders::_1,
                             std::placeholders::_2));
@@ -102,13 +102,13 @@ bool WSSampleClient<Stream>::run() {
 }
 
 template <typename Stream>
-void WSSampleClient<Stream>::on_read(beast::error_code ec,
-                                     std::size_t bytes_transferred) {
+void WSSampleClient<Stream>::OnRead(beast::error_code ec,
+                                    std::size_t bytes_transferred) {
   boost::ignore_unused(bytes_transferred);
 }
 
 template <>
-bool WSSampleClient<WS>::connect(tcp::resolver::results_type& results) {
+bool WSSampleClient<WS>::Connect(tcp::resolver::results_type& results) {
   boost::system::error_code ec;
   boost::asio::connect(ws_->next_layer(), results.begin(), results.end(), ec);
   if (ec) {
@@ -120,7 +120,7 @@ bool WSSampleClient<WS>::connect(tcp::resolver::results_type& results) {
 }
 
 template <>
-bool WSSampleClient<WSS>::connect(tcp::resolver::results_type& results) {
+bool WSSampleClient<WSS>::Connect(tcp::resolver::results_type& results) {
   boost::system::error_code ec;
   boost::asio::connect(ws_->lowest_layer(), results.begin(), results.end(), ec);
   if (ec) {
@@ -132,7 +132,7 @@ bool WSSampleClient<WSS>::connect(tcp::resolver::results_type& results) {
 }
 
 template <>
-bool WSSampleClient<WS>::handshake(const std::string& host,
+bool WSSampleClient<WS>::Handshake(const std::string& host,
                                    const std::string& target) {
   boost::system::error_code ec;
   ws_->handshake(host, target, ec);
@@ -145,7 +145,7 @@ bool WSSampleClient<WS>::handshake(const std::string& host,
 }
 
 template <>
-void WSSampleClient<WS>::stop() {
+void WSSampleClient<WS>::Stop() {
   ioc_.stop();
   ws_->lowest_layer().close();
 
@@ -154,7 +154,7 @@ void WSSampleClient<WS>::stop() {
 }
 
 template <>
-bool WSSampleClient<WSS>::handshake(const std::string& host,
+bool WSSampleClient<WSS>::Handshake(const std::string& host,
                                     const std::string& target) {
   std::cout << "KEK!!!!SECUREHANDSAKE!!!" << std::endl;
   boost::system::error_code ec;
@@ -178,7 +178,7 @@ bool WSSampleClient<WSS>::handshake(const std::string& host,
 }
 
 template <>
-void WSSampleClient<WSS>::stop() {
+void WSSampleClient<WSS>::Stop() {
   ioc_.stop();
   ws_->next_layer().next_layer().shutdown(
       boost::asio::ip::tcp::socket::shutdown_both);
@@ -189,16 +189,16 @@ void WSSampleClient<WSS>::stop() {
 }
 
 template <>
-void WSSampleClient<WSS>::on_handshake_timeout() {
+void WSSampleClient<WSS>::OnHandshakeTimeout() {
   std::cout << "KEK!!!HANDSHAKETIMEOUT!!!" << std::endl;
 
   if (!handshake_successful_) {
-    stop();
+    Stop();
   }
 }
 
 template <>
-bool WSSampleClient<WSS>::is_handshake_successful() const {
+bool WSSampleClient<WSS>::IsHandshakeSuccessful() const {
   return handshake_successful_;
 }
 

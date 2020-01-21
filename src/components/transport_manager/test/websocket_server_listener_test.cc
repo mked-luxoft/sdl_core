@@ -61,14 +61,12 @@ const std::string kDefaultKeyPath = "";
 const std::string kDefaultCACertPath = "";
 const uint32_t kDefaultPort = 2020;
 const std::string kDefaultPortStr = "2020";
-const std::string kWSPath = "ws://";
-const std::string kWSSPath = "wss://";
 const std::string kCACertPath = "./test_certs/ca-cert.pem";
 const std::string kClientCertPath = "./test_certs/client-cert.pem";
 const std::string kClientKeyPath = "./test_certs/client-key.pem";
-const std::string server_cert = "./test_certs/server-cert.pem";
-const std::string server_key = "./test_certs/server-key.pem";
-const std::string ca_cert = "./test_certs/ca-cert.pem";
+const std::string kServerCert = "./test_certs/server-cert.pem";
+const std::string kServerKey = "./test_certs/server-key.pem";
+const std::string kCACert = "./test_certs/ca-cert.pem";
 }  // namespace
 
 class WebSocketListenerTest : public ::testing::Test {
@@ -86,11 +84,11 @@ class WebSocketListenerTest : public ::testing::Test {
     ON_CALL(mock_tm_settings_, websocket_server_port())
         .WillByDefault(Return(kDefaultPort));
     ON_CALL(mock_tm_settings_, ws_server_cert_path())
-        .WillByDefault(ReturnRef(server_cert));
+        .WillByDefault(ReturnRef(kServerCert));
     ON_CALL(mock_tm_settings_, ws_server_key_path())
-        .WillByDefault(ReturnRef(server_key));
+        .WillByDefault(ReturnRef(kServerKey));
     ON_CALL(mock_tm_settings_, ws_server_ca_cert_path())
-        .WillByDefault(ReturnRef(ca_cert));
+        .WillByDefault(ReturnRef(kCACert));
   }
 };
 
@@ -114,8 +112,8 @@ TEST_F(WebSocketListenerTest, StartListening_ClientConnect_SUCCESS) {
   std::thread server_thread(
       std::bind(&WebSocketListener::StartListening, ws_listener.get()));
   sleep(1);
-  EXPECT_TRUE(ws_client->run());
-  ws_client->stop();
+  EXPECT_TRUE(ws_client->Run());
+  ws_client->Stop();
   server_thread.join();
 }
 
@@ -133,8 +131,8 @@ TEST_F(WebSocketListenerTest, StartListening_ClientConnectSecure_SUCCESS) {
   std::thread server_thread(
       std::bind(&WebSocketListener::StartListening, ws_listener.get()));
   sleep(1);
-  EXPECT_TRUE(wss_client->run());
-  wss_client->stop();
+  EXPECT_TRUE(wss_client->Run());
+  wss_client->Stop();
   server_thread.join();
 }
 
@@ -158,10 +156,10 @@ TEST_F(WebSocketListenerTest,
   timer::Timer handshake_timer(
       "HandshakeTimer",
       new ::timer::TimerTaskImpl<WSSampleClient<WSS> >(
-          wss_client.get(), &WSSampleClient<WSS>::on_handshake_timeout));
+          wss_client.get(), &WSSampleClient<WSS>::OnHandshakeTimeout));
   handshake_timer.Start(3000, timer::kSingleShot);
-  wss_client->run();
-  EXPECT_EQ(wss_client->is_handshake_successful(), false);
+  wss_client->Run();
+  EXPECT_EQ(wss_client->IsHandshakeSuccessful(), false);
   server_thread.join();
 }
 }  // namespace transport_manager_test

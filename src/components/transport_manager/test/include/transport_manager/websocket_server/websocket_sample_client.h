@@ -80,19 +80,19 @@ class WSSampleClient
                  const SecurityParams& params);
   ~WSSampleClient() {}
 
-  bool run();
+  bool Run();
 
-  void on_read(beast::error_code ec, std::size_t bytes_transferred);
+  void OnRead(beast::error_code ec, std::size_t bytes_transferred);
 
-  bool connect(tcp::resolver::results_type& results);
+  bool Connect(tcp::resolver::results_type& results);
 
-  bool handshake(const std::string& host, const std::string& target);
+  bool Handshake(const std::string& host, const std::string& target);
 
-  void on_handshake_timeout();
+  void OnHandshakeTimeout();
 
-  bool is_handshake_successful() const;
+  bool IsHandshakeSuccessful() const;
 
-  void stop();
+  void Stop();
 
  private:
   asio::io_context ioc_;
