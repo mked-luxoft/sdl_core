@@ -132,10 +132,9 @@ TEST_F(WebSocketListenerTest, StartListening_ClientConnectSecure_SUCCESS) {
 
   ws_listener_ = std::make_shared<WebSocketListener>(
       &mock_ta_controller_, mock_tm_settings_, 2);
-  wss_client_ =
-      std::make_shared<WSSampleClient<WSS> >(kDefaultAddress, kWSSValidTarget);
-  wss_client_->set_security_settings(
-      kCACertPath, kClientCertPath, kClientKeyPath);
+  const SecurityParams params{kCACertPath, kClientCertPath, kClientKeyPath};
+  wss_client_ = std::make_shared<WSSampleClient<WSS> >(
+      kDefaultAddress, kWSSValidTarget, params);
 
   EXPECT_CALL(mock_ta_controller_, AddDevice(_)).WillOnce(ReturnArg<0>());
   EXPECT_CALL(mock_ta_controller_, ConnectDone(_, _));
@@ -167,10 +166,9 @@ TEST_F(WebSocketListenerTest,
 
   ws_listener_ = std::make_shared<WebSocketListener>(
       &mock_ta_controller_, mock_tm_settings_, 2);
-  wss_client_ =
-      std::make_shared<WSSampleClient<WSS> >(kDefaultAddress, kWSValidTarget);
-  wss_client_->set_security_settings(
-      kCACertPath, kClientCertPath, kClientKeyPath);
+  const SecurityParams params{kCACertPath, kClientCertPath, kClientKeyPath};
+  wss_client_ = std::make_shared<WSSampleClient<WSS> >(
+      kDefaultAddress, kWSValidTarget, params);
 
   EXPECT_CALL(mock_ta_controller_, AddDevice(_)).WillOnce(ReturnArg<0>());
   EXPECT_CALL(mock_ta_controller_, ConnectDone(_, _));
@@ -202,11 +200,11 @@ TEST_F(WebSocketListenerTest,
 
   ws_listener_ = std::make_shared<WebSocketListener>(
       &mock_ta_controller_, mock_tm_settings_, 2);
-  wss_client_ =
-      std::make_shared<WSSampleClient<WSS> >(kDefaultAddress, kWSSValidTarget);
-  wss_client_->set_security_settings(kCACertPath,
-                                     "./test_certs/invalid_cert.pem",
-                                     "./test_certs/invalid_key.pem");
+  const SecurityParams params{kCACertPath,
+                              "./test_certs/invalid_cert.pem",
+                              "./test_certs/invalid_key.pem"};
+  wss_client_ = std::make_shared<WSSampleClient<WSS> >(
+      kDefaultAddress, kWSSValidTarget, params);
 
   EXPECT_CALL(mock_ta_controller_, AddDevice(_)).WillOnce(ReturnArg<0>());
   EXPECT_CALL(mock_ta_controller_, ConnectDone(_, _));
@@ -215,7 +213,7 @@ TEST_F(WebSocketListenerTest,
   std::thread server_thread(
       std::bind(&WebSocketListener::StartListening, ws_listener_.get()));
   usleep(1000);
-  EXPECT_FALSE(wss_client_->run());
+  wss_client_->run();
   usleep(5000);
   wss_client_->stop();
   server_thread.join();

@@ -33,16 +33,25 @@ using tcp = boost::asio::ip::tcp;
 using WS = websocket::stream<tcp::socket>;
 using WSS = websocket::stream<ssl::stream<tcp::socket> >;
 
+struct SecurityParams {
+  std::string ca_cert_;
+  std::string client_cert_;
+  std::string client_key_;
+};
+
 template <typename Stream = WS>
 class WSSampleClient
     : public std::enable_shared_from_this<WSSampleClient<Stream> > {
  public:
   WSSampleClient(const std::string& host, const std::string& target);
+  WSSampleClient(const std::string& host,
+                 const std::string& target,
+                 const SecurityParams& params);
   ~WSSampleClient() {}
 
   void stop() {
     ioc_.stop();
-    ws_.lowest_layer().close();
+    ws_->lowest_layer().close();
 
     io_pool_.stop();
     io_pool_.join();
@@ -76,11 +85,11 @@ class WSSampleClient
     }
 
     std::cout << "KEK!!!!HANDSHAKE!!!!!" << std::endl;
-    ws_.async_read(buffer_,
-                   std::bind(&WSSampleClient::on_read,
-                             this->shared_from_this(),
-                             std::placeholders::_1,
-                             std::placeholders::_2));
+    ws_->async_read(buffer_,
+                    std::bind(&WSSampleClient::on_read,
+                              this->shared_from_this(),
+                              std::placeholders::_1,
+                              std::placeholders::_2));
     std::cout << "KEK!!!!ASYNC_READ!!!!!" << std::endl;
     boost::asio::post(io_pool_, [&]() { ioc_.run(); });
     std::cout << "KEK!!!!POST!!!!!" << std::endl;
@@ -91,11 +100,11 @@ class WSSampleClient
     boost::ignore_unused(bytes_transferred);
 
     // Read a message into our buffer
-    ws_.async_read(buffer_,
-                   std::bind(&WSSampleClient::on_read,
-                             this->shared_from_this(),
-                             std::placeholders::_1,
-                             std::placeholders::_2));
+    ws_->async_read(buffer_,
+                    std::bind(&WSSampleClient::on_read,
+                              this->shared_from_this(),
+                              std::placeholders::_1,
+                              std::placeholders::_2));
   }
 
   void on_read(beast::error_code ec, std::size_t bytes_transferred) {
@@ -137,15 +146,12 @@ class WSSampleClient
   asio::io_context ioc_;
   tcp::resolver resolver_;
   ssl::context ctx_;
-  Stream ws_;
-  //  websocket::stream<ssl::stream<tcp::socket> > wss_;
+  std::unique_ptr<Stream> ws_;
   boost::asio::thread_pool io_pool_;
   beast::flat_buffer buffer_;
   bool secure_;
   std::string host_;
   std::string target_;
-  //  std::string host_;
-  //  std::string text_;
 };
 
 template <>
@@ -153,7 +159,7 @@ WSSampleClient<WS>::WSSampleClient(const std::string& host,
                                    const std::string& target)
     : resolver_(ioc_)
     , ctx_(ssl::context::sslv23_client)
-    , ws_(ioc_)
+    , ws_(new WS(ioc_))
     , secure_(false)
     , host_(host)
     , target_(target) {}
@@ -161,7 +167,7 @@ WSSampleClient<WS>::WSSampleClient(const std::string& host,
 template <>
 bool WSSampleClient<WS>::connect(tcp::resolver::results_type& results) {
   boost::system::error_code ec;
-  boost::asio::connect(ws_.next_layer(), results.begin(), results.end(), ec);
+  boost::asio::connect(ws_->next_layer(), results.begin(), results.end(), ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     std::cout << "KEK!!!!" << str_err << std::endl;
@@ -173,7 +179,7 @@ bool WSSampleClient<WS>::connect(tcp::resolver::results_type& results) {
 template <>
 bool WSSampleClient<WSS>::connect(tcp::resolver::results_type& results) {
   boost::system::error_code ec;
-  boost::asio::connect(ws_.lowest_layer(), results.begin(), results.end(), ec);
+  boost::asio::connect(ws_->lowest_layer(), results.begin(), results.end(), ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     std::cout << "KEK!!!!" << str_err << std::endl;
@@ -186,7 +192,7 @@ template <>
 bool WSSampleClient<WS>::handshake(const std::string& host,
                                    const std::string& target) {
   boost::system::error_code ec;
-  ws_.handshake(host, target, ec);
+  ws_->handshake(host, target, ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     std::cout << "KEK!!!!" << str_err << std::endl;
@@ -201,14 +207,14 @@ bool WSSampleClient<WSS>::handshake(const std::string& host,
   std::cout << "KEK!!!!SECUREHANDSAKE!!!" << std::endl;
   boost::system::error_code ec;
 
-  ws_.next_layer().handshake(ssl::stream_base::client, ec);
+  ws_->next_layer().handshake(ssl::stream_base::client, ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     std::cout << "KEK!!!!" << str_err << std::endl;
     return false;
   }
 
-  ws_.handshake(host, target, ec);
+  ws_->handshake(host, target, ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
     std::cout << "KEK!!!!" << str_err << std::endl;
@@ -220,14 +226,23 @@ bool WSSampleClient<WSS>::handshake(const std::string& host,
 
 template <>
 WSSampleClient<websocket::stream<ssl::stream<tcp::socket> > >::WSSampleClient(
-    const std::string& host, const std::string& target)
+    const std::string& host,
+    const std::string& target,
+    const SecurityParams& params)
     : resolver_(ioc_)
     , ctx_(ssl::context::sslv23_client)
-    , ws_(ioc_, ctx_)
+    , ws_(nullptr)
     , io_pool_(1)
     , secure_(true)
     , host_(host)
-    , target_(target) {}
+    , target_(target) {
+  ctx_.set_verify_mode(ssl::context::verify_peer);
+  ctx_.load_verify_file(params.ca_cert_);
+  ctx_.use_certificate_chain_file(params.client_cert_);
+  ctx_.use_private_key_file(params.client_key_, boost::asio::ssl::context::pem);
+
+  ws_.reset(new WSS(ioc_, ctx_));
+}
 
 // template class WSSampleClient<websocket::stream<tcp::socket> >;
 // template class WSSampleClient<websocket::stream<ssl::stream<tcp::socket> > >;
