@@ -59,10 +59,8 @@ template <typename ExecutorType>
 void WebSocketSecureSession<ExecutorType>::AsyncHandshake(
     boost::system::error_code ec) {
   LOG4CXX_AUTO_TRACE(ws_logger_);
-  std::cout << "KEK!!!ASYNCHANDHSAKE!!!" << std::endl;
   if (ec) {
     auto str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
     LOG4CXX_ERROR(ws_logger_, str_err);
     // shutdown_ = true;
     // thread_delegate_->SetShutdown();

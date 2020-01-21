@@ -73,31 +73,24 @@ bool WSSampleClient<Stream>::Run() {
 
   auto results = resolver_.resolve(host_, port_, ec);
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
+    std::cout << "ErrorMessage: " + ec.message() << std::endl;
+    return false;
   }
-
-  std::cout << "KEK!!!!RESOLVED!!!!!" << std::endl;
 
   if (!Connect(results)) {
     return false;
   }
 
-  std::cout << "KEK!!!!CONNECTED!!!!!" << std::endl;
-
   if (!Handshake(host_, "/")) {
     return false;
   }
 
-  std::cout << "KEK!!!!HANDSHAKE!!!!!" << std::endl;
   ws_->async_read(buffer_,
                   std::bind(&WSSampleClient::OnRead,
                             this->shared_from_this(),
                             std::placeholders::_1,
                             std::placeholders::_2));
-  std::cout << "KEK!!!!ASYNC_READ!!!!!" << std::endl;
   boost::asio::post(io_pool_, [&]() { ioc_.run(); });
-  std::cout << "KEK!!!!POST!!!!!" << std::endl;
   return true;
 }
 
@@ -113,7 +106,6 @@ bool WSSampleClient<WS>::Connect(tcp::resolver::results_type& results) {
   boost::asio::connect(ws_->next_layer(), results.begin(), results.end(), ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
     return false;
   }
   return true;
@@ -125,7 +117,6 @@ bool WSSampleClient<WSS>::Connect(tcp::resolver::results_type& results) {
   boost::asio::connect(ws_->lowest_layer(), results.begin(), results.end(), ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
     return false;
   }
   return true;
@@ -138,7 +129,6 @@ bool WSSampleClient<WS>::Handshake(const std::string& host,
   ws_->handshake(host, target, ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
     return false;
   }
   return true;
@@ -156,20 +146,17 @@ void WSSampleClient<WS>::Stop() {
 template <>
 bool WSSampleClient<WSS>::Handshake(const std::string& host,
                                     const std::string& target) {
-  std::cout << "KEK!!!!SECUREHANDSAKE!!!" << std::endl;
   boost::system::error_code ec;
 
   ws_->next_layer().handshake(ssl::stream_base::client, ec);
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
+    std::cout << "ErrorMessage: " + ec.message() << std::endl;
     return false;
   }
 
   ws_->handshake(host, target, ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    std::cout << "KEK!!!!" << str_err << std::endl;
     return false;
   }
 
@@ -190,8 +177,6 @@ void WSSampleClient<WSS>::Stop() {
 
 template <>
 void WSSampleClient<WSS>::OnHandshakeTimeout() {
-  std::cout << "KEK!!!HANDSHAKETIMEOUT!!!" << std::endl;
-
   if (!handshake_successful_) {
     Stop();
   }

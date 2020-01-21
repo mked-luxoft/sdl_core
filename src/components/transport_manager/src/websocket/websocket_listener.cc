@@ -80,7 +80,6 @@ TransportAdapter::Error WebSocketListener::StartListening() {
       return TransportAdapter::FAIL;
     }
   } else {
-    std::cout << "KEK!!!!STARTSECURESERVICE" << std::endl;
     LOG4CXX_INFO(logger_, "WebSocket server will start secure connection");
     ctx_.add_verify_path(cert_path);
     ctx_.set_options(boost::asio::ssl::context::default_workarounds);
@@ -151,7 +150,6 @@ TransportAdapter::Error WebSocketListener::StartListening() {
 
 bool WebSocketListener::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::cout << "KEK!!!RUN ENTER!!!" << std::endl;
 
   bool is_connection_open = WaitForConnection();
   if (is_connection_open) {
@@ -159,19 +157,16 @@ bool WebSocketListener::Run() {
   } else {
     LOG4CXX_ERROR(logger_, "Connection is shutdown or acceptor isn't open");
   }
-  std::cout << "KEK!!!RUN EXIT!!!" << std::endl;
   return is_connection_open;
 }
 
 bool WebSocketListener::WaitForConnection() {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::cout << "KEK!!!WAITFORCONNECTIONENTER!!!" << std::endl;
   if (!shutdown_ && acceptor_.is_open()) {
     acceptor_.async_accept(
         socket_,
         std::bind(
             &WebSocketListener::StartSession, this, std::placeholders::_1));
-    std::cout << "KEK!!!WAITFORSTARTSESSION!!!" << std::endl;
     return true;
   }
   return false;
@@ -225,8 +220,6 @@ void WebSocketListener::StartSession(boost::system::error_code ec) {
     return;
   }
 
-  std::cout << "KEK!!!STARTSESSION!!!" << std::endl;
-
   if (shutdown_) {
     return;
   }
@@ -244,8 +237,6 @@ void WebSocketListener::StartSession(boost::system::error_code ec) {
 
   DeviceSptr device = controller_->AddDevice(websocket_device);
 
-  std::cout << "KEK!!!STARTSESSION!!!DEVICEADD!!!" << std::endl;
-
   LOG4CXX_INFO(logger_, "Connected client: " << device->name());
 
   if (start_secure_) {
@@ -253,39 +244,28 @@ void WebSocketListener::StartSession(boost::system::error_code ec) {
         std::make_shared<WebSocketConnection<WebSocketSecureSession<> > >(
             device_uid, app_handle, std::move(socket_), ctx_, controller_);
     ProcessConnection(connection, device, app_handle);
-    std::cout << "KEK!!!STARTSESSION!!!SECURE!!!" << std::endl;
   } else {
-    std::cout << "KEK!!!STARTSESSION!!!UNSECURE!!!" << std::endl;
     auto connection =
         std::make_shared<WebSocketConnection<WebSocketSession<> > >(
             device_uid, app_handle, std::move(socket_), controller_);
-    std::cout << "KEK!!!CONNECTION!!!" << std::endl;
     ProcessConnection(connection, device, app_handle);
-    std::cout << "KEK!!!PROCESSCONNECTION!!!" << std::endl;
   }
 }
 
 void WebSocketListener::Shutdown() {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::cout << "KEK!!!ENTERSHUTDOWN!!!" << std::endl;
   if (false == shutdown_.exchange(true)) {
-    std::cout << "KEK!!!SHUTTINGDOWN!!!" << std::endl;
     ioc_.stop();
-    std::cout << "KEK!!!ioc.stop!!!" << std::endl;
     socket_.close();
-    std::cout << "KEK!!!socket.close!!!" << std::endl;
     boost::system::error_code ec;
     acceptor_.close(ec);
-    std::cout << "KEK!!!acceptor.close!!!" << std::endl;
 
     if (ec) {
       LOG4CXX_ERROR(logger_, "Acceptor closed with error: " << ec);
     }
 
     io_pool_.stop();
-    std::cout << "KEK!!!POOL STOP" << std::endl;
     io_pool_.join();
-    std::cout << "KEK!!!POOL JOIN!!!" << std::endl;
   }
 }
 
