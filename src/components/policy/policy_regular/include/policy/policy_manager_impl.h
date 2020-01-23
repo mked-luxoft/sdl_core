@@ -683,7 +683,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Get a list of enabled local applications
    * @return enabled_apps List filled with the policy app id of each enabled
-   * cloud application
+   * local application
    */
   std::vector<std::string> GetEnabledLocalApps() const OVERRIDE;
 

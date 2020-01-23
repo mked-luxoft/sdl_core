@@ -1504,6 +1504,28 @@ bool CacheManager::GetAppProperties(const std::string& policy_app_id,
   return false;
 }
 
+std::vector<std::string> CacheManager::GetEnabledLocalApps() const {
+#if !defined(WEBSOCKET_SERVER_TRANSPORT_SUPPORT)
+  return std::vector<std::string>();
+#else
+  std::vector<std::string> enabled_apps;
+  const policy_table::ApplicationPolicies& app_policies =
+      pt_->policy_table.app_policies_section.apps;
+  for (const auto& app_policies_item : app_policies) {
+    const auto app_policy = app_policies_item.second;
+    // Local (WebEngine) applications
+    // should not have "endpoint" field
+    if (app_policy.endpoint.is_initialized()) {
+      continue;
+    }
+    if (app_policy.enabled.is_initialized() && *app_policy.enabled) {
+      enabled_apps.push_back(app_policies_item.first);
+    }
+  }
+  return enabled_apps;
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+}
+
 void CacheManager::InitCloudApp(const std::string& policy_app_id) {
   CACHE_MANAGER_CHECK_VOID();
   sync_primitives::AutoLock auto_lock(cache_lock_);

@@ -636,6 +636,13 @@ class PolicyManager : public usage_statistics::StatisticsManager,
                                 AppProperties& out_app_properties) const = 0;
 
   /**
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
+   */
+  virtual std::vector<std::string> GetEnabledLocalApps() const = 0;
+
+  /**
    * @ brief Initialize new cloud app in the policy table
    * @ param policy_app_id Application ID
    */

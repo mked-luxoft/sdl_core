@@ -181,8 +181,15 @@ class CacheManager : public CacheManagerInterface {
    * @param enabled_apps List filled with the policy app id of each enabled
    * cloud application
    */
-  virtual void GetEnabledCloudApps(
-      std::vector<std::string>& enabled_apps) const;
+  void GetEnabledCloudApps(
+      std::vector<std::string>& enabled_apps) const OVERRIDE;
+
+  /**
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id
+   * of each enabled local application
+   */
+  std::vector<std::string> GetEnabledLocalApps() const OVERRIDE;
 
   /**
    * @brief Get cloud app policy information, all fields that aren't set for a
