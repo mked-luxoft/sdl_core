@@ -82,6 +82,7 @@ class WebSocketConnection
 
  protected:
   void Shutdown();
+  void OnError();
 
  private:
   const DeviceUID device_uid_;
@@ -96,7 +97,8 @@ class WebSocketConnection
   class LoopThreadDelegate : public threads::ThreadDelegate {
    public:
     LoopThreadDelegate(MessageQueue<Message, AsyncQueue>* message_queue,
-                       DataWriteCallback data_write);
+                       DataWriteCallback data_write,
+                       OnIOErrorCallback on_io_error);
 
     virtual void threadMain() OVERRIDE;
     virtual void exitThreadMain() OVERRIDE;
@@ -109,6 +111,7 @@ class WebSocketConnection
     void DrainQueue();
     MessageQueue<Message, AsyncQueue>& message_queue_;
     DataWriteCallback data_write_;
+    OnIOErrorCallback on_io_error_;
   };
 
   LoopThreadDelegate* thread_delegate_;

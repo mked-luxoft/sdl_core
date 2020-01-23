@@ -50,6 +50,7 @@ using DataReceiveCallback =
     std::function<void(protocol_handler::RawMessagePtr)>;
 using DataWriteCallback = std::function<TransportAdapter::Error(
     protocol_handler::RawMessagePtr message)>;
+using OnIOErrorCallback = std::function<void()>;
 
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 namespace websocket =
@@ -67,12 +68,14 @@ class WebSocketSession
     : public std::enable_shared_from_this<WebSocketSession<ExecutorType> > {
  public:
   WebSocketSession(boost::asio::ip::tcp::socket socket,
-                   DataReceiveCallback dataReceive);
+                   DataReceiveCallback dataReceive,
+                   OnIOErrorCallback on_error);
 
 #ifdef ENABLE_SECURITY
   WebSocketSession(boost::asio::ip::tcp::socket socket,
                    ssl::context& ctx,
-                   DataReceiveCallback dataReceive);
+                   DataReceiveCallback dataReceive,
+                   OnIOErrorCallback on_error);
 #endif  // ENABLE_SECURITY
 
   virtual ~WebSocketSession();
@@ -95,6 +98,7 @@ class WebSocketSession
   boost::asio::strand<boost::asio::io_context::executor_type> strand_;
   boost::beast::flat_buffer buffer_;
   DataReceiveCallback data_receive_;
+  OnIOErrorCallback on_io_error_;
 };
 
 }  // namespace transport_adapter
