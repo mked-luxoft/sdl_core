@@ -72,6 +72,8 @@
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
 
+#include "smart_objects/enum_schema_item.h"
+
 namespace test {
 namespace components {
 namespace policy_handler_test {
@@ -271,6 +273,18 @@ class PolicyHandlerTest : public ::testing::Test {
     policy_table::AppHmiTypes hmi_types;
     hmi_types.push_back(hmi_type);
     return hmi_types;
+  }
+
+  void SetExpectationsAndCheckCloudAppPropertiesStatus(
+      const policy::AppProperties& app_properties,
+      const smart_objects::SmartObject& properties,
+      const policy::PolicyHandlerInterface::AppPropertiesState&
+          app_properties_state) {
+    EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+        .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
+    EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(kPolicyAppId_, _, _));
+    EXPECT_EQ(app_properties_state,
+              policy_handler_.GetCloudAppPropertiesStatus(properties));
   }
 };
 
@@ -2765,6 +2779,354 @@ TEST_F(PolicyHandlerTest, GetCloudAppParameters_AllProperties_SUCCESS) {
   EXPECT_EQ(app_properties.transport_type, out_app_properties.transport_type);
   EXPECT_EQ(app_properties.hybrid_app_preference,
             out_app_properties.hybrid_app_preference);
+}
+
+TEST_F(PolicyHandlerTest, SendOnAppPropertiesChangeNotification_SUCCESS) {
+  using namespace smart_objects;
+  auto notification = std::make_shared<SmartObject>(SmartType_Null);
+
+  ON_CALL(app_manager_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+
+  EXPECT_CALL(mock_message_helper_,
+              CreateOnAppPropertiesChangeNotification(kPolicyAppId_, _))
+      .WillOnce(Return(notification));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(notification, commands::Command::SOURCE_HMI));
+
+  policy_handler_.SendOnAppPropertiesChangeNotification(kPolicyAppId_);
+}
+
+TEST_F(PolicyHandlerTest, GetApplicationPolicyIDs_GetEmptyIDsVector_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  std::vector<std::string> app_ids_vector;
+  ON_CALL(*mock_policy_manager_, GetApplicationPolicyIDs())
+      .WillByDefault(Return(app_ids_vector));
+
+  EXPECT_CALL(*mock_policy_manager_, GetApplicationPolicyIDs());
+  EXPECT_EQ(app_ids_vector, policy_handler_.GetApplicationPolicyIDs());
+}
+
+TEST_F(PolicyHandlerTest,
+       GetApplicationPolicyIDs_GetIDFromAppIDsVectorWithWrongIDs_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  std::vector<std::string> app_ids_vector = {policy::kDefaultId,
+                                             policy::kPreDataConsentId,
+                                             policy::kDeviceId,
+                                             kPolicyAppId_};
+  ON_CALL(*mock_policy_manager_, GetApplicationPolicyIDs())
+      .WillByDefault(Return(app_ids_vector));
+
+  EXPECT_CALL(*mock_policy_manager_, GetApplicationPolicyIDs());
+
+  auto policy_ids = policy_handler_.GetApplicationPolicyIDs();
+  EXPECT_NE(app_ids_vector, policy_ids);
+  EXPECT_EQ(1u, policy_ids.size());
+  EXPECT_EQ(kPolicyAppId_, policy_ids[0]);
+}
+
+TEST_F(PolicyHandlerTest, CheckCloudAppEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  policy::AppProperties out_app_properties;
+  out_app_properties.enabled = true;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(out_app_properties), Return(true)));
+  EXPECT_TRUE(policy_handler_.CheckCloudAppEnabled(kPolicyAppId_));
+}
+
+TEST_F(PolicyHandlerTest, CheckCloudAppNotEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _));
+  EXPECT_FALSE(policy_handler_.CheckCloudAppEnabled(kPolicyAppId_));
+}
+
+TEST_F(PolicyHandlerTest, OnLocalAppAdded_SUCCESS) {
+  ChangePolicyManagerToMock();
+  EXPECT_CALL(*mock_policy_manager_, OnLocalAppAdded());
+  policy_handler_.OnLocalAppAdded();
+}
+
+TEST_F(PolicyHandlerTest, GetCloudAppPropertiesStatus_NoPropertiesChanged) {
+  ChangePolicyManagerToMock();
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(kPolicyAppId_, _, _))
+      .WillOnce(Return(false));
+  EXPECT_EQ(policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES,
+            policy_handler_.GetCloudAppPropertiesStatus(properties));
+}
+
+TEST_F(PolicyHandlerTest,
+       GetCloudAppPropertiesStatus_EnableFlagSwitchChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  policy::AppProperties app_properties;
+  app_properties.enabled = false;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::enabled] = !app_properties.enabled;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::ENABLED_FLAG_SWITCH);
+}
+
+TEST_F(PolicyHandlerTest,
+       GetCloudAppPropertiesStatus_EnableFlagSwitchNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  policy::AppProperties app_properties;
+  app_properties.enabled = false;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::enabled] = app_properties.enabled;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES);
+}
+
+TEST_F(PolicyHandlerTest,
+       GetCloudAppPropertiesStatus_AuthTokenChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentToken = "kCurrentToken";
+  const std::string kNewToken = "kNewToken";
+
+  policy::AppProperties app_properties;
+  app_properties.auth_token = kCurrentToken;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::auth_token] = kNewToken;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::AUTH_TOKEN_CHANGE);
+}
+
+TEST_F(PolicyHandlerTest,
+       GetCloudAppPropertiesStatus_AuthTokenNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentToken = "kCurrentToken";
+
+  policy::AppProperties app_properties;
+  app_properties.auth_token = kCurrentToken;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::auth_token] = app_properties.auth_token;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES);
+}
+
+TEST_F(PolicyHandlerTest,
+       GetCloudAppPropertiesStatus_TransportTypeChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentTransportType = "kCurrentTransportType";
+  const std::string kNewTransportType = "kNewTransportType";
+
+  policy::AppProperties app_properties;
+  app_properties.transport_type = kCurrentTransportType;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::cloud_transport_type] = kNewTransportType;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::
+          TRANSPORT_TYPE_CHANGE);
+}
+
+TEST_F(PolicyHandlerTest,
+       GetCloudAppPropertiesStatus_TransportTypeNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentTransportType = "kCurrentTransportType";
+
+  policy::AppProperties app_properties;
+  app_properties.transport_type = kCurrentTransportType;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::cloud_transport_type] = app_properties.transport_type;
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES);
+}
+
+TEST_F(PolicyHandlerTest, GetCloudAppPropertiesStatus_EndPointChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentEndPoint = "kCurrentEndPoint";
+  const std::string kNewEndPoint = "kNewEndPoint";
+
+  policy::AppProperties app_properties;
+  app_properties.endpoint = kCurrentEndPoint;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::endpoint] = kNewEndPoint;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::ENDPOINT_CHANGE);
+}
+
+TEST_F(PolicyHandlerTest,
+       GetCloudAppPropertiesStatus_EndPointNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kCurrentEndPoint = "kCurrentEndPoint";
+
+  policy::AppProperties app_properties;
+  app_properties.endpoint = kCurrentEndPoint;
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::endpoint] = app_properties.endpoint;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES);
+}
+
+TEST_F(PolicyHandlerTest, GetCloudAppPropertiesStatus_NicknameChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kFakeNickname = "fake_nickname";
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::nicknames] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  properties[strings::nicknames].asArray()->push_back(
+      smart_objects::SmartObject(kFakeNickname));
+
+  std::shared_ptr<policy::StringArray> nicknames =
+      std::make_shared<policy::StringArray>();
+
+  const auto expected_app_properties_state =
+      policy::PolicyHandlerInterface::AppPropertiesState::NICKNAMES_CHANGED;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(kPolicyAppId_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(*nicknames), Return(true)));
+  EXPECT_EQ(expected_app_properties_state,
+            policy_handler_.GetCloudAppPropertiesStatus(properties));
+}
+
+TEST_F(PolicyHandlerTest,
+       GetCloudAppPropertiesStatus_NicknameNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const std::string kFakeNickname = "fake_nickname";
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::nicknames] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  properties[strings::nicknames].asArray()->push_back(
+      smart_objects::SmartObject(kFakeNickname));
+
+  std::shared_ptr<policy::StringArray> nicknames =
+      std::make_shared<policy::StringArray>();
+  nicknames->push_back(kFakeNickname);
+
+  const auto expected_app_properties_state =
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(kPolicyAppId_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(*nicknames), Return(true)));
+  EXPECT_EQ(expected_app_properties_state,
+            policy_handler_.GetCloudAppPropertiesStatus(properties));
+}
+
+TEST_F(PolicyHandlerTest,
+       GetCloudAppPropertiesStatus_HybridAppChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const auto kCurrentHybridAppProperties =
+      mobile_apis::HybridAppPreference::eType::CLOUD;
+  const auto kNewHybridAppProperties =
+      mobile_apis::HybridAppPreference::eType::MOBILE;
+
+  policy::AppProperties app_properties;
+  smart_objects::EnumConversionHelper<mobile_apis::HybridAppPreference::eType>::
+      EnumToString(kCurrentHybridAppProperties,
+                   &app_properties.hybrid_app_preference);
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::hybrid_app_preference] = kNewHybridAppProperties;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::
+          HYBRYD_APP_PROPERTIES_CHANGED);
+}
+
+TEST_F(PolicyHandlerTest,
+       GetCloudAppPropertiesStatus_HybridAppNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  const auto kCurrentHybridAppProperties =
+      mobile_apis::HybridAppPreference::eType::CLOUD;
+
+  policy::AppProperties app_properties;
+  smart_objects::EnumConversionHelper<mobile_apis::HybridAppPreference::eType>::
+      EnumToString(kCurrentHybridAppProperties,
+                   &app_properties.hybrid_app_preference);
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::hybrid_app_preference] = kCurrentHybridAppProperties;
+
+  SetExpectationsAndCheckCloudAppPropertiesStatus(
+      app_properties,
+      properties,
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES);
+}
+
+TEST_F(PolicyHandlerTest, GetEnabledLocalApps_SUCCESS) {
+  ChangePolicyManagerToMock();
+  std::vector<std::string> enabled_local_apps;
+
+  EXPECT_CALL(*mock_policy_manager_, GetEnabledLocalApps())
+      .WillOnce(Return(enabled_local_apps));
+  EXPECT_EQ(enabled_local_apps, policy_handler_.GetEnabledLocalApps());
+
+  enabled_local_apps.push_back("local_app");
+  EXPECT_CALL(*mock_policy_manager_, GetEnabledLocalApps())
+      .WillOnce(Return(enabled_local_apps));
+  EXPECT_EQ(enabled_local_apps, policy_handler_.GetEnabledLocalApps());
 }
 
 }  // namespace policy_handler_test
