@@ -75,14 +75,12 @@ void BCGetAppPropertiesRequest::FillAppProperties(
 
   policy_handler_.GetInitialAppData(policy_app_id, &nicknames, &app_hmi_types);
 
-  if (!nicknames.empty()) {
-    smart_objects::SmartObject nicknames_array(smart_objects::SmartType_Array);
-    size_t i = 0;
-    for (const auto& nickname : nicknames) {
-      nicknames_array[i++] = nickname;
-    }
-    out_properties[strings::nicknames] = nicknames_array;
+  smart_objects::SmartObject nicknames_array(smart_objects::SmartType_Array);
+  size_t i = 0;
+  for (const auto& nickname : nicknames) {
+    nicknames_array[i++] = nickname;
   }
+  out_properties[strings::nicknames] = nicknames_array;
 
   if (!app_properties.auth_token.empty()) {
     out_properties[strings::auth_token] = app_properties.auth_token;
