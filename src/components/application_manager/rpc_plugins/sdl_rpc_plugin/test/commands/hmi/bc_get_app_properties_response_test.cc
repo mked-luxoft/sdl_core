@@ -33,9 +33,6 @@
 #include "hmi/bc_get_app_properties_response.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/commands_test.h"
-#include "application_manager/event_engine/event.h"
-#include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/smart_object_keys.h"
 #include "gtest/gtest.h"
 #include "smart_objects/smart_object.h"
 
@@ -46,11 +43,6 @@ namespace hmi_commands_test {
 namespace bc_get_app_properties_response {
 
 using sdl_rpc_plugin::commands::BCGetAppPropertiesResponse;
-using test::components::event_engine_test::MockEventDispatcher;
-using test::components::policy_test::MockPolicyHandlerInterface;
-using ::testing::_;
-using ::testing::NiceMock;
-using ::testing::ReturnRef;
 
 class BCGetAppPropertiesResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
