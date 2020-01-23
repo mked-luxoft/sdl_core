@@ -57,6 +57,10 @@ const std::string kTransportManager = "TransportManager";
 const std::string kTcpAdapter = "TcpAdapter";
 const std::string kBluetoothAdapter = "BluetoothAdapter";
 const std::string kDevices = "devices";
+const std::string kServerAddress = "127.0.0.1";
+const std::string kCertPath = "server_certificate.crt";
+const std::string kWSServerKeyPathKey = "WSServerKeyPath";
+const std::string kWSServerCACertPath = "WSServerCACertificatePath";
 std::vector<uint8_t> kBTUUID = {0x93,
                                 0x6D,
                                 0xA0,
@@ -75,6 +79,18 @@ std::vector<uint8_t> kBTUUID = {0x93,
                                 0xA8};
 }  // namespace
 
+void ExpectationsTransportManager(
+    MockTransportManagerSettings& transport_manager_settings) {
+  ON_CALL(transport_manager_settings, websocket_server_address())
+      .WillByDefault(ReturnRef(kServerAddress));
+  ON_CALL(transport_manager_settings, ws_server_cert_path())
+      .WillByDefault(ReturnRef(kCertPath));
+  ON_CALL(transport_manager_settings, ws_server_key_path())
+      .WillByDefault(ReturnRef(kWSServerKeyPathKey));
+  ON_CALL(transport_manager_settings, ws_server_ca_cert_path())
+      .WillByDefault(ReturnRef(kWSServerCACertPath));
+}
+
 TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
@@ -83,6 +99,7 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   NiceMock<MockLastState> mock_last_state;
   Json::Value custom_dictionary = Json::Value();
 
+  ExpectationsTransportManager(transport_manager_settings);
   ON_CALL(mock_last_state, get_dictionary())
       .WillByDefault(ReturnRef(custom_dictionary));
 
@@ -134,6 +151,7 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   custom_dictionary[kTransportManager][kBluetoothAdapter][kDevices][0] =
       bluetooth_device;
 
+  ExpectationsTransportManager(transport_manager_settings);
   ON_CALL(mock_last_state, get_dictionary())
       .WillByDefault(ReturnRef(custom_dictionary));
 
@@ -171,6 +189,7 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
   custom_dictionary[kTransportManager][kBluetoothAdapter][kDevices][0] =
       bluetooth_device;
 
+  ExpectationsTransportManager(transport_manager_settings);
   ON_CALL(mock_last_state, get_dictionary())
       .WillByDefault(ReturnRef(custom_dictionary));
 
