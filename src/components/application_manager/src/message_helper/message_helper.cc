@@ -1931,14 +1931,12 @@ MessageHelper::CreateOnAppPropertiesChangeNotification(
   properties[strings::policy_app_id] = policy_app_id;
   properties[strings::enabled] = app_properties.enabled;
 
-  if (!nicknames.empty()) {
-    smart_objects::SmartObject nicknames_array(smart_objects::SmartType_Array);
-    size_t i = 0;
-    for (std::string nickname : nicknames) {
-      nicknames_array[i++] = nickname;
-    }
-    properties[strings::nicknames] = nicknames_array;
+  smart_objects::SmartObject nicknames_array(smart_objects::SmartType_Array);
+  size_t i = 0;
+  for (const auto& nickname : nicknames) {
+    nicknames_array[i++] = nickname;
   }
+  properties[strings::nicknames] = nicknames_array;
 
   if (!app_properties.auth_token.empty()) {
     properties[strings::auth_token] = app_properties.auth_token;
