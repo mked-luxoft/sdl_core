@@ -120,7 +120,7 @@ TEST_F(BCGetAppPropertiesRequestTest, Run_PolicyAppId_Exist_SUCCESS) {
   (*msg)[strings::msg_params][strings::policy_app_id] = kPolicyAppId;
   auto command = CreateCommand<BCGetAppPropertiesRequest>(msg);
 
-  // Fills app properties by default test values
+  // Fills app properties with default test values
   EXPECT_CALL(mock_policy_handler_, GetAppProperties(kPolicyAppId, _))
       .WillOnce(DoAll(
           SetTestAppProperties(policy::AppProperties("",
@@ -131,7 +131,7 @@ TEST_F(BCGetAppPropertiesRequestTest, Run_PolicyAppId_Exist_SUCCESS) {
                                                      kHybridAppPreference)),
           Return(true)));
 
-  // Fills app nicknames by default test values
+  // Fills app nicknames with default test values
   EXPECT_CALL(mock_policy_handler_, GetInitialAppData(kPolicyAppId, _, _))
       .WillOnce(
           DoAll(SetTestNickNames(policy::StringArray{kNickname1, kNickname2}),
@@ -148,6 +148,7 @@ TEST_F(BCGetAppPropertiesRequestTest, Run_PolicyAppId_Exist_SUCCESS) {
                   kSource))
       .WillOnce(DoAll(SaveArg<0>(&message_to_hmi), Return(true)));
 
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   const smart_objects::SmartObject& sent_app_properties =
@@ -195,6 +196,7 @@ TEST_F(BCGetAppPropertiesRequestTest,
                   application_manager::commands::Command::SOURCE_SDL_TO_HMI))
       .WillOnce(Return(true));
 
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -223,6 +225,7 @@ TEST_F(
                   Command::SOURCE_SDL_TO_HMI))
       .WillOnce(DoAll(SaveArg<0>(&message_to_hmi), Return(true)));
 
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   EXPECT_FALSE(
@@ -283,6 +286,7 @@ TEST_F(BCGetAppPropertiesRequestTest,
                   kSource))
       .WillOnce(DoAll(SaveArg<0>(&message_to_hmi), Return(true)));
 
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   const auto& sent_app_properties =
@@ -290,7 +294,7 @@ TEST_F(BCGetAppPropertiesRequestTest,
 
   EXPECT_EQ(2u, sent_app_properties.length());
 
-  // Compare test_app1 app_properties
+  // Compare test_app1 app_properties with sent app properties
   const auto& sent_test_app1_properties = sent_app_properties[0];
   EXPECT_FALSE(sent_test_app1_properties.keyExists(strings::endpoint));
   EXPECT_TRUE(
@@ -300,7 +304,7 @@ TEST_F(BCGetAppPropertiesRequestTest,
       sent_app_properties[0][strings::nicknames];
   EXPECT_TRUE(CompareNicknames(sent_test_app1_nicknames, test_nicknames1));
 
-  // Compare test_app2 app_properties
+  // Compare test_app2 app_properties with sent app properties
   const auto& sent_test_app2_properties = sent_app_properties[1];
   EXPECT_FALSE(sent_test_app2_properties.keyExists(strings::endpoint));
   EXPECT_TRUE(
@@ -319,7 +323,7 @@ TEST_F(BCGetAppPropertiesRequestTest,
   (*msg)[strings::msg_params][strings::policy_app_id] = kPolicyAppId;
   auto command = CreateCommand<BCGetAppPropertiesRequest>(msg);
 
-  // Fills app properties by default test values
+  // Fills app properties with default test values
   EXPECT_CALL(mock_policy_handler_, GetAppProperties(kPolicyAppId, _))
       .WillOnce(DoAll(
           SetTestAppProperties(policy::AppProperties("",
@@ -330,7 +334,7 @@ TEST_F(BCGetAppPropertiesRequestTest,
                                                      kHybridAppPreference)),
           Return(true)));
 
-  // In the case when nicknames array is empty, SDL should forwards the empty
+  // In the case when nicknames array is empty, SDL should forward the empty
   // array to HMI in the app properties
   EXPECT_CALL(mock_policy_handler_, GetInitialAppData(kPolicyAppId, _, _))
       .WillOnce(DoAll(SetTestNickNames(policy::StringArray{}), Return(true)));
@@ -346,13 +350,14 @@ TEST_F(BCGetAppPropertiesRequestTest,
                   kSource))
       .WillOnce(DoAll(SaveArg<0>(&message_to_hmi), Return(true)));
 
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   const auto& sent_app_properties =
       (*message_to_hmi)[strings::msg_params][strings::properties];
 
   EXPECT_TRUE(sent_app_properties[0].keyExists(strings::nicknames));
-  EXPECT_EQ(0u, sent_app_properties[0][strings::nicknames].length());
+  EXPECT_TRUE(sent_app_properties[0][strings::nicknames].empty());
 }
 
 }  // namespace bc_get_app_properties_request_test
