@@ -674,10 +674,11 @@ void TransportManagerImpl::CreateWebEngineDevice(const std::string& vin_code) {
                  vin_code,
                  webengine_constants::kWebEngineDeviceName,
                  webengine_constants::kWebEngineConnectionType);
+  auto ws_device = std::make_shared<transport_adapter::WebSocketDevice>(
+      web_engine_device_.name(), web_engine_device_.mac_address());
+  ws_device->set_keep_on_disconnect(true);
 
-  (*web_socket_ta)
-      ->AddDevice(std::make_shared<transport_adapter::WebSocketDevice>(
-          web_engine_device_.name(), web_engine_device_.mac_address()));
+  (*web_socket_ta)->AddDevice(ws_device);
   device_list_.push_back(std::make_pair(*web_socket_ta, web_engine_device_));
 
   RaiseEvent(&TransportManagerListener::OnDeviceAdded, web_engine_device_);
