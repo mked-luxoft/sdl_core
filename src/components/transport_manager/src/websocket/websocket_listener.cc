@@ -42,13 +42,68 @@ TransportAdapter::Error WebSocketListener::StartListening() {
     return TransportAdapter::OK;
   }
 
-  boost::system::error_code ec;
+#ifdef ENABLE_SECURITY
+  auto const ta_error = AddCertificateAuthority();
+  if (TransportAdapter::OK != ta_error) {
+    return ta_error;
+  }
+#endif
 
   auto const address =
       boost::asio::ip::make_address(settings_.websocket_server_address());
   tcp::endpoint endpoint = {address, settings_.websocket_server_port()};
 
+  // Open the acceptor
+  boost::system::error_code ec;
+  acceptor_.open(endpoint.protocol(), ec);
+  if (ec) {
+    auto str_err = "ErrorOpen: " + ec.message();
+    LOG4CXX_ERROR(logger_,
+                  str_err << " host/port: " << endpoint.address().to_string()
+                          << "/" << endpoint.port());
+    return TransportAdapter::FAIL;
+  }
+
+  acceptor_.set_option(boost::asio::socket_base::reuse_address(true), ec);
+  if (ec) {
+    std::string str_err = "ErrorSetOption: " + ec.message();
+    LOG4CXX_ERROR(logger_,
+                  str_err << " host/port: " << endpoint.address().to_string()
+                          << "/" << endpoint.port());
+    return TransportAdapter::FAIL;
+  }
+
+  // Bind to the server address
+  acceptor_.bind(endpoint, ec);
+  if (ec) {
+    std::string str_err = "ErrorBind: " + ec.message();
+    LOG4CXX_ERROR(logger_,
+                  str_err << " host/port: " << endpoint.address().to_string()
+                          << "/" << endpoint.port());
+    return TransportAdapter::FAIL;
+  }
+
+  // Start listening for connections
+  acceptor_.listen(boost::asio::socket_base::max_listen_connections, ec);
+  if (ec) {
+    std::string str_err = "ErrorListen: " + ec.message();
+    LOG4CXX_ERROR(logger_,
+                  str_err << " host/port: " << endpoint.address().to_string()
+                          << "/" << endpoint.port());
+    return TransportAdapter::FAIL;
+  }
+
+  if (false == Run()) {
+    return TransportAdapter::FAIL;
+  }
+
+  return TransportAdapter::OK;
+}
+
 #ifdef ENABLE_SECURITY
+TransportAdapter::Error WebSocketListener::AddCertificateAuthority() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
   const auto cert_path = settings_.ws_server_cert_path();
   LOG4CXX_DEBUG(logger_, "Path to certificate : " << cert_path);
   const auto key_path = settings_.ws_server_key_path();
@@ -97,61 +152,20 @@ TransportAdapter::Error WebSocketListener::StartListening() {
       LOG4CXX_ERROR(
           logger_,
           "Loading WS server certificate failed: " << sec_ec.message());
+      return TransportAdapter::FAIL;
     }
     sec_ec.clear();
     ctx_.use_private_key_file(key_path, context::pem, sec_ec);
     if (sec_ec) {
       LOG4CXX_ERROR(logger_,
                     "Loading WS server key failed: " << sec_ec.message());
+      return TransportAdapter::FAIL;
     }
-  }
-#endif  // ENABLE_SECURITY
-
-  // Open the acceptor
-  acceptor_.open(endpoint.protocol(), ec);
-  if (ec) {
-    auto str_err = "ErrorOpen: " + ec.message();
-    LOG4CXX_ERROR(logger_,
-                  str_err << " host/port: " << endpoint.address().to_string()
-                          << "/" << endpoint.port());
-    return TransportAdapter::FAIL;
-  }
-
-  acceptor_.set_option(boost::asio::socket_base::reuse_address(true), ec);
-  if (ec) {
-    std::string str_err = "ErrorSetOption: " + ec.message();
-    LOG4CXX_ERROR(logger_,
-                  str_err << " host/port: " << endpoint.address().to_string()
-                          << "/" << endpoint.port());
-    return TransportAdapter::FAIL;
-  }
-
-  // Bind to the server address
-  acceptor_.bind(endpoint, ec);
-  if (ec) {
-    std::string str_err = "ErrorBind: " + ec.message();
-    LOG4CXX_ERROR(logger_,
-                  str_err << " host/port: " << endpoint.address().to_string()
-                          << "/" << endpoint.port());
-    return TransportAdapter::FAIL;
-  }
-
-  // Start listening for connections
-  acceptor_.listen(boost::asio::socket_base::max_listen_connections, ec);
-  if (ec) {
-    std::string str_err = "ErrorListen: " + ec.message();
-    LOG4CXX_ERROR(logger_,
-                  str_err << " host/port: " << endpoint.address().to_string()
-                          << "/" << endpoint.port());
-    return TransportAdapter::FAIL;
-  }
-
-  if (false == Run()) {
-    return TransportAdapter::FAIL;
   }
 
   return TransportAdapter::OK;
 }
+#endif  // ENABLE_SECURITY
 
 bool WebSocketListener::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2019, Livio
+ * Copyright (c) 2020, Livio
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,9 @@ WebSocketDevice::WebSocketDevice(
 
 WebSocketDevice::WebSocketDevice(const std::string& name,
                                  const DeviceUID& unique_device_id)
-    : Device(name, unique_device_id), protocol_(boost::asio::ip::tcp::v4()) {}
+    : Device(name, unique_device_id)
+    , is_secure_connect_(false)
+    , protocol_(boost::asio::ip::tcp::v4()) {}
 
 bool WebSocketDevice::IsSameAs(const Device* other) const {
   LOG4CXX_TRACE(logger_, "enter. device: " << other);
@@ -82,38 +84,6 @@ bool WebSocketDevice::IsSameAs(const Device* other) const {
 
 ApplicationList WebSocketDevice::GetApplicationList() const {
   return ApplicationList{0};
-}
-
-protocol_type WebSocketDevice::protocol() const {
-  return protocol_;
-}
-
-void WebSocketDevice::setProtocol(const protocol_type& protocol) {
-  protocol_ = protocol;
-}
-
-bool WebSocketDevice::is_secure_connect() const {
-  return is_secure_connect_;
-}
-
-void WebSocketDevice::setIs_secure_connect(bool is_secure_connect) {
-  is_secure_connect_ = is_secure_connect;
-}
-
-std::string WebSocketDevice::port() const {
-  return port_;
-}
-
-void WebSocketDevice::setPort(const std::string& port) {
-  port_ = port;
-}
-
-std::string WebSocketDevice::host() const {
-  return host_;
-}
-
-void WebSocketDevice::setHost(const std::string& host) {
-  host_ = host;
 }
 
 const std::string& WebSocketDevice::GetHost() const {

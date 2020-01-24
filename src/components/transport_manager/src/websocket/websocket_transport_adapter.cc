@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,86 +81,10 @@ DeviceType WebSocketTransportAdapter::GetDeviceType() const {
 
 void WebSocketTransportAdapter::Store() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  //   Json::Value tcp_adapter_dictionary;
-  //   Json::Value devices_dictionary;
-  //   DeviceList device_ids = GetDeviceList();
-  //   for (DeviceList::const_iterator i = device_ids.begin(); i !=
-  //   device_ids.end();
-  //        ++i) {
-  //     DeviceUID device_id = *i;
-  //     DeviceSptr device = FindDevice(device_id);
-  //     if (!device) {  // device could have been disconnected
-  //       continue;
-  //     }
-  //     std::shared_ptr<TcpDevice> tcp_device =
-  //         std::static_pointer_cast<TcpDevice>(device);
-  //     Json::Value device_dictionary;
-  //     device_dictionary["name"] = tcp_device->name();
-  //     struct in_addr address;
-  //     address.s_addr = tcp_device->in_addr();
-  //     device_dictionary["address"] = std::string(inet_ntoa(address));
-  //     Json::Value applications_dictionary;
-  //     ApplicationList app_ids = tcp_device->GetApplicationList();
-  //     for (ApplicationList::const_iterator j = app_ids.begin();
-  //          j != app_ids.end();
-  //          ++j) {
-  //       ApplicationHandle app_handle = *j;
-  //       if (FindEstablishedConnection(tcp_device->unique_device_id(),
-  //                                     app_handle)) {
-  //         int port = tcp_device->GetApplicationPort(app_handle);
-  //         if (port != -1) {  // don't want to store incoming applications
-  //           Json::Value application_dictionary;
-  //           char port_record[12];
-  //           snprintf(port_record, sizeof(port_record), "%d", port);
-  //           application_dictionary["port"] = std::string(port_record);
-  //           applications_dictionary.append(application_dictionary);
-  //         }
-  //       }
-  //     }
-  //     if (!applications_dictionary.empty()) {
-  //       device_dictionary["applications"] = applications_dictionary;
-  //       devices_dictionary.append(device_dictionary);
-  //     }
-  //   }
-  //   tcp_adapter_dictionary["devices"] = devices_dictionary;
-  //   Json::Value& dictionary = last_state().get_dictionary();
-  //   dictionary["TransportManager"]["TcpAdapter"] = tcp_adapter_dictionary;
 }
 
 bool WebSocketTransportAdapter::Restore() {
   LOG4CXX_AUTO_TRACE(logger_);
-  //   bool errors_occurred = false;
-  //   const Json::Value tcp_adapter_dictionary =
-  //       last_state().get_dictionary()["TransportManager"]["TcpAdapter"];
-  //   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
-  //   for (Json::Value::const_iterator i = devices_dictionary.begin();
-  //        i != devices_dictionary.end();
-  //        ++i) {
-  //     const Json::Value device_dictionary = *i;
-  //     std::string name = device_dictionary["name"].asString();
-  //     std::string address_record = device_dictionary["address"].asString();
-  //     in_addr_t address = inet_addr(address_record.c_str());
-  //     TcpDevice* tcp_device = new TcpDevice(address, name);
-  //     DeviceSptr device(tcp_device);
-  //     AddDevice(device);
-  //     const Json::Value applications_dictionary =
-  //         device_dictionary["applications"];
-  //     for (Json::Value::const_iterator j = applications_dictionary.begin();
-  //          j != applications_dictionary.end();
-  //          ++j) {
-  //       const Json::Value application_dictionary = *j;
-  //       std::string port_record = application_dictionary["port"].asString();
-  //       int port = atoi(port_record.c_str());
-  //       ApplicationHandle app_handle =
-  //       tcp_device->AddDiscoveredApplication(port); if (Error::OK !=
-  //       Connect(device->unique_device_id(), app_handle)) {
-  //         errors_occurred = true;
-  //       }
-  //     }
-  //   }
-  //   bool result = !errors_occurred;
-  //   LOG4CXX_DEBUG(logger_, "result " << std::boolalpha << result);
-  //   return result;
   return true;
 }
 

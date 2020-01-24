@@ -65,18 +65,6 @@ class WebSocketDevice : public Device {
   virtual bool IsSecure();
   virtual const protocol_type& GetProtocol();
 
-  std::string host() const;
-  void setHost(const std::string& host);
-
-  std::string port() const;
-  void setPort(const std::string& port);
-
-  bool is_secure_connect() const;
-  void setIs_secure_connect(bool is_secure_connect);
-
-  protocol_type protocol() const;
-  void setProtocol(const protocol_type& protocol);
-
  protected:
   bool IsSameAs(const Device* other_device) const OVERRIDE;
   ApplicationList GetApplicationList() const OVERRIDE;

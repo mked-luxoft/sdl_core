@@ -81,14 +81,10 @@ class WebSocketListener : public ClientConnectionListener {
     return TransportAdapter::OK;
   }
 
-  /**
-   * @brief Attempt to add provided certificate to the ssl::context
-   *
-   * @param cert Certificate string from policy table
-   */
-  void AddCertificateAuthority(std::string cert, boost::system::error_code& ec);
-
  protected:
+#ifdef ENABLE_SECURITY
+  TransportAdapter::Error AddCertificateAuthority();
+#endif
   bool Run();
   bool WaitForConnection();
   void StartSession(boost::system::error_code ec);

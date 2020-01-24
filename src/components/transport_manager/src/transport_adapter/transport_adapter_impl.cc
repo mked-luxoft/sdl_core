@@ -492,7 +492,8 @@ DeviceSptr TransportAdapterImpl::GetWebEngineDevice() const {
       std::find_if(devices_.begin(),
                    devices_.end(),
                    [](const std::pair<DeviceUID, DeviceSptr> device) {
-                     return "Web Engine" == device.second->name();
+                     return webengine_constants::kWebEngineDeviceName ==
+                            device.second->name();
                    });
 
   if (devices_.end() != web_engine_device) {
