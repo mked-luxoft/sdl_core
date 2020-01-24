@@ -39,8 +39,12 @@ using namespace boost::beast::websocket;
 
 template <typename ExecutorType>
 WebSocketSecureSession<ExecutorType>::WebSocketSecureSession(
-    tcp::socket socket, ssl::context& ctx, DataReceiveCallback dataReceive)
-    : WebSocketSession<ExecutorType>(std::move(socket), ctx, dataReceive) {}
+    tcp::socket socket,
+    ssl::context& ctx,
+    DataReceiveCallback data_receive,
+    OnIOErrorCallback on_error)
+    : WebSocketSession<ExecutorType>(
+          std::move(socket), ctx, data_receive, on_error) {}
 
 template <typename ExecutorType>
 void WebSocketSecureSession<ExecutorType>::AsyncAccept() {

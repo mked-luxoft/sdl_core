@@ -50,14 +50,16 @@ WebSocketConnection<WebSocketSession<> >::WebSocketConnection(
     , session_(new WebSocketSession<>(
           std::move(socket),
           std::bind(
-              &WebSocketConnection::DataReceive, this, std::placeholders::_1)))
+              &WebSocketConnection::DataReceive, this, std::placeholders::_1),
+          std::bind(&WebSocketConnection::OnError, this)))
     , controller_(controller)
     , shutdown_(false)
-    , thread_delegate_(
-          new LoopThreadDelegate(&message_queue_,
-                                 std::bind(&WebSocketSession<>::WriteDown,
-                                           session_.get(),
-                                           std::placeholders::_1)))
+    , thread_delegate_(new LoopThreadDelegate(
+          &message_queue_,
+          std::bind(&WebSocketSession<>::WriteDown,
+                    session_.get(),
+                    std::placeholders::_1),
+          std::bind(&WebSocketConnection::OnError, this)))
     , thread_(threads::CreateThread("WS Async Send", thread_delegate_)) {
   thread_->start(threads::ThreadOptions());
 }
@@ -76,14 +78,16 @@ WebSocketConnection<WebSocketSecureSession<> >::WebSocketConnection(
           std::move(socket),
           ctx,
           std::bind(
-              &WebSocketConnection::DataReceive, this, std::placeholders::_1)))
+              &WebSocketConnection::DataReceive, this, std::placeholders::_1),
+          std::bind(&WebSocketConnection::OnError, this)))
     , controller_(controller)
     , shutdown_(false)
-    , thread_delegate_(
-          new LoopThreadDelegate(&message_queue_,
-                                 std::bind(&WebSocketSecureSession<>::WriteDown,
-                                           session_.get(),
-                                           std::placeholders::_1)))
+    , thread_delegate_(new LoopThreadDelegate(
+          &message_queue_,
+          std::bind(&WebSocketSecureSession<>::WriteDown,
+                    session_.get(),
+                    std::placeholders::_1),
+          std::bind(&WebSocketConnection::OnError, this)))
     , thread_(threads::CreateThread("WS Async Send", thread_delegate_)) {
   thread_->start(threads::ThreadOptions());
 }
@@ -95,6 +99,16 @@ WebSocketConnection<Session>::~WebSocketConnection() {
   if (!IsShuttingDown()) {
     Shutdown();
   }
+}
+
+template <typename Session>
+void WebSocketConnection<Session>::OnError() {
+  LOG4CXX_AUTO_TRACE(wsc_logger_);
+
+  controller_->ConnectionAborted(
+      device_uid_, app_handle_, CommunicationError());
+
+  session_->Shutdown();
 }
 
 template <typename Session>
@@ -155,8 +169,11 @@ bool WebSocketConnection<Session>::IsShuttingDown() {
 template <typename Session>
 WebSocketConnection<Session>::LoopThreadDelegate::LoopThreadDelegate(
     MessageQueue<Message, AsyncQueue>* message_queue,
-    DataWriteCallback data_write)
-    : message_queue_(*message_queue), data_write_(data_write) {}
+    DataWriteCallback data_write,
+    OnIOErrorCallback on_io_error)
+    : message_queue_(*message_queue)
+    , data_write_(data_write)
+    , on_io_error_(on_io_error) {}
 
 template <typename Session>
 void WebSocketConnection<Session>::LoopThreadDelegate::threadMain() {
@@ -178,7 +195,13 @@ template <typename Session>
 void WebSocketConnection<Session>::LoopThreadDelegate::DrainQueue() {
   Message message_ptr;
   while (!message_queue_.IsShuttingDown() && message_queue_.pop(message_ptr)) {
-    data_write_(message_ptr);
+    auto res = data_write_(message_ptr);
+    if (TransportAdapter::FAIL == res) {
+      LOG4CXX_WARN(wsc_logger_,
+                   "Writing to websocket stream failed. Will now close "
+                   "websocket connection.");
+      on_io_error_();
+    }
   }
 }
 

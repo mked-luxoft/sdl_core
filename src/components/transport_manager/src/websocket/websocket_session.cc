@@ -39,11 +39,14 @@ using namespace boost::beast::websocket;
 
 template <>
 WebSocketSession<tcp::socket&>::WebSocketSession(
-    boost::asio::ip::tcp::socket socket, DataReceiveCallback dataReceive)
+    boost::asio::ip::tcp::socket socket,
+    DataReceiveCallback data_receive,
+    OnIOErrorCallback on_error)
     : socket_(std::move(socket))
     , ws_(socket_)
     , strand_(ws_.get_executor())
-    , data_receive_(dataReceive) {
+    , data_receive_(data_receive)
+    , on_io_error_(on_error) {
   ws_.binary(true);
 }
 
@@ -52,11 +55,13 @@ template <>
 WebSocketSession<ssl::stream<tcp::socket&> >::WebSocketSession(
     boost::asio::ip::tcp::socket socket,
     ssl::context& ctx,
-    DataReceiveCallback dataReceive)
+    DataReceiveCallback data_receive,
+    OnIOErrorCallback on_error)
     : socket_(std::move(socket))
     , ws_(socket_, ctx)
     , strand_(ws_.get_executor())
-    , data_receive_(dataReceive) {
+    , data_receive_(data_receive)
+    , on_io_error_(on_error) {
   ws_.binary(true);
 }
 template class WebSocketSession<ssl::stream<tcp::socket&> >;
@@ -116,6 +121,7 @@ void WebSocketSession<ExecutorType>::Read(boost::system::error_code ec,
   if (ec) {
     LOG4CXX_ERROR(ws_logger_, ec.message());
     buffer_.consume(buffer_.size());
+    on_io_error_();
     return;
   }
 
@@ -140,7 +146,10 @@ template <typename ExecutorType>
 bool WebSocketSession<ExecutorType>::Shutdown() {
   LOG4CXX_AUTO_TRACE(ws_logger_);
   boost::system::error_code ec;
-  socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+  if (socket_.is_open()) {
+    socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+    socket_.close();
+  }
   buffer_.consume(buffer_.size());
   if (ec) {
     LOG4CXX_ERROR(ws_logger_, ec.message());
