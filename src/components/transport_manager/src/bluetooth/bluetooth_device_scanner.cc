@@ -150,7 +150,8 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
     , device_scan_requested_lock_()
     , device_scan_requested_cv_()
     , auto_repeat_search_(auto_repeat_search)
-    , auto_repeat_pause_sec_(auto_repeat_pause_sec) {
+    , auto_repeat_pause_sec_(auto_repeat_pause_sec)
+    , paired_devices_count_(0) {
   sdp_uuid128_create(&smart_device_link_service_uuid_,
                      smart_device_link_service_uuid_data);
   thread_ = threads::CreateThread("BT Device Scanner",
@@ -204,14 +205,18 @@ void BluetoothDeviceScanner::DoInquiry() {
     }
   }
 
+  const uint32_t scanned_paired_devices_count = paired_devices_.size();
   LOG4CXX_INFO(logger_,
-               "Check rfcomm channel on " << paired_devices_.size()
+               "Check rfcomm channel on " << scanned_paired_devices_count
                                           << " paired devices.");
 
   paired_devices_with_sdl_.clear();
+
   CheckSDLServiceOnDevices(
       paired_devices_, device_handle, &paired_devices_with_sdl_);
-  UpdateTotalDeviceList();
+  if (scanned_paired_devices_count != paired_devices_count_) {
+    UpdateTotalDeviceList();
+  }
 
   LOG4CXX_INFO(logger_, "Starting hci_inquiry on device " << device_id);
   const uint8_t inquiry_time = 8u;  // Time unit is 1.28 seconds
