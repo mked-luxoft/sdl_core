@@ -68,13 +68,13 @@ class WebSocketSession
     : public std::enable_shared_from_this<WebSocketSession<ExecutorType> > {
  public:
   WebSocketSession(boost::asio::ip::tcp::socket socket,
-                   DataReceiveCallback dataReceive,
+                   DataReceiveCallback data_receive,
                    OnIOErrorCallback on_error);
 
 #ifdef ENABLE_SECURITY
   WebSocketSession(boost::asio::ip::tcp::socket socket,
                    ssl::context& ctx,
-                   DataReceiveCallback dataReceive,
+                   DataReceiveCallback data_receive,
                    OnIOErrorCallback on_error);
 #endif  // ENABLE_SECURITY
 

@@ -43,7 +43,7 @@ class WebSocketSecureSession : public WebSocketSession<ExecutorType> {
  public:
   WebSocketSecureSession(tcp::socket,
                          ssl::context& ctx,
-                         DataReceiveCallback dataReceive,
+                         DataReceiveCallback data_receive,
                          OnIOErrorCallback on_errror);
 
   void AsyncAccept() OVERRIDE;

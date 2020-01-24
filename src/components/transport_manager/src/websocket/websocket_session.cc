@@ -40,12 +40,12 @@ using namespace boost::beast::websocket;
 template <>
 WebSocketSession<tcp::socket&>::WebSocketSession(
     boost::asio::ip::tcp::socket socket,
-    DataReceiveCallback dataReceive,
+    DataReceiveCallback data_receive,
     OnIOErrorCallback on_error)
     : socket_(std::move(socket))
     , ws_(socket_)
     , strand_(ws_.get_executor())
-    , data_receive_(dataReceive)
+    , data_receive_(data_receive)
     , on_io_error_(on_error) {
   ws_.binary(true);
 }
@@ -55,12 +55,12 @@ template <>
 WebSocketSession<ssl::stream<tcp::socket&> >::WebSocketSession(
     boost::asio::ip::tcp::socket socket,
     ssl::context& ctx,
-    DataReceiveCallback dataReceive,
+    DataReceiveCallback data_receive,
     OnIOErrorCallback on_error)
     : socket_(std::move(socket))
     , ws_(socket_, ctx)
     , strand_(ws_.get_executor())
-    , data_receive_(dataReceive)
+    , data_receive_(data_receive)
     , on_io_error_(on_error) {
   ws_.binary(true);
 }
