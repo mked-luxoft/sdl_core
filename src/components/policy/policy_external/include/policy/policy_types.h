@@ -451,11 +451,13 @@ struct ApplicationPolicyActions {
   ApplicationPolicyActions()
       : is_notify_system(false)
       , is_send_permissions_to_app(false)
-      , is_consent_needed(false) {}
+      , is_consent_needed(false)
+      , app_properties_changed(false) {}
 
   bool is_notify_system;
   bool is_send_permissions_to_app;
   bool is_consent_needed;
+  bool app_properties_changed;
 };
 
 /**
@@ -516,6 +518,7 @@ enum PermissionsCheckResult {
   RESULT_REQUEST_TYPE_CHANGED,
   RESULT_REQUEST_SUBTYPE_CHANGED,
   RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED,
+  RESULT_APP_PROPERTIES_CHANGED
 };
 
 /**
@@ -537,6 +540,39 @@ enum ConsentPriorityType { kUserConsentPrio, kExternalConsentPrio };
  * external consents
  */
 enum ConsentProcessingPolicy { kTimestampBased, kExternalConsentBased };
+
+/**
+ * @brief The AppProperties struct contains application properties
+ */
+struct AppProperties {
+  AppProperties()
+      : endpoint()
+      , certificate()
+      , enabled(false)
+      , auth_token()
+      , transport_type()
+      , hybrid_app_preference() {}
+
+  AppProperties(std::string endpoint,
+                std::string certificate,
+                bool enabled,
+                std::string auth_token,
+                std::string transport_type,
+                std::string hybrid_app_preference)
+      : endpoint(endpoint)
+      , certificate(certificate)
+      , enabled(enabled)
+      , auth_token(auth_token)
+      , transport_type(transport_type)
+      , hybrid_app_preference(hybrid_app_preference) {}
+
+  std::string endpoint;
+  std::string certificate;
+  bool enabled;
+  std::string auth_token;
+  std::string transport_type;
+  std::string hybrid_app_preference;
+};
 
 }  //  namespace policy
 
