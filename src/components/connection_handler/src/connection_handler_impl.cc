@@ -75,7 +75,8 @@ ConnectionHandlerImpl::ConnectionHandlerImpl(
     , connection_list_deleter_(&connection_list_)
     , start_service_context_map_lock_()
     , start_service_context_map_()
-    , ending_connection_(NULL) {}
+    , ending_connection_(NULL)
+    , vin_code_("") {}
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -153,6 +154,11 @@ void ConnectionHandlerImpl::OnDeviceAdded(
                 device_info.connection_type());
 
   auto result = device_list_.insert(std::make_pair(handle, device));
+
+  if (device_info.name() ==
+      transport_manager::webengine_constants::kWebEngineDeviceName) {
+    connection_handler_observer_->OnWebEngineDeviceCreated();
+  }
 
   if (!result.second) {
     LOG4CXX_ERROR(logger_,
@@ -839,6 +845,15 @@ void ConnectionHandlerImpl::OnSecondaryTransportEnded(
       SetSecondaryTransportID(session_id, 0);
     }
   }
+}
+
+void ConnectionHandlerImpl::CreateWebEngineDevice(const std::string& vin_code) {
+  transport_manager_.CreateWebEngineDevice(vin_code);
+}
+
+const transport_manager::DeviceInfo&
+ConnectionHandlerImpl::GetWebEngineDeviceInfo() const {
+  return transport_manager_.GetWebEngineDeviceInfo();
 }
 
 const std::string

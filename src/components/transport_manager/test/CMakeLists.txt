@@ -48,8 +48,9 @@ set(EXCLUDE_PATHS
 
 if (NOT BUILD_CLOUD_APP_SUPPORT)
   list(APPEND EXCLUDE_PATHS
-    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_connection_test.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_client_connection_test.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/sample_websocket_server.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_connection_test.cc
   )
 endif()
 
@@ -90,3 +91,4 @@ endif()
 create_test("transport_manager_test" "${SOURCES}" "${LIBRARIES}")
 
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY "test_certs/" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_certs)
