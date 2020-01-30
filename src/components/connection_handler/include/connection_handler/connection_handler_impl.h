@@ -650,7 +650,7 @@ class ConnectionHandlerImpl
    * \brief List of devices
    */
   DeviceMap device_list_;
-
+  mutable sync_primitives::RWLock device_list_lock_;
   /**
    * @brief session/connection map
    */
