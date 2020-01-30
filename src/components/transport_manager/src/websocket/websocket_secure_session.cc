@@ -66,8 +66,7 @@ void WebSocketSecureSession<ExecutorType>::AsyncHandshake(
   if (ec) {
     auto str_err = "ErrorMessage: " + ec.message();
     LOG4CXX_ERROR(ws_logger_, str_err);
-    // shutdown_ = true;
-    // thread_delegate_->SetShutdown();
+    WebSocketSession<ExecutorType>::on_io_error_();
     return;
   }
 

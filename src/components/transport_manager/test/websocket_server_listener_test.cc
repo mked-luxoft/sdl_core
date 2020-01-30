@@ -158,6 +158,7 @@ TEST_F(WebSocketListenerTest,
   EXPECT_CALL(mock_ta_controller_, ConnectionCreated(_, _, _));
   EXPECT_CALL(mock_ta_controller_, GetWebEngineDevice())
       .WillOnce(Return(CreateDevice(true)));
+  EXPECT_CALL(mock_ta_controller_, ConnectionAborted(_, _, _));
 
   ws_listener->StartListening();
   timer::Timer handshake_timer(
