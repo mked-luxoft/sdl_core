@@ -48,9 +48,15 @@ set(EXCLUDE_PATHS
 
 if (NOT BUILD_CLOUD_APP_SUPPORT)
   list(APPEND EXCLUDE_PATHS
-    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_client_connection_test.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/sample_websocket_server.cc
+  )
+endif()
+
+if (NOT BUILD_WEBSOCKET_SERVER_SUPPORT)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_client_connection_test.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/websocket_connection_test.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_server_listener_test.cc
   )
 endif()
 

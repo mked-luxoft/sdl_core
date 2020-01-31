@@ -123,7 +123,7 @@ TransportAdapter::Error WebSocketListener::AddCertificateAuthority() {
   if (start_secure_ && (!file_system::FileExists(cert_path) ||
                         !file_system::FileExists(key_path) ||
                         !file_system::FileExists(ca_cert_path))) {
-    LOG4CXX_ERROR(logger_, "Certificate or key not found");
+    LOG4CXX_ERROR(logger_, "Certificate or key file not found");
     return TransportAdapter::FAIL;
   }
 
