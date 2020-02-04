@@ -231,8 +231,11 @@ struct DeviceInfo {
     using namespace helpers;
     static const std::string bluetooth("BLUETOOTH");
     static const std::string wifi("WIFI");
+    static const std::string webengine("WEBENGINE_WEBSOCKET");
     if (Compare<std::string, EQ, ONE>(deviceType, bluetooth, wifi)) {
       connection_type.assign("BTMAC");
+    } else if (Compare<std::string, EQ, ONE>(deviceType, webengine)) {
+      connection_type.assign("");
     }
   }
 };
