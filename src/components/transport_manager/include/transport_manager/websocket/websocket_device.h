@@ -49,13 +49,6 @@ using protocol_type = boost::asio::basic_stream_socket<tcp>::protocol_type;
 
 class WebSocketDevice : public Device {
  public:
-  WebSocketDevice(
-      const std::string& host,
-      const std::string& port,
-      const std::string& name,
-      const bool is_secure_connect,
-      const boost::asio::basic_stream_socket<tcp>::protocol_type& protocol);
-
   WebSocketDevice(const std::string& name, const DeviceUID& unique_device_id);
 
   virtual const std::string& GetHost() const;

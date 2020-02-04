@@ -96,11 +96,8 @@ class WebSocketListenerTest : public ::testing::Test {
   }
 
   std::shared_ptr<WebSocketDevice> CreateDevice(const bool secure_connection) {
-    return std::make_shared<WebSocketDevice>(kDefaultAddress,
-                                             kDefaultPortStr,
-                                             kDefaultDeviceName,
-                                             secure_connection,
-                                             protocol_type::v4());
+    return std::make_shared<WebSocketDevice>(kDefaultDeviceName,
+                                             kDefaultDeviceName);
   }
 };
 

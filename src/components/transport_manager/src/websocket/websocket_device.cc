@@ -39,18 +39,6 @@ namespace transport_manager {
 namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-WebSocketDevice::WebSocketDevice(
-    const std::string& host,
-    const std::string& port,
-    const std::string& name,
-    const bool is_secure_connect,
-    const boost::asio::basic_stream_socket<tcp>::protocol_type& protocol)
-    : Device(name, name)
-    , host_(host)
-    , port_(port)
-    , is_secure_connect_(is_secure_connect)
-    , protocol_(protocol) {}
-
 WebSocketDevice::WebSocketDevice(const std::string& name,
                                  const DeviceUID& unique_device_id)
     : Device(name, unique_device_id)
