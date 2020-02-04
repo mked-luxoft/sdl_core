@@ -686,11 +686,11 @@ void TransportManagerImpl::CreateWebEngineDevice(const std::string& vin_code) {
 
   ws_device->set_keep_on_disconnect(true);
 
-  (*web_socket_ta)->AddDevice(ws_device);
+  RaiseEvent(&TransportManagerListener::OnDeviceAdded, web_engine_device_info_);
   device_list_.push_back(
       std::make_pair(*web_socket_ta, web_engine_device_info_));
+  (*web_socket_ta)->AddDevice(ws_device);
 
-  RaiseEvent(&TransportManagerListener::OnDeviceAdded, web_engine_device_info_);
 #endif
 }
 
