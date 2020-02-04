@@ -122,6 +122,7 @@ void ConnectionHandlerImpl::OnDeviceListUpdated(
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   sync_primitives::AutoReadLock lock(device_list_lock_);
+  LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
@@ -156,6 +157,7 @@ void ConnectionHandlerImpl::OnDeviceAdded(
 
   {
     sync_primitives::AutoWriteLock write_lock(device_list_lock_);
+    LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring write lock!");
     auto result = device_list_.insert(std::make_pair(handle, device));
 
     if (!result.second) {
@@ -200,6 +202,7 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   {
     sync_primitives::AutoWriteLock lock(device_list_lock_);
+    LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring write lock!");
     device_list_.erase(device_info.device_handle());
   }
   if (connection_handler_observer_) {
@@ -232,6 +235,7 @@ struct DeviceFinder {
 void ConnectionHandlerImpl::OnDeviceSwitchingStart(
     const std::string& device_uid_from, const std::string& device_uid_to) {
   sync_primitives::AutoReadLock lock(device_list_lock_);
+  LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
 
   auto device_from =
       std::find_if(device_list_.begin(),
@@ -276,6 +280,7 @@ void ConnectionHandlerImpl::OnConnectionPending(
                                            << device_info.connection_type());
   {
     sync_primitives::AutoReadLock lock(device_list_lock_);
+    LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
     auto it = device_list_.find(device_info.device_handle());
 
     if (device_list_.end() == it) {
@@ -330,6 +335,7 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
                     << device_info.connection_type());
   {
     sync_primitives::AutoReadLock lock(device_list_lock_);
+    LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
     auto it = device_list_.find(device_info.device_handle());
     if (device_list_.end() == it) {
       LOG4CXX_ERROR(logger_, "Unknown device!");
@@ -897,6 +903,7 @@ ConnectionHandlerImpl::TransportTypeProfileStringFromDeviceHandle(
   std::string connection_type;
   {
     sync_primitives::AutoReadLock lock(device_list_lock_);
+    LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
     auto it = device_list_.find(device_handle);
     if (device_list_.end() == it) {
       LOG4CXX_ERROR(logger_, "Device not found!");
@@ -1206,6 +1213,7 @@ bool ConnectionHandlerImpl::GetDeviceID(const std::string& mac_address,
                                         DeviceHandle* device_handle) {
   DCHECK_OR_RETURN(device_handle, false);
   sync_primitives::AutoReadLock lock(device_list_lock_);
+  LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
   DeviceMap::const_iterator it = std::find_if(
       device_list_.begin(), device_list_.end(), CompareMAC(mac_address));
   if (it != device_list_.end()) {
@@ -1226,6 +1234,7 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   int32_t result = -1;
 
   sync_primitives::AutoReadLock lock(device_list_lock_);
+  LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
   auto it = device_list_.find(device_handle);
 
   if (device_list_.end() == it) {
@@ -1274,6 +1283,7 @@ void ConnectionHandlerImpl::GetConnectedDevicesMAC(
   DeviceMap::const_iterator first = device_list_.begin();
   DeviceMap::const_iterator last = device_list_.end();
   sync_primitives::AutoReadLock lock(device_list_lock_);
+  LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
 
   while (first != last) {
     device_macs.push_back((*first).second.mac_address());
@@ -1372,6 +1382,7 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
   transport_manager_.SearchDevices();
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
   sync_primitives::AutoReadLock lock(device_list_lock_);
+  LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
@@ -1381,6 +1392,7 @@ void ConnectionHandlerImpl::ConnectToDevice(
     connection_handler::DeviceHandle device_handle) {
   connection_handler::DeviceMap::const_iterator it_in;
   sync_primitives::AutoReadLock lock(device_list_lock_);
+  LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
   it_in = device_list_.find(device_handle);
   if (device_list_.end() != it_in) {
     LOG4CXX_INFO(logger_, "Connecting to device with handle " << device_handle);
@@ -1403,6 +1415,7 @@ transport_manager::ConnectionStatus ConnectionHandlerImpl::GetConnectionStatus(
 void ConnectionHandlerImpl::RunAppOnDevice(const std::string& device_mac,
                                            const std::string& bundle_id) const {
   sync_primitives::AutoReadLock lock(device_list_lock_);
+  LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
   for (DeviceMap::const_iterator i = device_list_.begin();
        i != device_list_.end();
        ++i) {
@@ -1417,6 +1430,7 @@ void ConnectionHandlerImpl::RunAppOnDevice(const std::string& device_mac,
 
 void ConnectionHandlerImpl::ConnectToAllDevices() {
   sync_primitives::AutoReadLock lock(device_list_lock_);
+  LOG4CXX_DEBUG(logger_, "KEK!!!Aquiring read lock!");
   for (DeviceMap::iterator i = device_list_.begin(); i != device_list_.end();
        ++i) {
     connection_handler::DeviceHandle device_handle = i->first;
