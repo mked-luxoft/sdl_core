@@ -438,6 +438,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @brief Returns ws server key path to pem file
    */
   const std::string& ws_server_key_path() const OVERRIDE;
+
+  /**
+   * @brief Returns bool flag indicating whether WSS settings were setup
+   * correctly
+   */
+  const bool is_wss_settings_setup() const OVERRIDE;
 #endif  // ENABLE_SECURITY
 #endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 
@@ -1026,6 +1032,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string ws_server_cert_path_;
   std::string ws_server_ca_cert_path_;
   std::string ws_server_key_path_;
+  bool is_wss_settings_setup_;
 #endif  // ENABLE_SECURITY
 #endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
   uint32_t cloud_app_retry_timeout_;

@@ -93,6 +93,8 @@ class WebSocketListenerTest : public ::testing::Test {
         .WillByDefault(ReturnRef(kServerKey));
     ON_CALL(mock_tm_settings_, ws_server_ca_cert_path())
         .WillByDefault(ReturnRef(kCACert));
+    ON_CALL(mock_tm_settings_, is_wss_settings_setup())
+        .WillByDefault(Return(true));
   }
 
   std::shared_ptr<WebSocketDevice> CreateDevice(const bool secure_connection) {
@@ -108,6 +110,8 @@ TEST_F(WebSocketListenerTest, StartListening_ClientConnect_SUCCESS) {
       .WillByDefault(ReturnRef(kDefaultKeyPath));
   ON_CALL(mock_tm_settings_, ws_server_ca_cert_path())
       .WillByDefault(ReturnRef(kDefaultCACertPath));
+  ON_CALL(mock_tm_settings_, is_wss_settings_setup())
+      .WillByDefault(Return(false));
 
   const auto ws_listener = std::make_shared<WebSocketListener>(
       &mock_ta_controller_, mock_tm_settings_, kNumThreads);
@@ -209,6 +213,8 @@ TEST_F(WebSocketListenerTest, StartListening_BindToTheServerAddress_FAIL) {
       .WillByDefault(ReturnRef(kDefaultCertPath));
   ON_CALL(mock_tm_settings_, ws_server_key_path())
       .WillByDefault(ReturnRef(kDefaultKeyPath));
+  ON_CALL(mock_tm_settings_, is_wss_settings_setup())
+      .WillByDefault(Return(false));
   EXPECT_CALL(mock_tm_settings_, ws_server_ca_cert_path())
       .WillOnce(ReturnRef(kDefaultCACertPath));
   EXPECT_CALL(mock_tm_settings_, websocket_server_port())
@@ -227,6 +233,8 @@ TEST_F(WebSocketListenerTest, StartListening_AcceptorIsOpen_SUCCESS) {
       .WillByDefault(ReturnRef(kDefaultCertPath));
   ON_CALL(mock_tm_settings_, ws_server_key_path())
       .WillByDefault(ReturnRef(kDefaultKeyPath));
+  ON_CALL(mock_tm_settings_, is_wss_settings_setup())
+      .WillByDefault(Return(false));
 
   EXPECT_CALL(mock_ta_controller_, ConnectDone(_, _));
   EXPECT_CALL(mock_ta_controller_, ConnectionCreated(_, _, _));

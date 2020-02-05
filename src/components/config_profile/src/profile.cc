@@ -866,6 +866,10 @@ const std::string& Profile::ws_server_key_path() const {
 const std::string& Profile::ws_server_ca_cert_path() const {
   return ws_server_ca_cert_path_;
 }
+
+const bool Profile::is_wss_settings_setup() const {
+  return is_wss_settings_setup_;
+}
 #endif  // ENABLE_SECURITY
 #endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 
@@ -1928,29 +1932,34 @@ void Profile::UpdateValues() {
                     kTransportManagerSection);
 
 #ifdef ENABLE_SECURITY
-  ReadStringValue(&ws_server_cert_path_,
-                  "",
-                  kTransportManagerSection,
-                  kWSServerCertificatePathKey);
+  const bool is_ws_server_cert_setup =
+      ReadStringValue(&ws_server_cert_path_,
+                      "",
+                      kTransportManagerSection,
+                      kWSServerCertificatePathKey);
 
   LOG_UPDATED_VALUE(ws_server_cert_path_,
                     kWSServerCertificatePathKey,
                     kTransportManagerSection);
 
-  ReadStringValue(
+  const bool is_ws_server_key_setup = ReadStringValue(
       &ws_server_key_path_, "", kTransportManagerSection, kWSServerKeyPathKey);
 
   LOG_UPDATED_VALUE(
       ws_server_key_path_, kWSServerKeyPathKey, kTransportManagerSection);
 
-  ReadStringValue(&ws_server_ca_cert_path_,
-                  "",
-                  kTransportManagerSection,
-                  kWSServerCACertificaePathKey);
+  const bool is_ws_ca_cert_setup =
+      ReadStringValue(&ws_server_ca_cert_path_,
+                      "",
+                      kTransportManagerSection,
+                      kWSServerCACertificaePathKey);
 
   LOG_UPDATED_VALUE(ws_server_ca_cert_path_,
                     kWSServerCACertificaePathKey,
                     kTransportManagerSection);
+
+  is_wss_settings_setup_ =
+      is_ws_server_cert_setup && is_ws_server_key_setup && is_ws_ca_cert_setup;
 #endif  // ENABLE_SECURITY
 #endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 
