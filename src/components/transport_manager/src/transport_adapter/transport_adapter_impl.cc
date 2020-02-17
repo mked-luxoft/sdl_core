@@ -973,6 +973,7 @@ void TransportAdapterImpl::RemoveFinalizedConnection(
     connections_.erase(it_conn);
   }
 
+  sync_primitives::AutoLock locker(devices_mutex_);
   DeviceSptr device = FindDevice(device_handle);
   if (!device) {
     LOG4CXX_WARN(logger_, "Device: uid " << &device_uid << " not found");

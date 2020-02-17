@@ -629,7 +629,7 @@ class TransportAdapterImpl : public TransportAdapter,
   /**
    * @brief Mutex restricting access to device map.
    **/
-  mutable sync_primitives::Lock devices_mutex_;
+  mutable sync_primitives::RecursiveLock devices_mutex_;
 
   /**
    * @brief Container(map) of connections.
