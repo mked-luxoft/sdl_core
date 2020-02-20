@@ -236,6 +236,15 @@ class TransportAdapter {
   virtual DeviceSptr AddDevice(DeviceSptr device) = 0;
 
   /**
+   * @brief Get stored device ID from last state
+   * @param device_name - name of the device, which id is required
+   * @return stored unique device id, or empty string if no stored device id
+   * present in last saved state
+   */
+  virtual std::string GetStoredDeviceID(
+      const std::string& device_name) const = 0;
+
+  /**
    * @brief RunAppOnDevice allows to run specific application on the certain
    *device.
    *

@@ -523,6 +523,14 @@ class TransportAdapterImpl : public TransportAdapter,
   virtual bool Restore();
 
   /**
+   * @brief Get stored device ID form last state
+   * @param device_name - name of the device, which id is required
+   * @return stored unique device id, or empty string if no stored device id
+   * present in last saved state
+   */
+  virtual std::string GetStoredDeviceID(const std::string& device_name) const;
+
+  /**
    * @brief Returns true if \a device is to be connected automatically
    */
   virtual bool ToBeAutoConnected(DeviceSptr device) const;

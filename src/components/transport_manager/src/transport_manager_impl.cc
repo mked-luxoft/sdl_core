@@ -42,6 +42,7 @@
 #include <set>
 #include <sstream>
 
+#include "utils/gen_hash.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 
@@ -652,7 +653,7 @@ int TransportManagerImpl::PerformActionOnClients(
   return E_SUCCESS;
 }
 
-void TransportManagerImpl::CreateWebEngineDevice(const std::string& vin_code) {
+void TransportManagerImpl::CreateWebEngineDevice() {
 #ifndef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
   LOG4CXX_TRACE(logger_, "Web engine support is disabled. Exiting function");
 #else
@@ -667,17 +668,27 @@ void TransportManagerImpl::CreateWebEngineDevice(const std::string& vin_code) {
 
   if (transport_adapters_.end() == web_socket_ta) {
     LOG4CXX_WARN(logger_,
-                 "WebSocketTransportAdapter not found."
-                 "Not able to create WebEngineDevice");
+                 "WebSocketServerTransportAdapter not found."
+                 "Impossible to create WebEngineDevice");
     return;
   }
 
+  std::string unique_device_id =
+      (*web_socket_ta)
+          ->GetStoredDeviceID(webengine_constants::kWebEngineDeviceName);
+
+  if (unique_device_id.empty()) {
+    srand(time(0));
+    const size_t device_id_length = 64u;
+    unique_device_id = utils::gen_hash(device_id_length);
+  }
+
   DeviceHandle device_handle = converter_.UidToHandle(
-      vin_code, webengine_constants::kWebEngineConnectionType);
+      unique_device_id, webengine_constants::kWebEngineConnectionType);
 
   web_engine_device_info_ =
       DeviceInfo(device_handle,
-                 vin_code,
+                 unique_device_id,
                  webengine_constants::kWebEngineDeviceName,
                  webengine_constants::kWebEngineConnectionType);
 
@@ -690,8 +701,7 @@ void TransportManagerImpl::CreateWebEngineDevice(const std::string& vin_code) {
   device_list_.push_back(
       std::make_pair(*web_socket_ta, web_engine_device_info_));
   (*web_socket_ta)->AddDevice(ws_device);
-
-#endif
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 }
 
 const DeviceInfo& TransportManagerImpl::GetWebEngineDeviceInfo() const {
@@ -900,9 +910,9 @@ void TransportManagerImpl::TryDeviceSwitch(
                                            IOSBTAdapterFinder());
 
   if (transport_adapters_.end() == ios_bt_adapter) {
-    LOG4CXX_WARN(
-        logger_,
-        "There is no iAP2 Bluetooth adapter found. Switching is not possible.");
+    LOG4CXX_WARN(logger_,
+                 "There is no iAP2 Bluetooth adapter found. Switching is not "
+                 "possible.");
     return;
   }
 

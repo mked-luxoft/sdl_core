@@ -70,7 +70,8 @@ void WebSocketServerTransportAdapter::TransportConfigUpdated(
   TransportAdapterImpl::TransportConfigUpdated(new_config);
 }
 
-TransportConfig WebSocketServerTransportAdapter::GetTransportConfiguration() const {
+TransportConfig WebSocketServerTransportAdapter::GetTransportConfiguration()
+    const {
   LOG4CXX_AUTO_TRACE(logger_);
   return transport_config_;
 }
@@ -82,6 +83,7 @@ DeviceType WebSocketServerTransportAdapter::GetDeviceType() const {
 DeviceSptr WebSocketServerTransportAdapter::AddDevice(DeviceSptr device) {
   LOG4CXX_AUTO_TRACE(logger_);
   webengine_device_ = device;
+  Store();
   return TransportAdapterImpl::AddDevice(webengine_device_);
 }
 
@@ -91,6 +93,43 @@ TransportAdapter::Error WebSocketServerTransportAdapter::Init() {
     AddDevice(webengine_device_);
   }
   return TransportAdapterImpl::Init();
+}
+
+void WebSocketServerTransportAdapter::Store() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (webengine_device_) {
+    Json::Value& dictionary = last_state().get_dictionary();
+    if (dictionary["TransportManager"].isMember("WebsocketServerAdapter")) {
+      LOG4CXX_DEBUG(
+          logger_, "WebsocketServerAdapter already exists. Storing is skipped");
+      return;
+    }
+
+    Json::Value device_dictionary;
+    device_dictionary["unique_id"] = webengine_device_->unique_device_id();
+
+    Json::Value ws_adapter_dictionary;
+    ws_adapter_dictionary["device"] = device_dictionary;
+    dictionary["TransportManager"]["WebsocketServerAdapter"] =
+        ws_adapter_dictionary;
+  }
+}
+
+bool WebSocketServerTransportAdapter::Restore() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return true;
+}
+
+std::string WebSocketServerTransportAdapter::GetStoredDeviceID(
+    const std::string& device_name) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (webengine_constants::kWebEngineDeviceName == device_name) {
+    const Json::Value& dictionary = last_state().get_dictionary();
+    const Json::Value ws_adapter_dictionary =
+        dictionary["TransportManager"]["WebsocketServerAdapter"];
+    return ws_adapter_dictionary["device"]["unique_id"].asString();
+  }
+  return std::string();
 }
 
 }  // namespace transport_adapter

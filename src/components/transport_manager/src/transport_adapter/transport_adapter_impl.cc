@@ -1160,6 +1160,13 @@ bool TransportAdapterImpl::Restore() {
   return true;
 }
 
+std::string TransportAdapterImpl::GetStoredDeviceID(
+    const std::string& device_name) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  UNUSED(device_name);
+  return std::string();
+}
+
 bool TransportAdapterImpl::ToBeAutoConnected(DeviceSptr device) const {
   return false;
 }
