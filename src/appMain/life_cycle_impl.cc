@@ -242,7 +242,7 @@ void sig_handler(int sig) {
       FLUSH_LOGGER();
       // exit need to prevent endless sending SIGSEGV
       // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
-      abort();
+      // abort();
     default:
       LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
       exit(EXIT_FAILURE);
